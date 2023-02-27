@@ -6,7 +6,7 @@
 /*   By: rimney < rimney@student.1337.ma>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/24 21:53:42 by rimney            #+#    #+#             */
-/*   Updated: 2023/02/27 05:34:55 by rimney           ###   ########.fr       */
+/*   Updated: 2023/02/27 05:59:56 by rimney           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -228,14 +228,20 @@ class config_parser : public server_parser
             {
                 if (!strncmp(tempConf[i].c_str(), "server {", 8) && tempConf[i].back() == '{')
                 {
-                    while(tempConf[i] != "}" && is_open == false)
+                    opening_bracket = i + 1;
+                    std::cout << opening_bracket << "< opening index\n";
+                    while(tempConf[i] != "}")
                     {
-                        opening_bracket = i + 1;
-                        std::cout << opening_bracket << "< opening index\n";
                         if (!strncmp(tempConf[i].c_str(), "location", 8) && tempConf[i].back() == '{')
-                            std::cout << "|<<<<<<" << tempConf[i] << "|>>\n";               
+                        {
+                            while(tempConf[i] != "}")
+                                i++;
+                            
+                        }
                         i++;
                     }
+                    closing_bracket = i + 1;
+                    std::cout << "closing > " << closing_bracket << '\n';                    
                 }
             }
             // exit(0);
