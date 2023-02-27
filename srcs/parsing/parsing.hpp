@@ -6,7 +6,7 @@
 /*   By: rimney < rimney@student.1337.ma>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/24 21:53:42 by rimney            #+#    #+#             */
-/*   Updated: 2023/02/27 03:04:50 by rimney           ###   ########.fr       */
+/*   Updated: 2023/02/27 04:06:57 by rimney           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,6 +31,7 @@ class serverParsing
 class server_location
 {
     protected :
+        int     location_index;
         std::string name;
         std::string root;
         bool autoIndex;
@@ -44,7 +45,6 @@ class server_location
     public :
         server_location()
         {
-            std::cout << "location contructor called\n";
         }
         void        setName(std::string name)
         {
@@ -128,14 +128,14 @@ class server_location
         }
         ~server_location()
         {
-            std::cout << "location destructor called\n";
         }
         
 };
 
 class server_parser : public server_location
 {
-    private :
+    protected :
+        int server_index;
         int port;
         int host;
         std::string server_name;
@@ -145,11 +145,18 @@ class server_parser : public server_location
         std::string index;
         server_location *location;
     public :
-        server_parser();
+        server_parser() {};
         server_parser(std::string filename)
         {
-            
+            std::ifstream file(filename);
+            std::string line;
+            while(std::getline(file, line))
+            {
+                std::cout << line << '\n';
+            }
+            file.close();
         }
+        ~server_parser() {};
         int getPort(void)
         {
             return (this->port);
@@ -185,53 +192,38 @@ class server_parser : public server_location
         
 };
 
-// class parsingConfFile
-// {
-//     private :    
-//         server *server;
-
-//     public :
-//         parsingConfFile() {};
-//         parsingConfFile(std::string filename)
-//         {
-//             std::cout << "pa called\n";
-//             std::string line;
-//             std::string key;
-//             std::vector<std::string> currentValues;
-//             std::ifstream file(filename);
-//             while(std::getline(file, line))
-//             {
-//                 std::size_t pos = line.find('#');
-//                 if(pos != std::string::npos)
-//                     line.erase(pos);
-//                 line.erase(0, line.find_first_not_of(" \t\r\n"));
-//                 line.erase(0, line.find_last_not_of(" \t\n\r") + 1);
-//                 if(line.empty())
-//                     continue ;
-            
-//             if(line.back() == '{')
-//             {
-//                 key = line.substr(0, line.size() - 1);
-//                 currentValues.clear();
-//             }
-//             else if (line == "}")
-//             {
-//                 this->conf[key] = currentValues;
-//                 std::cout << key << "confkey\n";
-//             }
-//             else
-//             {
-//                 currentValues.push_back(line);
-//             }
-//             }      
-//             file.close(); 
-//         }
-//         std::map<std::string, std::vector<std::string> > getConf(void)
-//         {
-//             return (this->conf);
-//         }
-        
-        
-// };
+class config_parser : public server_parser
+{
+    private :
+        int server_count;
+        server_parser *server;
+    public :
+        config_parser() {};
+        config_parser(std::string filename)
+        {
+            std::vector<std::string> tempConf;
+            std::ifstream file(filename);
+            std::string line;
+            while(std::getline(file, line))
+            {
+                tempConf.push_back(line);
+            }
+            file.close();
+            getServersCount(tempConf);
+            exit(0);
+        }
+        int    getServersCount(std::vector<std::string> vec)
+        {
+            int count = 0;
+            for(std::vector<std::string>::size_type i = 0; i < vec.size(); i++)
+                {
+                    if (!strncmp(vec[i].c_str(), "server", 6))
+                        count++;  
+                }
+                std::cout << "server count >> " << count << '\n';
+                return (count); // here !!
+            }
+        ~config_parser() {};
+        };
 
 #endif
