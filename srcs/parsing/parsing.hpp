@@ -6,7 +6,7 @@
 /*   By: rimney < rimney@student.1337.ma>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/24 21:53:42 by rimney            #+#    #+#             */
-/*   Updated: 2023/02/27 05:59:56 by rimney           ###   ########.fr       */
+/*   Updated: 2023/02/27 06:34:17 by rimney           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -146,15 +146,15 @@ class server_parser : public server_location
         server_location *location;
     public :
         server_parser() {};
-        server_parser(std::string filename)
+        void    construct_server(std::vector<std::string>::iterator first, std::vector<std::string>::iterator last)
         {
-            std::ifstream file(filename);
-            std::string line;
-            while(std::getline(file, line))
-            {
-                std::cout << line << '\n';
-            }
-            file.close();
+            std::vector<std::string> serverVec(first, last);
+            std::cout << "\n/////////////////// server " << this->server_index << "//////////////\n";
+            for(size_t i = 0; i < serverVec.size(); i++)
+                std::cout << serverVec[i] << '\n';
+
+            std::cout << "/////////////////// server " << this->server_index << "//////////////\n\n";
+            
         }
         void    setServerIndex(int index)
         {
@@ -209,6 +209,7 @@ class config_parser : public server_parser
             std::ifstream file(filename);
             std::string line;
             bool        is_open = false;
+            int         server_index = 0;
             int         opening_bracket;
             int         closing_bracket;
             while(std::getline(file, line))
@@ -219,17 +220,14 @@ class config_parser : public server_parser
             }
             file.close();
             this->server_count = getServersCount(tempConf);
-            std::cout << this->server_count << '\n';
+            std::cout << "Number Of Servers : " << this->server_count << '\n';
             this->servers = new server_parser[this->server_count];
             this->servers_index_init();
-            // for(std::vector<std::string>::size_type i = 0; i < tempConf.size(); i++)
-            //     std::cout <<  "<" << tempConf[i] << ">" << '\n';
             for(std::vector<std::string>::size_type i = 0; i < tempConf.size(); i++)
             {
                 if (!strncmp(tempConf[i].c_str(), "server {", 8) && tempConf[i].back() == '{')
                 {
-                    opening_bracket = i + 1;
-                    std::cout << opening_bracket << "< opening index\n";
+                    opening_bracket = i;
                     while(tempConf[i] != "}")
                     {
                         if (!strncmp(tempConf[i].c_str(), "location", 8) && tempConf[i].back() == '{')
@@ -240,8 +238,9 @@ class config_parser : public server_parser
                         }
                         i++;
                     }
-                    closing_bracket = i + 1;
-                    std::cout << "closing > " << closing_bracket << '\n';                    
+                    closing_bracket = i;
+                    servers[server_index].construct_server(tempConf.begin() + opening_bracket, tempConf.begin() + closing_bracket + 1);
+                    server_index += 1;
                 }
             }
             // exit(0);
@@ -249,7 +248,7 @@ class config_parser : public server_parser
         void    servers_index_init()
         {
             for(size_t i = 0;i < this->server_count; i++)
-                this->servers->setServerIndex(i);
+                this->servers[i].setServerIndex(i);
         }
         int    getServersCount(std::vector<std::string> vec)
         {
