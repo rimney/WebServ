@@ -6,7 +6,7 @@
 /*   By: rimney < rimney@student.1337.ma>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/24 21:53:42 by rimney            #+#    #+#             */
-/*   Updated: 2023/02/27 04:37:07 by rimney           ###   ########.fr       */
+/*   Updated: 2023/02/27 04:49:16 by rimney           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -156,6 +156,10 @@ class server_parser : public server_location
             }
             file.close();
         }
+        void    setServerIndex(int index)
+        {
+            this->server_index = index;
+        }
         ~server_parser() {};
         int getPort(void)
         {
@@ -212,7 +216,19 @@ class config_parser : public server_parser
             this->server_count = getServersCount(tempConf);
             std::cout << this->server_count << '\n';
             this->servers = new server_parser[this->server_count];
+            this->servers_index_init();
+            for(std::vector<std::string>::size_type i = 0; i < tempConf.size(); i++)
+            {
+                tempConf[i].erase(0, tempConf[i].find_first_not_of(" \t\r\n"));
+                tempConf[i].erase(tempConf[i].find_last_not_of(" \t\r\n") + 1);
+                std::cout <<  "<" << tempConf[i] << ">" << '\n';
+            }
             exit(0);
+        }
+        void    servers_index_init()
+        {
+            for(size_t i = 0;i < this->server_count; i++)
+                this->servers->setServerIndex(i);
         }
         int    getServersCount(std::vector<std::string> vec)
         {
