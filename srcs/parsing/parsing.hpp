@@ -6,7 +6,7 @@
 /*   By: rimney < rimney@student.1337.ma>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/24 21:53:42 by rimney            #+#    #+#             */
-/*   Updated: 2023/02/27 04:06:57 by rimney           ###   ########.fr       */
+/*   Updated: 2023/02/27 04:37:07 by rimney           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -196,7 +196,7 @@ class config_parser : public server_parser
 {
     private :
         int server_count;
-        server_parser *server;
+        server_parser *servers;
     public :
         config_parser() {};
         config_parser(std::string filename)
@@ -209,7 +209,9 @@ class config_parser : public server_parser
                 tempConf.push_back(line);
             }
             file.close();
-            getServersCount(tempConf);
+            this->server_count = getServersCount(tempConf);
+            std::cout << this->server_count << '\n';
+            this->servers = new server_parser[this->server_count];
             exit(0);
         }
         int    getServersCount(std::vector<std::string> vec)
@@ -220,10 +222,12 @@ class config_parser : public server_parser
                     if (!strncmp(vec[i].c_str(), "server", 6))
                         count++;  
                 }
-                std::cout << "server count >> " << count << '\n';
-                return (count); // here !!
+                return (count);
             }
-        ~config_parser() {};
+        ~config_parser()
+        {
+            delete [] this->servers;
+        }
         };
 
 #endif
