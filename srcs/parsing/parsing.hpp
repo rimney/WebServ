@@ -6,7 +6,7 @@
 /*   By: rimney < rimney@student.1337.ma>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/24 21:53:42 by rimney            #+#    #+#             */
-/*   Updated: 2023/02/27 04:49:16 by rimney           ###   ########.fr       */
+/*   Updated: 2023/02/27 05:34:55 by rimney           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -208,8 +208,13 @@ class config_parser : public server_parser
             std::vector<std::string> tempConf;
             std::ifstream file(filename);
             std::string line;
+            bool        is_open = false;
+            int         opening_bracket;
+            int         closing_bracket;
             while(std::getline(file, line))
             {
+                line.erase(0, line.find_first_not_of(" \t\r\n"));
+                line.erase(line.find_last_not_of(" \t\r\n") + 1);
                 tempConf.push_back(line);
             }
             file.close();
@@ -217,13 +222,23 @@ class config_parser : public server_parser
             std::cout << this->server_count << '\n';
             this->servers = new server_parser[this->server_count];
             this->servers_index_init();
+            // for(std::vector<std::string>::size_type i = 0; i < tempConf.size(); i++)
+            //     std::cout <<  "<" << tempConf[i] << ">" << '\n';
             for(std::vector<std::string>::size_type i = 0; i < tempConf.size(); i++)
             {
-                tempConf[i].erase(0, tempConf[i].find_first_not_of(" \t\r\n"));
-                tempConf[i].erase(tempConf[i].find_last_not_of(" \t\r\n") + 1);
-                std::cout <<  "<" << tempConf[i] << ">" << '\n';
+                if (!strncmp(tempConf[i].c_str(), "server {", 8) && tempConf[i].back() == '{')
+                {
+                    while(tempConf[i] != "}" && is_open == false)
+                    {
+                        opening_bracket = i + 1;
+                        std::cout << opening_bracket << "< opening index\n";
+                        if (!strncmp(tempConf[i].c_str(), "location", 8) && tempConf[i].back() == '{')
+                            std::cout << "|<<<<<<" << tempConf[i] << "|>>\n";               
+                        i++;
+                    }
+                }
             }
-            exit(0);
+            // exit(0);
         }
         void    servers_index_init()
         {
