@@ -6,7 +6,7 @@
 /*   By: rimney < rimney@student.1337.ma>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/24 21:53:42 by rimney            #+#    #+#             */
-/*   Updated: 2023/02/28 16:53:33 by rimney           ###   ########.fr       */
+/*   Updated: 2023/03/01 00:07:37 by rimney           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,34 +23,47 @@ class server_location
 {
     protected :
         int     location_index;
-        std::string name;
-        std::string root;
-        bool autoIndex;
-        std::string  *allowMethods;
-        std::string index;
+        std::string location_name; // /location/example
+        std::string root; // root key
+        bool is_auto_index; // is autoindex
+        std::string  *HttpMethods; // GET, POST, DELETE
+        std::string index; // index 
         std::string rediection; // return aaa/aaaa/html
-        std::string alias;
-        bool is_cgi; // whether the given location is cgi interpreter or not
+        std::string alias; // alias key
         std::string cgiPath; // location of the interpreter 
         std::string cgiExt; // cgi extension
+        std::string error_page_location; // same as the previous class
+        std::vector<int> error_codes; // // // // 
     public :
         server_location(){}
-        void        setName(std::string name){this->name = name;}
-        std::string getName(void){return (this->name);}
+        void construct_location(std::vector<std::string>::iterator first, std::vector<std::string>::iterator last)
+        {
+            std::vector<std::string> locationVec(first, last);
+            for(size_t i = 1;i < locationVec.size(); i++)
+            {
+                std::cout << ">> " << locationVec[i] << '\n'; 
+            }
+            std::cout << "location index > " << this->location_index << '\n';
+            
+        }
+        void        setLocationIndex(size_t index)
+        {
+            this->location_index = index;
+        }
+        void        setName(std::string name){this->location_name = name;}
+        std::string getName(void){return (this->location_name);}
         void    setRoot(std::string root){this->root = root;}
         std::string getRoot(void){return (this->root);}
-        bool    getAutoIndex(void){return (this->autoIndex);}
-        void    setAutoIndex(bool autoIndex){this->autoIndex = autoIndex;}
-        void        setAllowMethods(std::string *allowMethods){this->allowMethods = allowMethods;}
-        std::string        *getAllocMethods(void){return (this->allowMethods);}
+        bool    getAutoIndex(void){return (this->is_auto_index);}
+        void    setAutoIndex(bool autoIndex){this->is_auto_index = autoIndex;}
+        void        setAllowMethods(std::string *allowMethods){this->HttpMethods = allowMethods;}
+        std::string        *getAllocMethods(void){return (this->HttpMethods);}
         void    setIndex(std::string index){this->index = index;}
         std::string getIndex(void){return (this->index);}
         std::string    getRedirection(void){return (this->rediection);}
         void    setRedirection(std::string redirection){this->rediection = redirection;}
         void    setAlias(std::string alias){this->alias = alias;}
         std::string getAlias(void){return (this->alias);}
-        void    setIsCgi(bool is_cgi){this->is_cgi = is_cgi;}
-        bool getIsCgi(void){return (this->is_cgi);}
         void    setCgiPath(std::string cgiPath){this->cgiPath = cgiPath;}
         std::string    getCgiPath(void){return (this->cgiPath);}
         void    setCgiExt(std::string cgiExt){this->cgiExt = cgiExt;}
@@ -68,7 +81,7 @@ class server_location
             tokens.push_back(split.substr(start));
             for(size_t i = 0; i < tokens.size(); i++)
                 std::cout << " << " << tokens[i] << ">> \n";
-            exit(0);
+            // exit(0);
             return (NULL);
         }
         ~server_location(){}
@@ -78,25 +91,58 @@ class server_location
 class server_parser : public server_location
 {
     protected :
-        int server_index;
-        int port;
-        int host;
-        std::string server_name;
-        std::string error_page;
-        int cmds;
-        std::string root;
-        std::string index;
-        server_location *location;
+        int port; // 8080
+        int host; // 0.0.0.1
+        int server_index; // server index in parsing
+        int location_count; // number of location objects for looping purposes
+        int client_max_body_size; // i mean that obvious
+        std::vector<int> error_codes; // list of error codes linked with error path
+
+        std::string root; // root key 
+        std::string index; // index key
+        std::string error_page; // error page index
+        std::string server_name; // obvious
+        std::string redirection; // return /eee/rrr
+
+        server_location *location; // location objects
+        bool is_auto_index; // is autoindex or not ? 
     public :
         server_parser() {};
         void    construct_server(std::vector<std::string>::iterator first, std::vector<std::string>::iterator last)
         {
             std::vector<std::string> serverVec(first, last);
+            size_t opening_bracket = 0;
+            size_t closing_bracket = 0;
+            size_t location_index = 0;
             std::cout << "\n/////////////////// server " << this->server_index << "//////////////\n";
-            for(size_t i = 0; i < serverVec.size(); i++)
-                std::cout << serverVec[i] << '\n';
-
+            this->location_count = getLocationCount(serverVec);
+            this->location = new server_location[this->location_count]; // locations allocation
+            setLocationsIndex(this->location);
+            for(size_t i = 1; i < serverVec.size(); i++)
+            {
+                // std::cout << serverVec[i] << '\n';
+                if (!strncmp(serverVec[i].c_str(), "location ", 9) && serverVec[i].back() == '{')
+                {
+                    opening_bracket = i;
+                    // std::cout << "\nLOCATION >>>" << serverVec[opening_bracket] << "\n";
+                    i++;
+                    while(serverVec[i] != "}")
+                    {
+                        // std::cout << serverVec[i] <<  "<< "<< '\n';
+                        i++;
+                    }
+                    closing_bracket = i;
+                    // std::cout << "\nclosing bracket >>> " << serverVec[closing_bracket] << '\n';
+                    this->location[location_index++].construct_location(serverVec.begin() + opening_bracket, serverVec.begin() + closing_bracket);                    
+                }
+                // stringSplit(serverVec[i]);
+            }
             std::cout << "/////////////////// server " << this->server_index << "//////////////\n\n"; 
+        }
+        void    setLocationsIndex(server_location *location)
+        {
+            for(size_t i = 0; i < this->location_count;i++)
+                this->location[i].setLocationIndex(i);
         }
         void    setServerIndex(int index){ this->server_index = index;}
         ~server_parser() {};
@@ -108,6 +154,17 @@ class server_parser : public server_location
         std::string getRoot(void){return (this->root);}
         std::string getIndex(void){return (this->index);}
         server_location *getLocations(void){return (this->location);}
+        size_t getLocationCount(std::vector<std::string> vec)
+        {
+            size_t count = 0;
+            for(size_t i = 0; i < vec.size(); i++)
+            {
+                if (!strncmp(vec[i].c_str(), "location ", 9) && vec[i].back() == '{')
+                    count++;
+            }
+            std::cout << count << " < location count\n";
+            return (count);
+        }
 };
 
 class config_parser : public server_parser
@@ -135,8 +192,8 @@ class config_parser : public server_parser
             file.close();
             this->server_count = getServersCount(tempConf);
             std::cout << "Number Of Servers : " << this->server_count << '\n';
-            this->servers = new server_parser[this->server_count];
-            this->servers_index_init();
+            this->servers = new server_parser[this->server_count]; // server allocation
+            this->servers_index_init(); // indexing the serves depending in their position
             for(std::vector<std::string>::size_type i = 0; i < tempConf.size(); i++)
             {
                 if (!strncmp(tempConf[i].c_str(), "server {", 8) && tempConf[i].back() == '{')
