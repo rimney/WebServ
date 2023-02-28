@@ -19,8 +19,7 @@ int main(int argc, char const *argv[])
     int addrlen = sizeof(address);
     char* ip = "127.0.0.1";
     
-    std::string hello = "HTTP/1.1 200 OK\nContent-Type: text/plain\nContent-Length: 12\n\n";
-    std::string send_msg = "HTTP/1.1 200 OK\nContent-Type: text/plain\nContent-Length: 12\n\n";
+   char * hello = "HTTP/1.1 200 OK\nContent-Type: text/plain\nContent-Length: 12\n\nVON";
     
     // Creating socket file descriptor
     if ((server_fd = socket(AF_INET, SOCK_STREAM, 0)) == 0)
@@ -54,15 +53,7 @@ int main(int argc, char const *argv[])
         char buffer[30000] = {0};
         recv(new_socket,buffer,30000,0);
         std::cout << buffer  << std::endl;
-        memset(buffer, 0, 30000);
-        // std::string tmp ;
-        // std::cout << "msg : ";
-        // std::getline(std::cin, tmp);
-        // std::cout << " " << std::endl;
-        send_msg += "hi";
-        send(new_socket,send_msg.c_str()  ,send_msg.length() ,0);
-        send_msg.clear();
-        send_msg = hello ;
+        send(new_socket,hello  ,strlen(hello) ,0);
         std::cout << "* Hello message sent *"<< std::endl;
         close(new_socket);
     }
