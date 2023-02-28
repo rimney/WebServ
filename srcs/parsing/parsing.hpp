@@ -6,7 +6,7 @@
 /*   By: rimney < rimney@student.1337.ma>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/24 21:53:42 by rimney            #+#    #+#             */
-/*   Updated: 2023/03/01 00:07:37 by rimney           ###   ########.fr       */
+/*   Updated: 2023/03/01 00:43:10 by rimney           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -92,7 +92,7 @@ class server_parser : public server_location
 {
     protected :
         int port; // 8080
-        int host; // 0.0.0.1
+        std::string host; // 0.0.0.1
         int server_index; // server index in parsing
         int location_count; // number of location objects for looping purposes
         int client_max_body_size; // i mean that obvious
@@ -120,6 +120,11 @@ class server_parser : public server_location
             setLocationsIndex(this->location);
             for(size_t i = 1; i < serverVec.size(); i++)
             {
+                if(!strncmp(serverVec[i].c_str(), "listen ", 7))
+                {
+                    std::cout << serverVec[i] << '\n';
+                    exit(0);
+                }
                 // std::cout << serverVec[i] << '\n';
                 if (!strncmp(serverVec[i].c_str(), "location ", 9) && serverVec[i].back() == '{')
                 {
@@ -147,10 +152,10 @@ class server_parser : public server_location
         void    setServerIndex(int index){ this->server_index = index;}
         ~server_parser() {};
         int getPort(void){ return (this->port);}
-        int getHost(void){ return (this->host);}
+        std::string getHost(void){ return (this->host);}
         std::string getServerName(void){ return (this->server_name);}
         std::string getErrorPage(void){ return (this->error_page);}
-        int getCmds(void){ return (this->cmds);}
+        int getCmds(void){ return (this->client_max_body_size);}
         std::string getRoot(void){return (this->root);}
         std::string getIndex(void){return (this->index);}
         server_location *getLocations(void){return (this->location);}
