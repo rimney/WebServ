@@ -6,7 +6,7 @@
 /*   By: rimney < rimney@student.1337.ma>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/24 21:53:42 by rimney            #+#    #+#             */
-/*   Updated: 2023/02/28 00:25:45 by rimney           ###   ########.fr       */
+/*   Updated: 2023/02/28 16:53:33 by rimney           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -55,6 +55,22 @@ class server_location
         std::string    getCgiPath(void){return (this->cgiPath);}
         void    setCgiExt(std::string cgiExt){this->cgiExt = cgiExt;}
         std::string getCgiExt(void){return (this->cgiExt);}
+        std::string *stringSplit(std::string split)
+        {
+            std::vector<std::string> tokens;
+            size_t start = 0;
+            size_t end = 0;
+            while ((end = split.find(' ', start)) != std::string::npos)
+            {
+                tokens.push_back(split.substr(start, end - start));
+                start = end + 1;
+            }
+            tokens.push_back(split.substr(start));
+            for(size_t i = 0; i < tokens.size(); i++)
+                std::cout << " << " << tokens[i] << ">> \n";
+            exit(0);
+            return (NULL);
+        }
         ~server_location(){}
         
 };
@@ -151,7 +167,7 @@ class config_parser : public server_parser
             int count = 0;
             for(std::vector<std::string>::size_type i = 0; i < vec.size(); i++)
                 {
-                    if (!strncmp(vec[i].c_str(), "server", 6))
+                    if (!strncmp(vec[i].c_str(), "server ", 7) && vec[i].back() == '{')
                         count++;  
                 }
                 return (count);
