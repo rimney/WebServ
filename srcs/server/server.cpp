@@ -85,7 +85,6 @@ void    server::receive()
     rec = recv(_fd_connection, buffer, RECV_SIZE, 0);
     if (rec == -1)
     {
-        // ::close(_fd_socket);
         close();
         throw(std::string("ERROR: failed to receive data"));
     }
@@ -94,11 +93,20 @@ void    server::receive()
 
 void    server::run()
 {
-    accept();
-    // while (1)
-    // {
-    receive();
-    // }
-    std::cout << _request << '\n';
+    while (1)
+    {
+        try
+        {
+            accept();
+            receive();
+            std::cout << _request << '\n';
+        }
+        catch(std::string const & msg)
+        {
+            std::cout << msg << '\n';
+        }
+        if (_fd_connection >= 0)
+            ::close(_fd_connection);
+    }
     close();
 }
