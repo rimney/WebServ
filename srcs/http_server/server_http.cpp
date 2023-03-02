@@ -48,6 +48,8 @@ int main(int argc, char const *argv[])
     {
         std::string tmp;
         std::cout << "\nWaiting for new connection ...\n\n" << std::endl;
+        std::string st = "GET /favicon.ico HTTP/1.1\nHost: localhost:8080\nUser-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10.14; rv:109.0) Gecko/20100101 Firefox/110.0\nAccept: image/avif,image/webp,*/*\nAccept-Language: en-US,en;q=0.5\nAccept-Encoding: gzip, deflate, br\nConnection: keep-alive\nReferer: http://localhost:8080/\nSec-Fetch-Dest: image\nSec-Fetch-Mode: no-cors\nSec-Fetch-Site: same-origin";
+        request = st;
         if ((new_socket = accept(server_fd, (struct sockaddr *)&address, (socklen_t*)&addrlen))<0)
         {
             perror("In accept");
@@ -56,12 +58,6 @@ int main(int argc, char const *argv[])
         char buffer[30000] = {0};
         recv(new_socket,buffer,30000,0);
         tmp = buffer;
-        
-        std::cout <<  tmp << std::endl;
-        request = tmp;
-        std::cout <<  request.get_start_line().method << std::endl;
-        std::cout <<  request.get_start_line().path << std::endl;
-        std::cout <<  request.get_start_line().vertion << std::endl;
         send(new_socket,hello  ,strlen(hello) ,0);
         std::cout << "* Hello message sent *"<< std::endl;
         close(new_socket);
