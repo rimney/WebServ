@@ -6,7 +6,7 @@
 /*   By: rimney < rimney@student.1337.ma>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/24 21:53:42 by rimney            #+#    #+#             */
-/*   Updated: 2023/03/02 02:05:15 by rimney           ###   ########.fr       */
+/*   Updated: 2023/03/02 03:20:24 by rimney           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -93,6 +93,9 @@ class server_location
             
             // delete [] ret;
             *index_save = tokens.size();
+            std::cout << *index_save << '\n';
+            std::cout << split << "<<<\n";
+            exit(0);
             return (ret);
         }
         ~server_location(){}
@@ -127,8 +130,11 @@ class server_parser : public server_location
         {
             std::string *temparray;
             size_t temp_sizee;
+            for(size_t i = 0; i < temp_size; i++)
+                std::cout << Port[i] << '\n';
             if(temp_size > 2)
             {
+                std::cout << Port[temp_size - 1] << "<<<<\n";
                 std::cout << "Error listen has more than one argument !\n";
                 exit(0);
             }
@@ -151,10 +157,18 @@ class server_parser : public server_location
             }
             if (temp_size == 2 && is_digits(Port[1]))
             {
-                
                 this->port = stoi(Port[1]);
             }
             delete [] Port;
+        }
+        void    getServerName(std::string *keys, size_t size)
+        {
+            
+            for(size_t i = 0; i < size; i++)
+            {
+                std::cout << keys[i] << '\n';
+            }
+            exit(0);
         }
         void    construct_server(std::vector<std::string>::iterator first, std::vector<std::string>::iterator last)
         {
@@ -169,23 +183,27 @@ class server_parser : public server_location
             setLocationsIndex(this->location);
             for(size_t i = 1; i < serverVec.size(); i++)
             {
+                // std::cout << serverVec[i] << " <\n";
                 if(!strncmp(serverVec[i].c_str(), "listen ", 7))
                 {
-                    // std::cout << serverVec[i] << '\n';
-                    
-                    getPort(stringSplit(serverVec[i], ' ', &temp_size), temp_size);
+                    getPort(stringSplit(serverVec[i], ' ', &temp_size), temp_size); // host and port parsing;
                     if(this->host.size() == 0)
                         host = "localhost";
-                        
-                    std::cout << this->port << " <Port Parsed!\n";
-                    std::cout << this->host << " <Host Parsed!\n";
+                    std::cout << this->port << " < Port Parsed!\n";
+                    std::cout << this->host << " < Host Parsed!\n";
+
+                }
+                else if(!strncmp(serverVec[i].c_str(), "server_name ", 12))
+                {
                     // exit(0);
-                                      
-                    // system("leaks a.out");
+                    std::cout << serverVec[i] << " < here\n";
                     // exit(0);
+                    getServerName(stringSplit(serverVec[i], ' ', &temp_size), temp_size);
+                    // getServerName(stringSplit(serverVec[i], ' ', &temp_size), temp_size); // host and port parsing;
+
                 }
                 // std::cout << serverVec[i] << '\n';
-                if (!strncmp(serverVec[i].c_str(), "location ", 9) && serverVec[i].back() == '{')
+                else if (!strncmp(serverVec[i].c_str(), "location ", 9) && serverVec[i].back() == '{')
                 {
                     opening_bracket = i;
                     // std::cout << "\nLOCATION >>>" << serverVec[opening_bracket] << "\n";
@@ -251,6 +269,8 @@ class config_parser : public server_parser
             {
                 line.erase(0, line.find_first_not_of(" \t\r\n"));
                 line.erase(line.find_last_not_of(" \t\r\n;") + 1);
+                std::replace(std::begin(line),std::end(line),'\t',' ');
+                std::replace(std::begin(line),std::end(line),'\n',' ');
                 tempConf.push_back(line);
             }
             file.close();
