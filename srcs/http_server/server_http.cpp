@@ -7,6 +7,7 @@
 #include <string.h>
 #include <iostream>
 #include <string>
+#include "/Users/brmohamm/Desktop/WebServ/includes/request.hpp"
 
 #define PORT 8080
 
@@ -41,9 +42,11 @@ int main(int argc, char const *argv[])
     {
         perror("In listen");
         exit(EXIT_FAILURE);
-    }
+    }        
+    Request request;
     while(1)
     {
+        std::string tmp;
         std::cout << "\nWaiting for new connection ...\n\n" << std::endl;
         if ((new_socket = accept(server_fd, (struct sockaddr *)&address, (socklen_t*)&addrlen))<0)
         {
@@ -52,7 +55,13 @@ int main(int argc, char const *argv[])
         }
         char buffer[30000] = {0};
         recv(new_socket,buffer,30000,0);
-        std::cout << buffer  << std::endl;
+        tmp = buffer;
+        
+        std::cout <<  tmp << std::endl;
+        request = tmp;
+        std::cout <<  request.get_start_line().method << std::endl;
+        std::cout <<  request.get_start_line().path << std::endl;
+        std::cout <<  request.get_start_line().vertion << std::endl;
         send(new_socket,hello  ,strlen(hello) ,0);
         std::cout << "* Hello message sent *"<< std::endl;
         close(new_socket);
