@@ -6,7 +6,7 @@
 /*   By: rimney < rimney@student.1337.ma>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/24 21:53:42 by rimney            #+#    #+#             */
-/*   Updated: 2023/03/01 00:43:10 by rimney           ###   ########.fr       */
+/*   Updated: 2023/03/02 02:05:15 by rimney           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,7 +41,7 @@ class server_location
             std::vector<std::string> locationVec(first, last);
             for(size_t i = 1;i < locationVec.size(); i++)
             {
-                std::cout << ">> " << locationVec[i] << '\n'; 
+                // std::cout << ">> " << locationVec[i] << '\n'; 
             }
             std::cout << "location index > " << this->location_index << '\n';
             
@@ -68,21 +68,32 @@ class server_location
         std::string    getCgiPath(void){return (this->cgiPath);}
         void    setCgiExt(std::string cgiExt){this->cgiExt = cgiExt;}
         std::string getCgiExt(void){return (this->cgiExt);}
-        std::string *stringSplit(std::string split)
+        std::string *stringSplit(std::string split, char c, size_t *index_save)
         {
             std::vector<std::string> tokens;
             size_t start = 0;
             size_t end = 0;
-            while ((end = split.find(' ', start)) != std::string::npos)
+            while ((end = split.find(c, start)) != std::string::npos)
             {
                 tokens.push_back(split.substr(start, end - start));
                 start = end + 1;
             }
             tokens.push_back(split.substr(start));
-            for(size_t i = 0; i < tokens.size(); i++)
-                std::cout << " << " << tokens[i] << ">> \n";
+            // for(size_t i = 0; i < tokens.size(); i++)
+            //     std::cout << " << " << tokens[i] << ">> \n";
             // exit(0);
-            return (NULL);
+            std::string *ret = new std::string[tokens.size()]; // ret string allocation;
+            std::copy(tokens.begin(), tokens.end(), ret);
+            for(size_t i = 0; i < tokens.size(); i++)
+            {
+                ret[i].erase(0, ret[i].find_first_not_of(" \t\r\n"));
+                ret[i].erase(ret[i].find_last_not_of(" \t\r\n") + 1);
+                // std::cout << ret[i] << std::endl;
+            }
+            
+            // delete [] ret;
+            *index_save = tokens.size();
+            return (ret);
         }
         ~server_location(){}
         
@@ -108,12 +119,50 @@ class server_parser : public server_location
         bool is_auto_index; // is autoindex or not ? 
     public :
         server_parser() {};
+        bool is_digits(const std::string &str)
+        {
+            return str.find_first_not_of("0123456789") == std::string::npos;
+        }
+        void    getPort(std::string *Port, size_t temp_size)
+        {
+            std::string *temparray;
+            size_t temp_sizee;
+            if(temp_size > 2)
+            {
+                std::cout << "Error listen has more than one argument !\n";
+                exit(0);
+            }
+            if(!strncmp(Port[1].c_str(), "localhost:", 10))
+            {
+                std::cout << "EE\n";
+                
+                temparray = stringSplit(Port[1], ':', &temp_sizee);
+                if (temp_sizee > 2)
+                {
+                    std::cout << "Error port has more than one location\n";
+                    exit(0);
+                }
+                
+                delete [] temparray;
+                this->port = stoi(temparray[1]);
+                this->host = temparray[0];
+                
+                // exit(0);
+            }
+            if (temp_size == 2 && is_digits(Port[1]))
+            {
+                
+                this->port = stoi(Port[1]);
+            }
+            delete [] Port;
+        }
         void    construct_server(std::vector<std::string>::iterator first, std::vector<std::string>::iterator last)
         {
             std::vector<std::string> serverVec(first, last);
             size_t opening_bracket = 0;
             size_t closing_bracket = 0;
             size_t location_index = 0;
+            size_t temp_size;
             std::cout << "\n/////////////////// server " << this->server_index << "//////////////\n";
             this->location_count = getLocationCount(serverVec);
             this->location = new server_location[this->location_count]; // locations allocation
@@ -122,8 +171,18 @@ class server_parser : public server_location
             {
                 if(!strncmp(serverVec[i].c_str(), "listen ", 7))
                 {
-                    std::cout << serverVec[i] << '\n';
-                    exit(0);
+                    // std::cout << serverVec[i] << '\n';
+                    
+                    getPort(stringSplit(serverVec[i], ' ', &temp_size), temp_size);
+                    if(this->host.size() == 0)
+                        host = "localhost";
+                        
+                    std::cout << this->port << " <Port Parsed!\n";
+                    std::cout << this->host << " <Host Parsed!\n";
+                    // exit(0);
+                                      
+                    // system("leaks a.out");
+                    // exit(0);
                 }
                 // std::cout << serverVec[i] << '\n';
                 if (!strncmp(serverVec[i].c_str(), "location ", 9) && serverVec[i].back() == '{')
@@ -140,7 +199,7 @@ class server_parser : public server_location
                     // std::cout << "\nclosing bracket >>> " << serverVec[closing_bracket] << '\n';
                     this->location[location_index++].construct_location(serverVec.begin() + opening_bracket, serverVec.begin() + closing_bracket);                    
                 }
-                // stringSplit(serverVec[i]);
+                // stringSplit(serverVec[i], ' ', &index_save);
             }
             std::cout << "/////////////////// server " << this->server_index << "//////////////\n\n"; 
         }
@@ -191,7 +250,7 @@ class config_parser : public server_parser
             while(std::getline(file, line))
             {
                 line.erase(0, line.find_first_not_of(" \t\r\n"));
-                line.erase(line.find_last_not_of(" \t\r\n") + 1);
+                line.erase(line.find_last_not_of(" \t\r\n;") + 1);
                 tempConf.push_back(line);
             }
             file.close();
