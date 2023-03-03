@@ -6,7 +6,7 @@
 /*   By: rimney < rimney@student.1337.ma>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/24 21:53:42 by rimney            #+#    #+#             */
-/*   Updated: 2023/03/03 03:06:35 by rimney           ###   ########.fr       */
+/*   Updated: 2023/03/03 04:58:34 by rimney           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -79,7 +79,7 @@ class server_location
                 start = end + 1;
                 while (start < split.length() && (split[start] == c || isspace(split[start]))) {
                     ++start;
-            }
+                }
             }
             tokens.push_back(split.substr(start));
             // for(size_t i = 0; i < tokens.size(); i++)
@@ -171,6 +171,20 @@ class server_parser : public server_location
             }
             for(size_t i = 1; i < size; i++)
                 this->server_names.push_back(keys[i]);
+
+            delete [] keys;
+            // exit(0);
+        }
+        void    getErrorPage(std::string *keys, size_t size)
+        {
+            if (size <= 1)
+            {
+                std::cout << "Error Error Page Not Found\n";
+                exit(0);
+            }
+            this->error_page = keys[size - 1];
+            for(size_t i = 1; i < size - 1;i++)
+                this->error_codes.push_back(stoi(keys[i]));
             // exit(0);
         }
         void    construct_server(std::vector<std::string>::iterator first, std::vector<std::string>::iterator last)
@@ -180,7 +194,7 @@ class server_parser : public server_location
             size_t closing_bracket = 0;
             size_t location_index = 0;
             size_t temp_size;
-            std::cout << "\n/////////////////// server " << this->server_index << "//////////////\n";
+            std::cout << "\n/////////////////// server " << this->server_index << "/////////////////\n";
             this->location_count = getLocationCount(serverVec);
             this->location = new server_location[this->location_count]; // locations allocation
             setLocationsIndex(this->location);
@@ -202,6 +216,15 @@ class server_parser : public server_location
                     if(this->server_names.size() == 0)
                         this->server_names.push_back("localhost ");
                     std::cout << this->server_names[0] << "     server name <<<<\n";
+                }
+                else if(!strncmp(serverVec[i].c_str(), "error", 5))
+                {
+                    getErrorPage(stringSplit(serverVec[i], ' ', &temp_size), temp_size);
+                    if(error_codes.size() == 0)
+                        error_codes.push_back(404);
+                    for(size_t i = 0; i < error_codes.size();i++)
+                        std::cout << error_codes[i] << "Err <\n";
+                    exit(0);
                 }
                 // std::cout << serverVec[i] << '\n';
                 else if (!strncmp(serverVec[i].c_str(), "location ", 9) && serverVec[i].back() == '{')
