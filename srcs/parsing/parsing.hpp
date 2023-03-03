@@ -6,7 +6,7 @@
 /*   By: rimney < rimney@student.1337.ma>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/24 21:53:42 by rimney            #+#    #+#             */
-/*   Updated: 2023/03/02 03:20:24 by rimney           ###   ########.fr       */
+/*   Updated: 2023/03/03 03:06:35 by rimney           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -77,6 +77,9 @@ class server_location
             {
                 tokens.push_back(split.substr(start, end - start));
                 start = end + 1;
+                while (start < split.length() && (split[start] == c || isspace(split[start]))) {
+                    ++start;
+            }
             }
             tokens.push_back(split.substr(start));
             // for(size_t i = 0; i < tokens.size(); i++)
@@ -93,9 +96,7 @@ class server_location
             
             // delete [] ret;
             *index_save = tokens.size();
-            std::cout << *index_save << '\n';
-            std::cout << split << "<<<\n";
-            exit(0);
+            // exit(0);
             return (ret);
         }
         ~server_location(){}
@@ -115,7 +116,7 @@ class server_parser : public server_location
         std::string root; // root key 
         std::string index; // index key
         std::string error_page; // error page index
-        std::string server_name; // obvious
+        std::vector<std::string> server_names; // obvious
         std::string redirection; // return /eee/rrr
 
         server_location *location; // location objects
@@ -130,18 +131,13 @@ class server_parser : public server_location
         {
             std::string *temparray;
             size_t temp_sizee;
-            for(size_t i = 0; i < temp_size; i++)
-                std::cout << Port[i] << '\n';
             if(temp_size > 2)
             {
-                std::cout << Port[temp_size - 1] << "<<<<\n";
                 std::cout << "Error listen has more than one argument !\n";
                 exit(0);
             }
             if(!strncmp(Port[1].c_str(), "localhost:", 10))
             {
-                std::cout << "EE\n";
-                
                 temparray = stringSplit(Port[1], ':', &temp_sizee);
                 if (temp_sizee > 2)
                 {
@@ -163,12 +159,19 @@ class server_parser : public server_location
         }
         void    getServerName(std::string *keys, size_t size)
         {
-            
-            for(size_t i = 0; i < size; i++)
+            if (size <= 1)
             {
-                std::cout << keys[i] << '\n';
+                std::cout << "Error Missing Server Name !";
+                exit(0);
             }
-            exit(0);
+            if(this->server_names.size() > 0)
+            {
+                std::cout << "Error Duplicate Server_name !";
+                exit(0);
+            }
+            for(size_t i = 1; i < size; i++)
+                this->server_names.push_back(keys[i]);
+            // exit(0);
         }
         void    construct_server(std::vector<std::string>::iterator first, std::vector<std::string>::iterator last)
         {
@@ -193,14 +196,12 @@ class server_parser : public server_location
                     std::cout << this->host << " < Host Parsed!\n";
 
                 }
-                else if(!strncmp(serverVec[i].c_str(), "server_name ", 12))
+                else if(!strncmp(serverVec[i].c_str(), "server_name", 11))
                 {
-                    // exit(0);
-                    std::cout << serverVec[i] << " < here\n";
-                    // exit(0);
                     getServerName(stringSplit(serverVec[i], ' ', &temp_size), temp_size);
-                    // getServerName(stringSplit(serverVec[i], ' ', &temp_size), temp_size); // host and port parsing;
-
+                    if(this->server_names.size() == 0)
+                        this->server_names.push_back("localhost ");
+                    std::cout << this->server_names[0] << "     server name <<<<\n";
                 }
                 // std::cout << serverVec[i] << '\n';
                 else if (!strncmp(serverVec[i].c_str(), "location ", 9) && serverVec[i].back() == '{')
@@ -230,7 +231,7 @@ class server_parser : public server_location
         ~server_parser() {};
         int getPort(void){ return (this->port);}
         std::string getHost(void){ return (this->host);}
-        std::string getServerName(void){ return (this->server_name);}
+        std::vector<std::string> getServerName(void){ return (this->server_names);}
         std::string getErrorPage(void){ return (this->error_page);}
         int getCmds(void){ return (this->client_max_body_size);}
         std::string getRoot(void){return (this->root);}
