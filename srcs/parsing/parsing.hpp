@@ -6,7 +6,7 @@
 /*   By: rimney < rimney@student.1337.ma>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/24 21:53:42 by rimney            #+#    #+#             */
-/*   Updated: 2023/03/03 04:58:34 by rimney           ###   ########.fr       */
+/*   Updated: 2023/03/03 08:02:59 by rimney           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -54,7 +54,6 @@ class server_location
         std::string getName(void){return (this->location_name);}
         void    setRoot(std::string root){this->root = root;}
         std::string getRoot(void){return (this->root);}
-        bool    getAutoIndex(void){return (this->is_auto_index);}
         void    setAutoIndex(bool autoIndex){this->is_auto_index = autoIndex;}
         void        setAllowMethods(std::string *allowMethods){this->HttpMethods = allowMethods;}
         std::string        *getAllocMethods(void){return (this->HttpMethods);}
@@ -123,6 +122,63 @@ class server_parser : public server_location
         bool is_auto_index; // is autoindex or not ? 
     public :
         server_parser() {};
+        server_parser(server_parser & server_parser)
+        {
+            *this = server_parser;
+        }
+        server_parser & operator=(server_parser & s)
+        {
+            this->port = s.getPortObject();
+            this->host = s.getHostObject();
+            this->server_index = s.getServer_IndexLocationObject();
+            this->location_count = s.getLocationCount();
+            this->client_max_body_size = s.getCmbsObject();
+            this->rediection = s.getRedirectionObject();
+            this->is_auto_index = s.getIsAutoIndexObject();
+            return (*this);
+        }
+        /////// GETTERS AND SETTERS /////////////
+        int getPortObject(void)
+        {
+            return (this->port);
+        }
+        std::string getHostObject(void)
+        {
+            return (this->host);
+        }
+        int getServer_IndexLocationObject(void)
+        {
+            return (this->location_index);
+        }
+        int getLocationCount(void)
+        {
+            return (this->location_count);
+        }
+        int getCmbsObject(void)
+        {
+            return (this->client_max_body_size);
+        }
+        std::vector<int> getErrorCodesObject(void)
+        {
+            return (this->error_codes);
+        }
+        std::string getIndexObject(void)
+        {
+            return (this->index);
+        }
+        std::string getRedirectionObject(void)
+        {
+            return (this->rediection);
+        }
+        server_location *getServerLocation(void)
+        {
+            return (this->location);
+        }
+        bool getIsAutoIndexObject(void)
+        {
+            return (this->is_auto_index);
+        }
+        /////// GETTERS AND SETTERS /////////////
         bool is_digits(const std::string &str)
         {
             return str.find_first_not_of("0123456789") == std::string::npos;
@@ -185,7 +241,56 @@ class server_parser : public server_location
             this->error_page = keys[size - 1];
             for(size_t i = 1; i < size - 1;i++)
                 this->error_codes.push_back(stoi(keys[i]));
+            delete [] keys;
             // exit(0);
+        }
+        void    getIndexPage(std::string *keys, size_t size)
+        {
+            if(size <= 1 || size > 2)
+            {
+                std::cout << "Error Missing index page !";
+                exit(0);
+            }
+            this->index = keys[size - 1];
+            delete [] keys;
+            // exit(9);
+        }
+        void    getAutoIndex(std::string *keys, size_t size)
+        {
+            if(size <= 1 || size > 2)
+            {
+                std::cout << "Error Autoindex Bad Argument\n";
+                exit(0);
+            }
+            if(keys[size - 1] == "on")
+                this->is_auto_index = true;
+            else if(keys[size - 1] == "off")
+                this->is_auto_index = false;
+            else
+            {
+                std::cout << "Error Wrong autoindex Argument";
+                exit(0);
+            }
+        }
+        void    getRoot(std::string *keys, size_t size)
+        {
+            if(size <= 1 || size > 2)
+            {
+                std::cout << "Error Missing Root Page\n";
+                exit(0);
+            }
+            this->root = keys[size - 1];
+            delete [] keys;
+        }
+        void    getRedirection(std::string *keys, size_t size)
+        {
+            if(size <= 1 || size > 2)
+            {
+                std::cout << "Error Redirection Arguments !\n";
+                exit(0);
+            }
+            this->redirection = keys[size - 1];
+            delete [] keys;
         }
         void    construct_server(std::vector<std::string>::iterator first, std::vector<std::string>::iterator last)
         {
@@ -223,8 +328,29 @@ class server_parser : public server_location
                     if(error_codes.size() == 0)
                         error_codes.push_back(404);
                     for(size_t i = 0; i < error_codes.size();i++)
-                        std::cout << error_codes[i] << "Err <\n";
-                    exit(0);
+                        std::cout << error_codes[i] << " Err <\n";
+                    // exit(0);
+                }
+                else if(!strncmp(serverVec[i].c_str(), "index", 5))
+                {
+                    getIndexPage(stringSplit(serverVec[i], ' ', &temp_size), temp_size);
+                    std::cout << this->index << "<< index\n";
+                        
+                }
+                else if(!strncmp(serverVec[i].c_str(), "root", 4))
+                {
+                    getRoot(stringSplit(serverVec[i], ' ', &temp_size), temp_size);
+                    std::cout << this->root << "<< root\n";
+                    // exit(0);
+                }
+                else if (!strncmp(serverVec[i].c_str(), "autoindex", 9))
+                {
+                    getAutoIndex(stringSplit(serverVec[i], ' ', &temp_size), temp_size);
+                }
+                else if (!strncmp(serverVec[i].c_str(), "return", 6))
+                {
+                    getRedirection(stringSplit(serverVec[i], ' ', &temp_size), temp_size);
+                    std::cout << this->redirection << "<< redirection \n";
                 }
                 // std::cout << serverVec[i] << '\n';
                 else if (!strncmp(serverVec[i].c_str(), "location ", 9) && serverVec[i].back() == '{')
@@ -252,14 +378,6 @@ class server_parser : public server_location
         }
         void    setServerIndex(int index){ this->server_index = index;}
         ~server_parser() {};
-        int getPort(void){ return (this->port);}
-        std::string getHost(void){ return (this->host);}
-        std::vector<std::string> getServerName(void){ return (this->server_names);}
-        std::string getErrorPage(void){ return (this->error_page);}
-        int getCmds(void){ return (this->client_max_body_size);}
-        std::string getRoot(void){return (this->root);}
-        std::string getIndex(void){return (this->index);}
-        server_location *getLocations(void){return (this->location);}
         size_t getLocationCount(std::vector<std::string> vec)
         {
             size_t count = 0;
@@ -280,6 +398,28 @@ class config_parser : public server_parser
         server_parser *servers;
     public :
         config_parser() {};
+        config_parser(config_parser & c)
+        {
+            *this = c;
+        }
+        config_parser & operator=(config_parser & c)
+        {
+            if(server_count > 0)
+                delete [] this->servers;
+            servers = new config_parser[c.getServerCountObject()];
+            for(size_t i = 0; i < this->server_count; i++)
+                this->servers[i] = c.servers[i];
+            return (*this);
+        }
+        /////// GETTERS AND SETTERS //////////
+        int getServerCountObject(void)
+        {
+            return (this->server_count);
+        }
+        server_parser getServerObject(size_t index)
+        {
+            return (this->servers[index]);
+        }
         config_parser(std::string filename)
         {
             std::vector<std::string> tempConf;
@@ -338,6 +478,7 @@ class config_parser : public server_parser
                 return (count);
             }
         ~config_parser(){delete [] this->servers;}
+        
         };
 
 #endif
