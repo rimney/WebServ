@@ -36,6 +36,7 @@ std::string   server::get_request() const
     return _request;
 }
 
+// TO BE EDITED TO ADD THE OTHER CLASS ARGS
 server  & server::operator=(server const & s)
 {
     _port = s.get_port();
