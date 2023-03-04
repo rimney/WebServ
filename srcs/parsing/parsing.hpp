@@ -6,7 +6,7 @@
 /*   By: rimney < rimney@student.1337.ma>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/24 21:53:42 by rimney            #+#    #+#             */
-/*   Updated: 2023/03/04 01:40:13 by rimney           ###   ########.fr       */
+/*   Updated: 2023/03/04 04:58:09 by rimney           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -168,6 +168,8 @@ class server_parser : public server_location
             this->client_max_body_size = s.getCmbsObject();
             this->rediection = s.getRedirectionObject();
             this->is_auto_index = s.getIsAutoIndexObject();
+            this->root = s.getRootObject();
+            this->server_names = s.getServerNamesObject();
             // if(this->location)
             //     delete [] this->location;
             this->location = new server_location[this->location_count];
@@ -176,6 +178,10 @@ class server_parser : public server_location
             return (*this);
         }
         /////// GETTERS AND SETTERS /////////////
+        std::vector<std::string> getServerNamesObject(void)
+        {
+            return (this->server_names);
+        }
         int getPortObject(void)
         {
             return (this->port);
@@ -204,6 +210,10 @@ class server_parser : public server_location
         {
             return (this->index);
         }
+        std::string getRootObject(void)
+        {
+            return (this->root);
+        }
         std::string getRedirectionObject(void)
         {
             return (this->rediection);
@@ -215,6 +225,14 @@ class server_parser : public server_location
         bool getIsAutoIndexObject(void)
         {
             return (this->is_auto_index);
+        }
+        int getServerLocationCountObject(void)
+        {
+            return (this->location_count);
+        }
+        int getServerIndexObject(void)
+        {
+            return (this->server_index);
         }
         /////// GETTERS AND SETTERS /////////////
         bool is_digits(const std::string &str)
@@ -427,6 +445,7 @@ class server_parser : public server_location
             std::cout << count << " < location count\n";
             return (count);
         }
+
 };
 
 class config_parser : public server_parser
@@ -455,9 +474,9 @@ class config_parser : public server_parser
         {
             return (this->server_count);
         }
-        server_parser getServerObject(size_t index)
+        server_parser *getServersObject(void)
         {
-            return (this->servers[index]);
+            return (this->servers);
         }
         config_parser(std::string filename)
         {
@@ -518,7 +537,36 @@ class config_parser : public server_parser
                 return (count);
             }
         ~config_parser(){}
-        
         };
 
+        std::ostream & operator<<(std::ostream & os, server_parser & s)
+        {
+            std::vector<int> serverErrorCodes = s.getErrorCodesObject();
+            std::vector<std::string> serverNames = s.getServerNamesObject();
+            os << "|------------->>\n";
+            os << "| Server index : " << s.getServerIndexObject() << '\n';
+            os << "| Server Port : " << s.getPortObject() << '\n';
+            os << "| Server Host : " << s.getHostObject() << '\n';
+            os << "| Server Location Count: " << s.getServerLocationCountObject() << '\n';
+            os << "| Server CMBS : " << s.getCmbsObject() << '\n';
+            for(size_t i = 0;i < serverErrorCodes.size();i++)
+                os << "| Server Error codes : " << serverErrorCodes[i] << '\n';
+            os << "| Server Error Page : " << '\n';
+            os << "| Server Root : " << s.getRootObject() << '\n';
+            os << "| Server Index Page : " << s.getIndexObject() << '\n';
+            os << "| Server Redirection : " << s.getRedirectionObject();
+            for(size_t i = 0; i < serverNames.size(); i++)
+                os << "| Server Names : "<< serverNames[i] << '\n';
+             os << "| Server AutoIndex : " << s.getIsAutoIndexObject() << '\n';
+            // for(size_t i = 0; i < this->location_count; i++)
+            //     std::cout << "  |" 
+            return (os);
+        }
+        std::ostream & operator<<(std::ostream & os, config_parser & p)
+        {
+            server_parser *servers = p.getServersObject();
+            for(size_t i = 0; i < p.getServerCountObject(); i++)
+                os << servers[0] << '\n';
+            return (os);
+        }
 #endif

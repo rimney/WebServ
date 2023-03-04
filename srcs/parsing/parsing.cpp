@@ -6,7 +6,7 @@
 /*   By: rimney < rimney@student.1337.ma>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/27 03:28:04 by rimney            #+#    #+#             */
-/*   Updated: 2023/03/04 02:00:47 by rimney           ###   ########.fr       */
+/*   Updated: 2023/03/04 03:31:55 by rimney           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,8 +19,7 @@ int main(int argc, char **argv)
     {
         config_parser servers(argv[1]);
         config_parser aa = servers;
-        std::cout << aa.getServerCountObject() << " << EEEEEEE\n";
-        std::cout << servers.getServerCountObject() << " << EEEE\n";
+        std::cout << servers;
         // system("leaks a.out");
     }
 }
