@@ -6,7 +6,7 @@
 /*   By: rimney < rimney@student.1337.ma>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/24 21:53:42 by rimney            #+#    #+#             */
-/*   Updated: 2023/03/03 08:02:59 by rimney           ###   ########.fr       */
+/*   Updated: 2023/03/04 01:40:13 by rimney           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,7 +26,8 @@ class server_location
         std::string location_name; // /location/example
         std::string root; // root key
         bool is_auto_index; // is autoindex
-        std::string  *HttpMethods; // GET, POST, DELETE
+        std::vector<std::string>  HttpMethods; // GET, POST, DELETE
+        
         std::string index; // index 
         std::string rediection; // return aaa/aaaa/html
         std::string alias; // alias key
@@ -36,6 +37,38 @@ class server_location
         std::vector<int> error_codes; // // // // 
     public :
         server_location(){}
+        server_location(server_location & s)
+        {
+
+            this->location_index = s.location_index;
+            this->location_name = s.location_name;
+            this->root = s.root;
+            this->is_auto_index = s.is_auto_index;
+            this->HttpMethods = s.HttpMethods;
+            this->index = s.index;
+            this->alias = s.alias;
+            this->cgiPath = s.cgiPath;
+            this->cgiExt = s.cgiExt;
+            this->error_codes = s.error_codes;
+            this->error_page_location = s.error_page_location;
+            // exit(0);
+        }
+        server_location operator=(server_location & s)
+        {
+            this->location_index = s.location_index;
+            this->location_name = s.location_name;
+            this->root = s.root;
+            this->is_auto_index = s.is_auto_index;
+            this->HttpMethods = s.HttpMethods;
+            this->index = s.index;
+            this->alias = s.alias;
+            this->cgiPath = s.cgiPath;
+            this->cgiExt = s.cgiExt;
+            this->error_codes = s.error_codes;
+            this->error_page_location = s.error_page_location;
+            
+            return (*this);
+        }
         void construct_location(std::vector<std::string>::iterator first, std::vector<std::string>::iterator last)
         {
             std::vector<std::string> locationVec(first, last);
@@ -55,8 +88,8 @@ class server_location
         void    setRoot(std::string root){this->root = root;}
         std::string getRoot(void){return (this->root);}
         void    setAutoIndex(bool autoIndex){this->is_auto_index = autoIndex;}
-        void        setAllowMethods(std::string *allowMethods){this->HttpMethods = allowMethods;}
-        std::string        *getAllocMethods(void){return (this->HttpMethods);}
+        void        setAllowMethods(std::vector<std::string> allowMethods){this->HttpMethods = allowMethods;}
+        std::vector<std::string>        getAllocMethods(void){return (this->HttpMethods);}
         void    setIndex(std::string index){this->index = index;}
         std::string getIndex(void){return (this->index);}
         std::string    getRedirection(void){return (this->rediection);}
@@ -135,6 +168,11 @@ class server_parser : public server_location
             this->client_max_body_size = s.getCmbsObject();
             this->rediection = s.getRedirectionObject();
             this->is_auto_index = s.getIsAutoIndexObject();
+            // if(this->location)
+            //     delete [] this->location;
+            this->location = new server_location[this->location_count];
+            for(size_t i = 0;i < location_count; i++)
+                this->location[i] = s.location[i];
             return (*this);
         }
         /////// GETTERS AND SETTERS /////////////
@@ -201,10 +239,10 @@ class server_parser : public server_location
                     exit(0);
                 }
                 
-                delete [] temparray;
                 this->port = stoi(temparray[1]);
                 this->host = temparray[0];
                 
+                delete [] temparray;
                 // exit(0);
             }
             if (temp_size == 2 && is_digits(Port[1]))
@@ -404,8 +442,9 @@ class config_parser : public server_parser
         }
         config_parser & operator=(config_parser & c)
         {
-            if(server_count > 0)
-                delete [] this->servers;
+            // if(this->servers)
+            //     delete [] this->servers;
+            this->server_count = c.getServerCountObject();
             servers = new config_parser[c.getServerCountObject()];
             for(size_t i = 0; i < this->server_count; i++)
                 this->servers[i] = c.servers[i];
@@ -457,7 +496,8 @@ class config_parser : public server_parser
                         i++;
                     }
                     closing_bracket = i;
-                    servers[server_index].construct_server(tempConf.begin() + opening_bracket, tempConf.begin() + closing_bracket + 1); // constructing server
+                    if (servers + server_index)
+                        servers[server_index].construct_server(tempConf.begin() + opening_bracket, tempConf.begin() + closing_bracket + 1); // constructing server
                     server_index += 1;
                 }
             }
@@ -477,7 +517,7 @@ class config_parser : public server_parser
                 }
                 return (count);
             }
-        ~config_parser(){delete [] this->servers;}
+        ~config_parser(){}
         
         };
 
