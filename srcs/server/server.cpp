@@ -1,7 +1,7 @@
 
 
 #include "server.hpp"
-#include "/Users/brmohamm/Desktop/WebServ/includes/request.hpp"
+#include "../../includes/request.hpp"
 
 server::server()
     : _port(DEFAULT_PORT), _host(INADDR_ANY)
@@ -37,6 +37,7 @@ std::string   server::get_request() const
     return _request;
 }
 
+// TO BE EDITED TO ADD THE OTHER CLASS ARGS
 server  & server::operator=(server const & s)
 {
     _port = s.get_port();
@@ -72,8 +73,6 @@ void server::accept()
         throw(std::string("ERROR: connection faild."));
 }
 
-
-
 void    server::close()
 {
     ::close(_fd_socket);
@@ -82,29 +81,53 @@ void    server::close()
 
 void    server::receive()
 {
+    Request request;
     int     rec;
     char    buffer[RECV_SIZE] = {0};
-    // Request request;
-
+    
     rec = recv(_fd_connection, buffer, RECV_SIZE, 0);
     if (rec == -1)
+    {
+        close();
         throw(std::string("ERROR: failed to receive data"));
+    }
     _request = std::string(buffer);
-    // request = _request;
-    // std::cout <<  request.get_start_line().method << std::endl;
-    // std::cout <<  request.get_start_line().path << std::endl;
-    // std::cout <<  request.get_start_line().vertion << std::endl;
-    
+    request = _request;
+    std::cout << "\nThe first line is : \n";
+    std::cout <<  request.get_start_line().method << std::endl;
+    std::cout <<  request.get_start_line().path << std::endl;
+    std::cout <<  request.get_start_line().vertion << std::endl;
+    std::cout << "\n\n";
+    std::map<std::string, std::string>::iterator itr;
+    std::cout << "\nThe heder is : \n";
+    std::cout << "\tKEY\tELEMENT\n";
+    for (itr = request.get_header().begin(); itr != request.get_header().end(); ++itr) {
+        std::cout << '\t' << itr->first << '\t' << itr->second << '\n';
+    }
+    std::cout << std::endl;
+    std::vector<std::string>::iterator itrv;
+    std::cout << "\nThe body is : \n";
+    for (itrv = request.get_body().begin(); itrv != request.get_body().end(); ++itrv) {
+        std::cout << *itrv << '\n';
+    }
 }
 
 void    server::run()
 {
-    accept();
     while (1)
     {
-        receive();
-    
+        try
+        {
+            accept();
+            receive();
+            // std::cout << _request << '\n';
+        }
+        catch(std::string const & msg)
+        {
+            std::cout << msg << '\n';
+        }
+        if (_fd_connection >= 0)
+            ::close(_fd_connection);
     }
-    std::cout << "closing\n";
     close();
 }

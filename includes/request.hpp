@@ -5,7 +5,7 @@
 #include <vector>
 #include <map>
 #include <iterator>
-#include "/home/von/Desktop/WebServ/includes/lexer.hpp"
+#include "lexer.hpp"
 
 struct Start_line
 {
@@ -25,33 +25,37 @@ class Request
         Request() {}
         Request(std::string value)
         {
+            parser(value);
+        }
+        void parser(std::string value)
+        {
             token _token;
             lexer _lexer(value);
             std::string buffer;
 
             uintptr_t p = reinterpret_cast<uintptr_t>(&start_line);
             std::string *t = reinterpret_cast<std::string *>(p);
-            for(int i = 0 ;_token._type != TYPE_EOF;)
+            for(int i = 0 ;_token.type != TYPE_EOF;)
             {
                 _token = _lexer.get_next_token();
-                if(_token._type == TYPE_END_OF_LINE)
+                if(_token.type == TYPE_END_OF_LINE)
                     i++;
                 if(i == 0)
                 {
                     *t = _token.value;
                     t++;
                 }
-                else if (is_endsection != true &&_token._type != TYPE_END_OF_LINE 
-                        && _token._type != TYPE_END_OF_SSECTION && _token._type != TYPE_TWO_POINT)
+                else if (_token.type != TYPE_END_OF_LINE 
+                        && _token.type != TYPE_END_OF_SSECTION && _token.type != TYPE_TWO_POINT)
                 {
                     _lexer.get_next_token();
                     header.insert(std::make_pair(_token.value,_lexer.get_next_token().value));
                 }
-                else if(_token._type == TYPE_END_OF_SSECTION)
+                else if(_token.type == TYPE_END_OF_SSECTION)
                 {
-                    while(_token._type != TYPE_EOF)
+                    while(_token.type != TYPE_EOF)
                     {
-                        while(_token._type != TYPE_END_OF_SSECTION && _token._type != TYPE_EOF)
+                        while(_token.type != TYPE_END_OF_SSECTION && _token.type != TYPE_EOF)
                         {
                             buffer += _token.value;
                             _token = _lexer.get_next_token();

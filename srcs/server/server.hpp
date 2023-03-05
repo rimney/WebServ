@@ -3,7 +3,7 @@
 #ifndef SERVER_HPP
 # define SERVER_HPP
 
-# define DEFAULT_PORT 80
+# define DEFAULT_PORT 8080
 # define DEFAULT_PROTOCOL 0
 # define RECV_SIZE 65536
 
@@ -32,7 +32,6 @@ class server
         server();
         server(int port, unsigned int host);
         server(server const & s);
-
         ~server();
 
         int             get_port() const;

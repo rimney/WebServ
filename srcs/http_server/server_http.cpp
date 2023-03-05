@@ -7,7 +7,7 @@
 #include <string.h>
 #include <iostream>
 #include <string>
-#include "/home/von/Desktop/WebServ/includes/request.hpp"
+#include "../../request.hpp"
 
 #define PORT 8080
 
