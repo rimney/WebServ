@@ -6,7 +6,7 @@
 /*   By: rimney < rimney@student.1337.ma>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/24 21:53:42 by rimney            #+#    #+#             */
-/*   Updated: 2023/03/04 20:02:33 by rimney           ###   ########.fr       */
+/*   Updated: 2023/03/06 22:35:21 by rimney           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -43,6 +43,48 @@ class server_location
         {
             this->location_index = index;
         }
+        std::vector<int> getLocationErrorCodesObject(void)
+        {
+            return (this->error_codes);
+        }
+        std::vector<std::string> getLocationMethodsObject(void)
+        {
+            return (this->HttpMethods);
+        }
+        int getLocationindexObject(void)
+        {
+            return (this->location_index);
+        }
+        int getCmbsObject(void)
+        {
+            return (this->client_max_body_size);
+        }
+        std::string getLocationErrorPageObject(void)
+        {
+            return (this->error_page);
+        }
+        std::string getLocationRootObject(void)
+        {
+            return (this->root);
+        }
+        std::string getLocationIndexObject(void)
+        {
+            return (this->index);
+        }
+        std::string getLocationRedirectionObject(void)
+        {
+            return (this->redirection);
+        }
+        bool getLocationIsAutoIndexObject(void)
+        {
+            return (this->is_auto_index ? true : false);
+        }
+        std::string getLocationNameObject(void)
+        {
+            return (this->location_name);
+        }
+
+        
         /// GETTERS AND SETTERS ///
         
         server_location(){}
@@ -77,10 +119,6 @@ class server_location
             this->error_page = s.error_page;
             
             return (*this);
-        }
-        void    getHttpMethods(std::string *keys, size_t size)
-        {
-            
         }
         void    getErrorPage(std::string *keys, size_t size)
         {
@@ -167,14 +205,30 @@ class server_location
             }
             delete [] Keys;
         }
+        void    getLocationName(std::string *Keys, size_t size)
+        {
+            if(size <= 1 || size > 3)
+            {
+                std::cout << "Error Location Name Arguments";
+                exit(0);
+            }
+            this->location_name = Keys[size - 2];
+            delete [] Keys;
+        }
         void construct_location(std::vector<std::string>::iterator first, std::vector<std::string>::iterator last)
         {
             std::vector<std::string> locationVec(first, last);
             size_t temp_size;
-            
+            this->client_max_body_size = 0;
+            this->is_auto_index = false;
             for(size_t i = 0; i < locationVec.size(); i++)
             {
-                if(!strncmp(locationVec[i].c_str(), "error", 5))
+                if(!strncmp(locationVec[i].c_str(), "location", 8) && locationVec[i].back() == '{')
+                {
+                    getLocationName(stringSplit(locationVec[i], ' ', &temp_size), temp_size);
+                    std::cout << this->location_name << " << here\n";
+                }
+                else if(!strncmp(locationVec[i].c_str(), "error", 5))
                 {
                     getErrorPage(stringSplit(locationVec[i], ' ', &temp_size), temp_size);
                     if(error_codes.size() == 0)
@@ -287,6 +341,10 @@ class server_parser : public server_location
             return (*this);
         }
         /////// GETTERS AND SETTERS /////////////
+        server_location *getServerLocationsObject(void)
+        {
+            return (this->location);
+        }
         std::vector<std::string> getServerNamesObject(void)
         {
             return (this->server_names);
@@ -649,11 +707,30 @@ class config_parser : public server_parser
             }
         ~config_parser(){}
         };
-
+        std::ostream & operator<<(std::ostream & os, server_location & s)
+        {
+            std::vector<int> locationErrorCodes = s.getLocationErrorCodesObject();
+            std::vector<std::string> locationMethods = s.getLocationMethodsObject();
+            os << "     |------------->>\n";
+            os << "     | Location index : " << s.getLocationindexObject() << '\n';
+            os << "     | Location  Name : " << s.getLocationNameObject() << '\n';
+            os << "     | Location CMBS : " << s.getCmbsObject() << '\n';
+            for(size_t i = 0;i < locationErrorCodes.size();i++)
+                os << "     | Location Error codes : " << locationErrorCodes[i] << '\n';
+            os << "     | Location Error Page : " << s.getLocationErrorPageObject() <<  '\n';
+            os << "     | Location Root : " << s.getLocationRootObject() << '\n';
+            os << "     | Location Index Page : " << s.getLocationIndexObject() << '\n';
+            os << "     | Location Redirection : " << s.getLocationRedirectionObject() << '\n';
+            for(size_t i = 0; i < locationMethods.size(); i++)
+                os << "     | Location Methods : "<< locationMethods[i] << '\n';
+             os << "       | Location AutoIndex : " << s.getLocationIsAutoIndexObject() << '\n'; 
+             return (os);
+        }
         std::ostream & operator<<(std::ostream & os, server_parser & s)
         {
             std::vector<int> serverErrorCodes = s.getErrorCodesObject();
             std::vector<std::string> serverNames = s.getServerNamesObject();
+            server_location *serverLocations = s.getServerLocationsObject();
             os << "|------------->>\n";
             os << "| Server index : " << s.getServerIndexObject() << '\n';
             os << "| Server Port : " << s.getPortObject() << '\n';
@@ -669,8 +746,8 @@ class config_parser : public server_parser
             for(size_t i = 0; i < serverNames.size(); i++)
                 os << "| Server Names : "<< serverNames[i] << '\n';
              os << "| Server AutoIndex : " << s.getIsAutoIndexObject() << '\n';
-            // for(size_t i = 0; i < this->location_count; i++)
-            //     std::cout << "  |" 
+            for(size_t i = 0; i < s.getLocationCount(); i++)
+                os << serverLocations[i] << '\n';
             return (os);
         }
         std::ostream & operator<<(std::ostream & os, config_parser & p)
