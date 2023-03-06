@@ -3,17 +3,25 @@
 /*                                                        :::      ::::::::   */
 /*   webserv.cpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: eel-ghan <eel-ghan@student.42.fr>          +#+  +:+       +#+        */
+/*   By: rimney < rimney@student.1337.ma>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/25 20:56:08 by eel-ghan          #+#    #+#             */
-/*   Updated: 2023/02/25 21:00:22 by eel-ghan         ###   ########.fr       */
+/*   Updated: 2023/03/06 23:36:54 by rimney           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "includes/webserv.hpp"
+#include "includes/parsing.hpp"
 
-int main()
+int main(int argc, char **argv)
 {
-    
-    return 0;
+    (void)argc;
+    if(argc == 2)
+    {
+        config_parser servers(argv[1]);
+        // config_parser aa = servers;
+        // std::cout << servers;
+        system("leaks webserv");
+
+    }
 }
