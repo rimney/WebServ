@@ -6,7 +6,7 @@
 /*   By: rimney < rimney@student.1337.ma>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/24 21:53:42 by rimney            #+#    #+#             */
-/*   Updated: 2023/03/06 23:45:58 by rimney           ###   ########.fr       */
+/*   Updated: 2023/03/06 23:53:41 by rimney           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -608,8 +608,6 @@ class server_parser : public server_location
                     }
                     closing_bracket = i;
                     this->location[location_index++].construct_location(serverVec.begin() + opening_bracket, serverVec.begin() + closing_bracket);                    
-            system("leaks webserv");
-
                }
                 
             }
