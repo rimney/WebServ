@@ -6,7 +6,7 @@
 /*   By: eel-ghan <eel-ghan@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/25 20:56:08 by eel-ghan          #+#    #+#             */
-/*   Updated: 2023/03/07 20:37:19 by eel-ghan         ###   ########.fr       */
+/*   Updated: 2023/03/07 23:34:55 by eel-ghan         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,16 +20,19 @@ int main(int argc, char **argv)
     {
         try
         {
-            config_parser parsing(argv[1]);
-            // server_parser *p = parsing.getServersObject();
-            // config_parser aa = servers;
-            std::cout << parsing;
-            // std::cout << p[0].getPortObject();
+            config_parser config(argv[1]);
+            
+            // std::cout << config;
 
-            servers     s;
+            servers     s(config);
+            if (s.setup(config.getServersObject()))
+            {
+                // system("leaks webserv");
+                return 1;
+            }
             s.run();
 
-         // system("leaks webserv");
+            // system("leaks webserv");
         }
         catch(const std::string& msg)
         {
@@ -37,7 +40,7 @@ int main(int argc, char **argv)
         }
     }
     else
-        std::cout << "ERROR: bad args\n";
+        std::cout << "ERROR: bad args number\n";
     
     return 0;
 }

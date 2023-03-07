@@ -15,6 +15,7 @@
 # include <sys/socket.h>
 # include <vector>
 # include <fcntl.h>
+# include "parsing.hpp"
 
 // TO BE DELETED //
 #include <string.h>
@@ -29,6 +30,7 @@ class server
         int                 _fd_connection;
         struct sockaddr_in  _addr;
         std::string         _request;
+        server_parser       _server_config;
         int                 _error_flag;
         
 
@@ -43,13 +45,15 @@ class server
         std::string     get_request() const;
         int             get_fd_socket() const;
         int             get_fd_connection() const;
+        int             get_error_flag() const;
         server  &       operator=(server const & s);
         void            accept();
         void            close();
         void            receive();
+        void            set_server_config(server_parser server_config);
+        void            setup(server_parser server_config);
     
     private:
-        void            setup();
         void            set_addr();
 };
 

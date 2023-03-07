@@ -3,19 +3,13 @@
 #include "../../includes/server.hpp"
 
 server::server()
-    : _port(DEFAULT_PORT), _host(INADDR_ANY), _error_flag(0)
-{
-    setup();
-}
+    : _port(DEFAULT_PORT), _host(INADDR_ANY), _error_flag(1) {}
 
 server::server(int port, unsigned int host)
-    : _port(port), _host(host), _error_flag(0)
-{
-    setup();
-}
+    : _port(port), _host(host), _error_flag(1) {}
 
 server::server(server const & s)
-    : _error_flag(0)
+    : _error_flag(1)
 {
     *this = s;
 }
@@ -47,6 +41,11 @@ int server::get_fd_connection() const
     return _fd_connection;
 }
 
+int server::get_error_flag() const
+{
+    return _error_flag;
+}
+
 // TO BE EDITED TO ADD THE OTHER CLASS ARGS
 server  & server::operator=(server const & s)
 {
@@ -61,26 +60,26 @@ server  & server::operator=(server const & s)
 
 // to handle exception thrown by this method,
 // I should set a flag or an enum to know what kind of error I am handling
-void server::setup()
+void server::setup(server_parser server_config)
 {
     int optval = 1;
 
     _fd_socket = socket(AF_INET, SOCK_STREAM, DEFAULT_PROTOCOL);
     if (_fd_socket == -1)
     {
-        _error_flag = 1;
+        _error_flag = 0;
         throw(std::string("ERROR: failed to create the socket."));
     }
-
     //Allow socket descriptor to be reuseable
     if (setsockopt(_fd_socket, SOL_SOCKET, SO_REUSEADDR, &optval, sizeof(optval)) == -1)
-        throw(std::string("ERROR: faild to set socket option (setsockopt()) for _fd_socket"));
+        throw(std::string("ERROR: faild to set socket option (setsockopt()) for _fd_socket."));
     set_addr();
     if (bind(_fd_socket, (struct sockaddr*)&_addr, sizeof(_addr)) == -1)
         throw(std::string("ERROR: failed to bind the socket."));
     if (listen(_fd_socket, 100) == -1)
         throw(std::string("ERROR: failed to listen."));
-    std::cout << "listening...\n";
+    set_server_config(server_config);
+    std::cout << "host: " << _host << " is listening on port " << _port << "...\n\n";
 }
 
 void    server::set_addr()
@@ -103,7 +102,6 @@ void server::accept()
 void    server::close()
 {
     ::close(_fd_socket);
-    ::close(_fd_connection);
 }
 
 void    server::receive()
@@ -115,4 +113,9 @@ void    server::receive()
     if (rec == -1)
         throw(std::string("ERROR: failed to receive data."));
     _request = std::string(buffer);
+}
+
+void    server::set_server_config(server_parser server_config)
+{
+    _server_config = server_config;
 }
