@@ -1,6 +1,6 @@
 NAME = webserv
 
-SRC = webserv.cpp
+SRC = webserv.cpp srcs/parsing/Parsing.cpp
 
 CFLAGS = -Wall -Wextra -Werror -std=c++98 #-fsanitize=address -g3
 
