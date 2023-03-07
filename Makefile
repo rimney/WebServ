@@ -1,6 +1,8 @@
 NAME = webserv
 
-SRC = webserv.cpp
+SERVER = srcs/server
+
+SRC = webserv.cpp ${SERVER}/server.cpp ${SERVER}/servers.cpp 
 
 CFLAGS = -Wall -Wextra -Werror -std=c++98
 
