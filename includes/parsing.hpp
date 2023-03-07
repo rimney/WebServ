@@ -6,7 +6,7 @@
 /*   By: rimney < rimney@student.1337.ma>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/24 21:53:42 by rimney            #+#    #+#             */
-/*   Updated: 2023/03/07 05:22:17 by rimney           ###   ########.fr       */
+/*   Updated: 2023/03/07 08:08:35 by rimney           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -71,7 +71,7 @@ class server_parser : public server_location
 {
     protected :
         int port; // 8080
-        std::string host; // 0.0.0.1
+        int host; // 0.0.0.1 --> into in int
         int server_index; // server index in parsing
         size_t location_count; // number of location objects for looping purposes
         int client_max_body_size; // i mean that obvious
@@ -93,7 +93,7 @@ class server_parser : public server_location
         server_location *getServerLocationsObject(void);
         std::vector<std::string> getServerNamesObject(void);
         int getPortObject(void);
-        std::string getHostObject(void);
+        int getHostObject(void);
         int getServer_IndexLocationObject(void);
         size_t getLocationCount(void);
         int getCmbsObject(void);
@@ -118,6 +118,7 @@ class server_parser : public server_location
         void    construct_server(std::vector<std::string>::iterator first, std::vector<std::string>::iterator last);
         void    setLocationsIndex(server_location *location);
         void    setServerIndex(int index);
+        int     ipToInt(std::string host);
         ~server_parser() {} ;
         size_t getLocationCount(std::vector<std::string> vec);
 
@@ -132,7 +133,7 @@ class config_parser : public server_parser
         config_parser(){} ;
         config_parser(config_parser & c);
         config_parser & operator=(config_parser & c);
-        size_t getServerCountObject(void);
+        size_t getServerCountObject(void); // server count getter
         server_parser *getServersObject(void);
         config_parser(std::string filename);
         void    getServerName(std::string *keys, size_t size);

@@ -6,11 +6,21 @@
 /*   By: rimney < rimney@student.1337.ma>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/07 03:50:36 by rimney            #+#    #+#             */
-/*   Updated: 2023/03/07 05:10:48 by rimney           ###   ########.fr       */
+/*   Updated: 2023/03/07 07:59:13 by rimney           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../../includes/parsing.hpp"
+#include <arpa/inet.h>
+
+char *toIp(int ip)
+{
+    struct in_addr addr;
+    addr.s_addr = htonl((u_int32_t)ip);
+    char* ip_address = inet_ntoa(addr);
+
+    return(ip_address);
+}
 
 std::ostream & operator<<(std::ostream & os, server_location & s)
 {
@@ -40,7 +50,7 @@ std::ostream & operator<<(std::ostream & os, server_parser & s)
     os << "|------------->>\n";
     os << "| Server index : " << s.getServerIndexObject() << '\n';
     os << "| Server Port : " << s.getPortObject() << '\n';
-    os << "| Server Host : " << s.getHostObject() << '\n';
+    os << "| Server Host : " << s.getHostObject() << " ( " << toIp(s.getHostObject())<<  " )" <<'\n';
     os << "| Server Location Count: " << s.getServerLocationCountObject() << '\n';
     os << "| Server CMBS : " << s.getCmbsObject() << '\n';
     for(size_t i = 0;i < serverErrorCodes.size();i++)
@@ -80,7 +90,7 @@ server_location::server_location(server_location & s)
     this->cgiExt = s.cgiExt;
     this->error_codes = s.error_codes;
     this->error_page = s.error_page;
-    // exit(0);
+    // exit();
 }
 server_location server_location::operator=(server_location & s)
 {
@@ -109,7 +119,6 @@ void    server_location::getErrorPage(std::string *keys, size_t size)
     for(size_t i = 1; i < size - 1;i++)
         this->error_codes.push_back(stoi(keys[i]));
     delete [] keys;
-    // exit(0);
 }
 void    server_location::getIndexPage(std::string *keys, size_t size)
 {
@@ -120,7 +129,6 @@ void    server_location::getIndexPage(std::string *keys, size_t size)
     }
     this->index = keys[size - 1];
     delete [] keys;
-    // exit(9);
 }
 void    server_location::getAutoIndex(std::string *keys, size_t size)
 {
@@ -251,21 +259,14 @@ std::string *server_location::stringSplit(std::string split, char c, size_t *ind
         }
     }
     tokens.push_back(split.substr(start));
-    // for(size_t i = 0; i < tokens.size(); i++)
-    //     std::cout << " << " << tokens[i] << ">> \n";
-    // exit(0);
     std::string *ret = new std::string[tokens.size()]; // ret string allocation;
     std::copy(tokens.begin(), tokens.end(), ret);
     for(size_t i = 0; i < tokens.size(); i++)
     {
         ret[i].erase(0, ret[i].find_first_not_of(" \t\r\n"));
         ret[i].erase(ret[i].find_last_not_of(" \t\r\n") + 1);
-        // std::cout << ret[i] << std::endl;
     }
-    
-    // delete [] ret;
     *index_save = tokens.size();
-    // exit(0);
     return (ret);
 }
 
@@ -283,8 +284,6 @@ server_parser::server_parser(server_parser & s)
     this->is_auto_index = s.getIsAutoIndexObject();
     this->root = s.getRootObject();
     this->server_names = s.getServerNamesObject();
-    // if(this->location)
-    //     delete [] this->location;
     this->location = new server_location[this->location_count];
     for(size_t i = 0;i < location_count; i++)
         this->location[i] = s.location[i];
@@ -300,14 +299,11 @@ server_parser & server_parser::operator=(server_parser & s)
     this->is_auto_index = s.getIsAutoIndexObject();
     this->root = s.getRootObject();
     this->server_names = s.getServerNamesObject();
-    // if(this->location)
-    //     delete [] this->location;
     this->location = new server_location[this->location_count];
     for(size_t i = 0;i < location_count; i++)
         this->location[i] = s.location[i];
     return (*this);
 }
-/////// GETTERS AND SETTERS /////////////
 server_location *server_parser::getServerLocationsObject(void)
 {
     return (this->location);
@@ -320,7 +316,7 @@ int server_parser::getPortObject(void)
 {
     return (this->port);
 }
-std::string server_parser::getHostObject(void)
+int server_parser::getHostObject(void)
 {
     return (this->host);
 }
@@ -381,6 +377,35 @@ bool server_parser::is_digits(const std::string &str)
 {
     return str.find_first_not_of("0123456789") == std::string::npos;
 }
+
+int server_parser::ipToInt(std::string host)
+{
+    size_t size;
+    int ret = 0; // we can make it size_t !!
+    std::vector<int> Array;
+    std::string *keys = stringSplit(host, '.', &size);
+    for(size_t i = 0; i < size; i++)
+    {
+        Array.push_back(stoi(keys[i]));
+        if(!is_digits(keys[i]) || Array[i] > 256 || Array[i] < 0)
+        {
+            std::cout << "Error Wrong IP Value\n";
+            exit(0);
+        }
+        std::cout << keys[i] << " <<\n";
+    }
+    if(size != 4)
+    {
+        std::cout << "Wrong ip Address";
+        exit(0);
+    }
+    for (int i = 0; i < 4; i++) {
+        ret |= (Array[i] << (8 * (3 - i)));
+    }
+    std::cout << ret << "  << \n";
+    delete [] keys;
+    return (ret);
+}
 void    server_parser::getPort(std::string *Port, size_t temp_size)
 {
     std::string *temparray;
@@ -403,7 +428,7 @@ void    server_parser::getPort(std::string *Port, size_t temp_size)
         }
         
         this->port = stoi(temparray[1]);
-        this->host = temparray[0];
+        this->host = ipToInt(temparray[0]);
         // exit(0);
         delete [] temparray;
         // exit(0);
@@ -509,6 +534,7 @@ void    server_parser::construct_server(std::vector<std::string>::iterator first
     this->port = 8080;
     this->is_auto_index = false;
     this->client_max_body_size = 0;
+    this->host = 0;
     std::vector<std::string> serverVec(first, last);
     size_t opening_bracket = 0;
     size_t closing_bracket = 0;
@@ -523,8 +549,8 @@ void    server_parser::construct_server(std::vector<std::string>::iterator first
         if(!strncmp(serverVec[i].c_str(), "listen ", 7))
         {
             getPort(stringSplit(serverVec[i], ' ', &temp_size), temp_size); // host and port parsing;
-            if(this->host.size() == 0)
-                host = "localhost";
+            if(this->host == 0)
+                host = 2130706433;
 
         }
         else if(!strncmp(serverVec[i].c_str(), "server_name", 11))
