@@ -29,6 +29,8 @@ class server
         int                 _fd_connection;
         struct sockaddr_in  _addr;
         std::string         _request;
+        int                 _error_flag;
+        
 
     public:
         server();
