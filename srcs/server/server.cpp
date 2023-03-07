@@ -1,6 +1,6 @@
 
 
-#include "server.hpp"
+#include "../../includes/server.hpp"
 
 server::server()
     : _port(DEFAULT_PORT), _host(INADDR_ANY)
@@ -36,19 +36,38 @@ std::string   server::get_request() const
     return _request;
 }
 
+int server::get_fd_socket() const
+{
+    return _fd_socket;
+}
+
+int server::get_fd_connection() const
+{
+    return _fd_connection;
+}
+
 // TO BE EDITED TO ADD THE OTHER CLASS ARGS
 server  & server::operator=(server const & s)
 {
-    _port = s.get_port();
-    _host = s.get_host();
+    _port = s._port;
+    _host = s._host;
+    _fd_socket = s._fd_socket;
+    _fd_connection = s._fd_connection;
+    _addr = s._addr;
+    _request = s._request;
     return *this;
 }
 
 void server::setup()
 {
+    int optval = 1;
+
     _fd_socket = socket(AF_INET, SOCK_STREAM, DEFAULT_PROTOCOL);
     if (_fd_socket == -1)
         throw(std::string("ERROR: failed to create the socket."));
+    //Allow socket descriptor to be reuseable
+    if (setsockopt(_fd_socket, SOL_SOCKET, SO_REUSEADDR, &optval, sizeof(optval)) == -1)
+        throw(std::string("ERROR: faild set option (setsockopt()) for _fd_socket"));
     set_addr();
     if (bind(_fd_socket, (struct sockaddr*)&_addr, sizeof(_addr)) == -1)
         throw(std::string("ERROR: failed to bind the socket."));
@@ -70,6 +89,7 @@ void server::accept()
     _fd_connection = ::accept(_fd_socket, NULL, NULL);
     if (_fd_connection == -1)
         throw(std::string("ERROR: connection faild."));
+    fcntl(_fd_connection, F_SETFL, O_NONBLOCK); // if the return == -1
 }
 
 void    server::close()
@@ -90,24 +110,4 @@ void    server::receive()
         throw(std::string("ERROR: failed to receive data"));
     }
     _request = std::string(buffer);
-}
-
-void    server::run()
-{
-    while (1)
-    {
-        try
-        {
-            accept();
-            receive();
-            std::cout << _request << '\n';
-        }
-        catch(std::string const & msg)
-        {
-            std::cout << msg << '\n';
-        }
-        if (_fd_connection >= 0)
-            ::close(_fd_connection);
-    }
-    close();
 }
