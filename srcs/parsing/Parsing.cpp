@@ -6,7 +6,7 @@
 /*   By: rimney < rimney@student.1337.ma>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/07 03:50:36 by rimney            #+#    #+#             */
-/*   Updated: 2023/03/07 07:59:13 by rimney           ###   ########.fr       */
+/*   Updated: 2023/03/07 18:25:57 by rimney           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -392,7 +392,6 @@ int server_parser::ipToInt(std::string host)
             std::cout << "Error Wrong IP Value\n";
             exit(0);
         }
-        std::cout << keys[i] << " <<\n";
     }
     if(size != 4)
     {
@@ -402,7 +401,6 @@ int server_parser::ipToInt(std::string host)
     for (int i = 0; i < 4; i++) {
         ret |= (Array[i] << (8 * (3 - i)));
     }
-    std::cout << ret << "  << \n";
     delete [] keys;
     return (ret);
 }
