@@ -7,5 +7,6 @@
 
 # include "server.hpp"
 # include "servers.hpp"
+# include "parsing.hpp"
 
 #endif
