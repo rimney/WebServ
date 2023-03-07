@@ -6,8 +6,8 @@
 # include <sys/select.h>
 # include <map>
 # include "webserv.hpp"
-# include "parsing.hpp"
 # include "server.hpp"
+# include "parsing.hpp"
 
 class servers
 {
@@ -15,7 +15,7 @@ class servers
         fd_set                  _set_fds;
         fd_set                  _set_read_fds;
         // fd_set                  _set_write_fds;
-        config_parser           _config;
+        // config_parser           _config;
         int                     _servers_count;
         int                     _max_fd;
         std::vector<server>     _servers;
@@ -23,7 +23,7 @@ class servers
 
     public:
         servers();
-        servers(config_parser config);
+        // servers(config_parser config);
         servers(servers const & s);
         ~servers();
 
