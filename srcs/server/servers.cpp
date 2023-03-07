@@ -34,23 +34,31 @@ servers &   servers::operator=(servers const & s)
 
 void    servers::setup()
 {
-    int fd;
+    int fd, i;
 
-    for (int i = 0; i < _servers_count; i++)
-       _servers.push_back(server(400 + i, INADDR_ANY));
+    for (i = 0; i < _servers_count; i++)
+    {
+        try
+        {
+            _servers.push_back(server(400 + i, INADDR_ANY));
+        }
+        catch(const std::string& msg)
+        {
+            std::cerr << msg << '\n';
+            // handle error: close fds ... 
+        }
+    }
 
     FD_ZERO(&_set_fds);
 
     _max_fd = 0;
-    for (int i = 0; i < _servers_count; i++)
+    for (i = 0; i < _servers_count; i++)
     {
         fd = _servers[i].get_fd_socket();
         FD_SET(fd, &_set_fds);
         if (_max_fd < _servers[i].get_fd_socket())
             _max_fd = _servers[i].get_fd_socket();
     }
-
-    
 }
 
 void    servers::run()
@@ -60,14 +68,26 @@ void    servers::run()
         memcpy(&_set_read_fds, &_set_fds, sizeof(_set_fds)); // use ft_memcpy()
         // _set_read_fds = _set_fds;
         if (select(_max_fd + 1, &_set_read_fds, NULL, NULL, NULL) == -1)
+        {
             throw(std::string("ERROR: failed to select sockets"));
+            // handle error: close fd's ... 
+        }
 
         // accept connections
         for (std::vector<server>::iterator it = _servers.begin(); it != _servers.end(); it++)
         {
             if (FD_ISSET((*it).get_fd_socket(), &_set_read_fds))
             {
-                (*it).accept();
+                try
+                {
+                    (*it).accept();
+                }
+                catch(const std::string& msg)
+                {
+                    std::cerr << msg << '\n';
+                    // handle error: close fds ... 
+                }
+                
                 FD_SET((*it).get_fd_connection(), &_set_fds);
                 _fds_cnx.insert(std::make_pair((*it).get_fd_connection(), *it));
                 if (_max_fd < (*it).get_fd_connection())
@@ -84,7 +104,15 @@ void    servers::run()
         {
             if (FD_ISSET((*it).first, &_set_read_fds))
             {
-                (*it).second.receive();
+                try
+                {
+                    (*it).second.receive();
+                }
+                catch(const std::string& msg)
+                {
+                    std::cerr << msg << '\n';
+                    // handle error: close fds ... 
+                }
                 std::cout << (*it).second.get_request() << '\n';
             }
         }
