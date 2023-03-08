@@ -66,19 +66,11 @@ class Request
                 }
                 else if(_token.type == TYPE_END_OF_SSECTION)
                 {
-                    while(_token.type != TYPE_EOF )
-                    {
-                        // while(_token.type != TYPE_END_OF_SSECTION && _token.type != TYPE_EOF && _token.type != TYPE_CR)
-                        // {
-                            buffer += _token.value;
-                            _token = _lexer.get_next_token();
-                        // }
-                        // _token = _lexer.get_next_token();
-                        // if(!buffer.empty())
-                        //     body.push_back(buffer);
-                        // buffer.clear();
-                    }
+                    buffer.clear();
+                    for (int i = _lexer.get_index(); i < (int)value.length(); i++)
+                        buffer += value[i];
                     body1 = buffer;
+                    break;
                 }
                 _token.value.clear();
             }
@@ -107,10 +99,14 @@ class Request
                 if(header.find("Transfer-Encoding")->second != "chunked" )
                     r_error = "501 Not Implemented";
             }
-            if(start_line.method == "POST" && header.find("Transfer-Encoding")->first.empty() && header.find("Content-Length")->first.empty())
+            if((start_line.method == "POST" && header.find("Transfer-Encoding")->first.empty() && header.find("Content-Length")->first.empty())
+                || (start_line.method == "POST" && !header.find("Transfer-Encoding")->first.empty() && !header.find("Content-Length")->first.empty()))
                 r_error = "400 Bad Request";
-            if(serv[0].getCmbsObject()  <  stoi(header.find("Content-Length")->second))
+            if(!header.find("Content-Length")->first.empty())
+            {
+                if(serv[0].getCmbsObject()  <  stoi(header.find("Content-Length")->second))
                 r_error = "413 Request Entity Too Large";
+            }
             if(tmp_path.length() > 2048)
                 r_error = "414 Request-URI Too Long";
             for(int i = 0 ; i < (int)tmp_path.length() ; i++)

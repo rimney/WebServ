@@ -42,6 +42,8 @@ class lexer
         return src;
     }
 
+    int get_index(){return index;}
+
     token get_next_token()
     {
         _token.value.clear();
@@ -94,27 +96,4 @@ class lexer
     }
 };
 
-// GET /favicon.ico HTTP/1.1
-// Host: localhost:8080
-// User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10.14; rv:109.0) Gecko/20100101 Firefox/110.0
-// Accept: image/avif,image/webp,*/*
-// Accept-Language: en-US,en;q=0.5
-// Accept-Encoding: gzip, deflate, br
-// Connection: keep-alive
-// Referer: http://localhost:8080/
-// Sec-Fetch-Dest: image
-// Sec-Fetch-Mode: no-cors
-// Sec-Fetch-Site: same-origin
-
-// POST /api/ValidateTwitterFollowerCount HTTP/1.1
-// Host: myazurefunction.azurewebsites.net
-// Content-Type: application/json
-// cache-control: no-cache
-// Postman-Token: XXXXXXX-XXXXX-XXXXXX
-
-// {
-//     "followersCount" : 220,
-//     "tweettext":"#Stack Overflow rocks",
-//     "Name": "John Doe"
-// }
 #endif             
