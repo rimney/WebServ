@@ -6,7 +6,7 @@
 /*   By: rimney < rimney@student.1337.ma>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/07 03:50:36 by rimney            #+#    #+#             */
-/*   Updated: 2023/03/08 23:28:32 by rimney           ###   ########.fr       */
+/*   Updated: 2023/03/08 23:31:40 by rimney           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -92,7 +92,8 @@ server_location::server_location(server_location & s)
     this->error_page = s.error_page;
     // exit();
 }
-server_location server_location::operator=(server_location & const  s)
+
+server_location server_location::operator=(server_location const & s)
 {
     this->location_index = s.location_index;
     this->location_name = s.location_name;
@@ -288,6 +289,7 @@ server_parser::server_parser(server_parser & s)
     for(size_t i = 0;i < location_count; i++)
         this->location[i] = s.location[i];
 }
+
 server_parser & server_parser::operator=(server_parser const & s)
 {
     this->port = s.getPortObject();

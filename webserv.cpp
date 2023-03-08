@@ -23,28 +23,6 @@ int main(int argc, char **argv)
         // server_parser *p = servers.getServersObject();
         // config_parser aa = servers;
         std::cout << servers;
-        int listenn = socket(AF_INET, SOCK_STREAM, 0);
-        if(listen == -1)
-        {
-            std::cerr << "Error cannot create Socket !\n";
-            exit(0);
-        }
-        sockaddr_in addr;
-        addr.sin_family = AF_INET;
-        addr.sin_port = htons(8080);
-        inet_pton(AF_INET, "127.0.0.1", &addr);
-        if (bind(listenn, (sockaddr *)&addr, sizeof(addr)) == -1)
-        {
-            std::cerr << "Error Cannot Bind To IP/PORT";
-            exit(0);
-        }
-        if(listen(listenn, SOMAXCONN) == -1)
-        {
-            std::cerr << "Can't listen ";
-            exit(0);
-        }
-        
-        
         // std::cout << p[0].getPortObject();
         // system("leaks websrv");
 
