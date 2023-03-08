@@ -106,12 +106,20 @@ void    server::close()
 
 void    server::receive()
 {
-    int     rec;
+    int     r;
     char    buffer[RECV_SIZE] = {0};
     
-    rec = recv(_fd_connection, buffer, RECV_SIZE, 0);
-    if (rec == -1)
-        throw(std::string("ERROR: failed to receive data."));
+    r = recv(_fd_connection, buffer, RECV_SIZE, 0);
+    if (r == -1)
+    {
+        ::close(_fd_connection);
+        throw(std::string("ERROR: failed to receive data, closing connection."));
+    }
+    else if (r == 0)
+    {
+        ::close(_fd_connection);
+        throw(std::string("ERROR: connection closed by client."));
+    }
     _request = std::string(buffer);
 }
 
