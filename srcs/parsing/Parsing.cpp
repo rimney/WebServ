@@ -6,7 +6,7 @@
 /*   By: rimney < rimney@student.1337.ma>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/07 03:50:36 by rimney            #+#    #+#             */
-/*   Updated: 2023/03/07 18:25:57 by rimney           ###   ########.fr       */
+/*   Updated: 2023/03/08 01:52:30 by rimney           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -529,6 +529,7 @@ void    server_parser::getCmds(std::string *keys, size_t size)
 }
 void    server_parser::construct_server(std::vector<std::string>::iterator first, std::vector<std::string>::iterator last)
 {
+    // exit(0);
     this->port = 8080;
     this->is_auto_index = false;
     this->client_max_body_size = 0;
@@ -667,12 +668,13 @@ config_parser::config_parser(std::string filename)
     }
     file.close();
     this->server_count = getServersCount(tempConf);
+    std::cout << this->server_count << " <<\n";
     this->servers = new server_parser[this->server_count]; // server allocation
     this->servers_index_init(); // indexing the serves depending in their position
 
     for(std::vector<std::string>::size_type i = 0; i < tempConf.size(); i++)
     {
-        if (!strncmp(tempConf[i].c_str(), "server {", 8) && tempConf[i].back() == '{')
+        if ((!strncmp(tempConf[i].c_str(), "server", 6) && tempConf[i].back() == '{') || (!strncmp(tempConf[i].c_str(), "server", 6) && tempConf[i + 1] == "{"))
         {
             opening_bracket = i;
             while(tempConf[i] != "}")
@@ -704,7 +706,7 @@ int    config_parser::getServersCount(std::vector<std::string> vec)
     int count = 0;
     for(std::vector<std::string>::size_type i = 0; i < vec.size(); i++)
         {
-            if (!strncmp(vec[i].c_str(), "server ", 7) && vec[i].back() == '{')
+            if ((!strncmp(vec[i].c_str(), "server", 6) && vec[i].back() == '{') || (!strncmp(vec[i].c_str(), "server", 6) && vec[i + 1] == "{"))
                 count++;  
         }
         return (count);

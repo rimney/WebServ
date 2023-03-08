@@ -2,7 +2,7 @@ NAME = webserv
 
 SRC = webserv.cpp srcs/parsing/Parsing.cpp
 
-CFLAGS = -Wall -Wextra -Werror -std=c++98 #-fsanitize=address -g3
+CFLAGS = -Wall -Wextra -Werror -std=c++98 -fsanitize=address -g3
 
 ${NAME} : ${SRC}
 		@g++ ${CFLAGS} ${SRC} -o ${NAME}

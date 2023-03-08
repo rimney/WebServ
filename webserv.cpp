@@ -6,7 +6,7 @@
 /*   By: rimney < rimney@student.1337.ma>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/25 20:56:08 by eel-ghan          #+#    #+#             */
-/*   Updated: 2023/03/07 18:24:56 by rimney           ###   ########.fr       */
+/*   Updated: 2023/03/08 01:40:48 by rimney           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,11 +18,11 @@ int main(int argc, char **argv)
     if(argc == 2)
     {
         config_parser servers(argv[1]);
-        server_parser *p = servers.getServersObject();
-        config_parser aa = servers;
-        // std::cout << servers;
-        std::cout << p[0].getPortObject();
-        // system("leaks webserv");
+        // server_parser *p = servers.getServersObject();
+        // config_parser aa = servers;
+        std::cout << servers;
+        // std::cout << p[0].getPortObject();
+        // system("leaks websrv");
 
     }
 }
