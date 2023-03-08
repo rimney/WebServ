@@ -9,8 +9,8 @@ server::server()
     setup();
 }
 
-server::server(int port, unsigned int host)
-    : _port(port), _host(host)
+server::server(int port, unsigned int host,config_parser &s)
+    : _port(port), _host(host) ,servers(s)
 {
     setup();
 }
@@ -47,7 +47,10 @@ server  & server::operator=(server const & s)
 
 void server::setup()
 {
+    int      option;
     _fd_socket = socket(AF_INET, SOCK_STREAM, DEFAULT_PROTOCOL);
+    option = 1;
+    setsockopt( _fd_socket, SOL_SOCKET, SO_REUSEADDR, &option, sizeof(option) );
     if (_fd_socket == -1)
         throw(std::string("ERROR: failed to create the socket."));
     set_addr();
@@ -81,7 +84,7 @@ void    server::close()
 
 void    server::receive()
 {
-    Request request;
+   
     int     rec;
     char    buffer[RECV_SIZE] = {0};
     
@@ -92,7 +95,12 @@ void    server::receive()
         throw(std::string("ERROR: failed to receive data"));
     }
     _request = std::string(buffer);
-    request = _request;
+    Request request(_request,servers);
+
+
+    // for(int i = 0 ; i < (int)_request.length() ; i++)
+    //       std::cout <<  _request[i] << "*     *" << (int)_request[i] << std::endl;
+
     std::cout << "\nThe first line is : \n";
     std::cout <<  request.get_start_line().method << std::endl;
     std::cout <<  request.get_start_line().path << std::endl;
@@ -102,15 +110,36 @@ void    server::receive()
     std::cout << "\nThe heder is : \n";
     std::cout << "\tKEY\tELEMENT\n";
     for (itr = request.get_header().begin(); itr != request.get_header().end(); ++itr) {
-        std::cout << '\t' << itr->first << '\t' << itr->second << '\n';
+        std::cout << '\t' << "*"<< itr->first << "*" << '\t' <<  "*" << itr->second << "*"<< '\n';
     }
     std::cout << std::endl;
-    std::vector<std::string>::iterator itrv;
-    std::cout << "\nThe body is : \n";
-    for (itrv = request.get_body().begin(); itrv != request.get_body().end(); ++itrv) {
-        std::cout << *itrv << '\n';
+    if(!request.get_body().empty())
+    {
+        std::vector<std::string>::iterator itrv;
+        std::cout << "\nThe body is : \n";
+        for (itrv = request.get_body().begin(); itrv != request.get_body().end(); ++itrv) {
+            std::cout << *itrv <<'\n';
+        }
+        // std::string p = request.get_body()[2];
+        // for(int i = 0 ; i < (int)p.length();i++)
+        //     std::cout <<  p[i] << "   " << (int)p[i] << std::endl;
+        // std::cout << p << std::endl;
     }
+    if(!request.get_body1().empty())
+    {
+        std::cout << "\nThe body is : \n"; 
+         std::cout << request.get_body1() << std::endl;
+         std::cout << request.get_body1().length() << std::endl;
+    }
+
+
+
+
+    
+    // std::cout << _request << std::endl;
+    std::cout << request.get_error() << std::endl;
 }
+
 
 void    server::run()
 {
@@ -121,6 +150,7 @@ void    server::run()
             accept();
             receive();
             // std::cout << _request << '\n';
+            std::cout << "end" << std::endl;
         }
         catch(std::string const & msg)
         {

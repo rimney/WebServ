@@ -13,6 +13,7 @@
 # include <unistd.h>
 # include <iostream>
 # include <sys/socket.h>
+#include "../../includes/parsing.hpp"
 
 // TO BE DELETED //
 #include <string.h>
@@ -27,10 +28,11 @@ class server
         int                 _fd_connection;
         struct sockaddr_in  _addr;
         std::string         _request;
+        config_parser     servers;
 
     public:
         server();
-        server(int port, unsigned int host);
+        server(int port, unsigned int host,config_parser &s);
         server(server const & s);
         ~server();
 

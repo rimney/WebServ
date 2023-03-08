@@ -7,7 +7,7 @@
 #include <string.h>
 #include <iostream>
 #include <string>
-#include "../../request.hpp"
+// #include "../../request.hpp"
 
 #define PORT 8080
 
@@ -18,7 +18,7 @@ int main(int argc, char const *argv[])
     int server_fd, new_socket; long valread;
     struct sockaddr_in address;
     int addrlen = sizeof(address);
-    char* ip = "127.0.0.1";
+    char* ip = "192.0.0.6";
     
    char * hello = "HTTP/1.1 200 OK\nContent-Type: text/plain\nContent-Length: 12\n\nVON";
     
@@ -43,7 +43,7 @@ int main(int argc, char const *argv[])
         perror("In listen");
         exit(EXIT_FAILURE);
     }        
-    Request request;
+    // Request request;
     while(1)
     {
         std::string tmp;
@@ -51,7 +51,7 @@ int main(int argc, char const *argv[])
         //std::string st = "GET /favicon.ico HTTP/1.1\nHost: localhost:8080\nUser-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10.14; rv:109.0) Gecko/20100101 Firefox/110.0\nAccept: image/avif,image/webp,*/*\nAccept-Language: en-US,en;q=0.5\nAccept-Encoding: gzip, deflate, br\nConnection: keep-alive\nReferer: http://localhost:8080/\nSec-Fetch-Dest: image\nSec-Fetch-Mode: no-cors\nSec-Fetch-Site: same-origin";
         std::string st = "POST /api/ValidateTwitterFollowerCount HTTP/1.1\nHost: myazurefunction.azurewebsites.net\nContent-Type: application/json\ncache-control: no-cache\nPostman-Token: XXXXXXX-XXXXX-XXXXXX\n\n{\n    \"followersCount\" : 220,\n    \"tweettext\":\"#Stack Overflow rocks\",\n    \"Name\": \"John Doe\"\n}\n\n{\n    \"followersCount\" : 220,\n    \"tweettext\":\"#Stack Overflow rocks\",\n    \"Name\": \"John Doe\"\n}";
         // std::cout <<  st << std::endl;
-        request = st;
+        // request = st;
         
         // std::cout << "\nThe first line is : \n";
         // std::cout <<  request.get_start_line().method << std::endl;

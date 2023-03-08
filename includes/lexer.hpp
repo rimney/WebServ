@@ -9,6 +9,7 @@ enum type
 {
     TYPE_TEXT,
     TYPE_END_OF_LINE,
+    TYPE_CR,
     TYPE_END_OF_SSECTION,
     TYPE_TWO_POINT,
     TYPE_EOF
@@ -49,12 +50,22 @@ class lexer
             return _token;
         }
         while (index < size) {
-            if (src[index] == '\n' && (index + 1 < size && src[index + 1] == '\n')) {
+            if ((src[index] == '\n' && (index + 1 < size && src[index + 1] == '\n'))  || (src[index] == 13 && (index + 1 < size && src[index + 1] == 13))) {
                 _token.type = TYPE_END_OF_SSECTION;
                 index += 2;
                 break;
-            } else if (src[index] == '\n') {
+            } if ((src[index] == 13 && (index + 1 < size && src[index + 1] == 10)) &&  (index + 2 < size && src[index + 2] == 13) && (index + 3 < size && src[index + 3] == 10)) {
+                _token.type = TYPE_END_OF_SSECTION;
+                index += 4;
+                break;
+            }else if (src[index] == '\n') {
                 _token.type = TYPE_END_OF_LINE;
+                _token.value += src[index];
+                is_key = false;
+                ++index;
+                break;
+            } else if (src[index] == 13) {
+                _token.type = TYPE_CR;
                 _token.value += src[index];
                 is_key = false;
                 ++index;
@@ -73,9 +84,10 @@ class lexer
                 _token.value += src[index];
                 _token.type = TYPE_TEXT;
             }
-            ++index;
-            if (src[index] == '\n' || (src[index] == ':' && !is_key) 
-                        || (src[index] == '\n' && (index + 1 < size && src[index + 1] == '\n')))
+            index++;
+            if (src[index] == 13 || src[index] == '\n' || (src[index] == ':' && !is_key) 
+                        || (src[index] == '\n' && (index + 1 < size && src[index + 1] == '\n'))
+                        || (src[index] == 13 && (index + 1 < size && src[index + 1] == 13)))
                 break;
         }
         return _token;
@@ -105,4 +117,4 @@ class lexer
 //     "tweettext":"#Stack Overflow rocks",
 //     "Name": "John Doe"
 // }
-#endif
+#endif             
