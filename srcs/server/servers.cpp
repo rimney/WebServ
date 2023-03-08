@@ -2,13 +2,7 @@
 
 #include "../../includes/servers.hpp"
 
-servers::servers()
-    // : _servers_count(2)
-{
-    // config_parser   tmp_config(DEFAULT_CONFIG);
-    // _config = tmp_config;
-    // setup();
-}
+servers::servers(){}
 
 servers::servers(config_parser config)
     : _servers_count(config.getServerCountObject()) {}
@@ -71,11 +65,15 @@ void    servers::run()
 {
     int r;
     int fd;
+    struct timeval time;
+
+    time.tv_sec = 5;
+    time.tv_usec = 0;
 
     while(1)
     {
         memcpy(&_set_read_fds, &_set_fds, sizeof(_set_fds)); // use ft_memcpy()
-        r = select(_max_fd + 1, &_set_read_fds, NULL, NULL, NULL);
+        r = select(_max_fd + 1, &_set_read_fds, NULL, NULL, &time);
         if (r == -1)
         {
             std::cerr << "ERROR: failed to select sockets.\n";
@@ -94,10 +92,7 @@ void    servers::run()
             continue ;
         }
         else if (r == 0)
-        {
-            std::cerr << "TIMEOUT\n";
             continue ;
-        }
 
         // accept connections
         for (std::vector<server>::iterator it = _servers.begin(); it != _servers.end(); it++)
@@ -132,15 +127,16 @@ void    servers::run()
                 try
                 {
                     (*it).second.receive();
+                    std::cout << (*it).second.get_request() << "\n\n";
                 }
                 catch(const std::string& msg)
                 {
-                    std::cerr << msg << '\n';
+                    std::cerr << msg << "\n\n";
                     FD_CLR((*it).first, &_set_read_fds);
                     FD_CLR((*it).first, &_set_fds);
                     _fds_cnx.erase((*it).first);
+                    break ;
                 }
-                std::cout << (*it).second.get_request() << "\n\n";
             }
         }
 
