@@ -92,6 +92,7 @@ server_location::server_location(server_location & s)
     this->error_page = s.error_page;
     // exit();
 }
+
 server_location server_location::operator=(server_location const & s)
 {
     this->location_index = s.location_index;
@@ -288,7 +289,8 @@ server_parser::server_parser(server_parser & s)
     for(size_t i = 0;i < location_count; i++)
         this->location[i] = s.location[i];
 }
-server_parser & server_parser::operator=(server_parser const  & s)
+
+server_parser & server_parser::operator=(server_parser const & s)
 {
     this->port = s.getPortObject();
     this->host = s.getHostObject();
@@ -631,7 +633,7 @@ config_parser::config_parser(config_parser & c)
         this->servers[i] = c.servers[i];
 }
 
-config_parser & config_parser::operator=(config_parser const & c)
+config_parser & config_parser::operator=(config_parser const  & c)
 {
     this->server_count = c.getServerCountObject();
     servers = new config_parser[c.getServerCountObject()];
