@@ -1,21 +1,15 @@
 
 
-#include "server.hpp"
-#include "../../includes/request.hpp"
+#include "../../includes/server.hpp"
 
 server::server()
-    : _port(DEFAULT_PORT), _host(INADDR_ANY)
-{
-    setup();
-}
+    : _port(DEFAULT_PORT), _host(INADDR_ANY), _error_flag(1) {}
 
-server::server(int port, unsigned int host,config_parser &s)
-    : _port(port), _host(host) ,servers(s)
-{
-    setup();
-}
+server::server(int port, unsigned int host)
+    : _port(port), _host(host), _error_flag(1) {}
 
 server::server(server const & s)
+    : _error_flag(1)
 {
     *this = s;
 }
@@ -37,28 +31,55 @@ std::string   server::get_request() const
     return _request;
 }
 
+int server::get_fd_socket() const
+{
+    return _fd_socket;
+}
+
+int server::get_fd_connection() const
+{
+    return _fd_connection;
+}
+
+int server::get_error_flag() const
+{
+    return _error_flag;
+}
+
 // TO BE EDITED TO ADD THE OTHER CLASS ARGS
 server  & server::operator=(server const & s)
 {
-    _port = s.get_port();
-    _host = s.get_host();
+    _port = s._port;
+    _host = s._host;
+    _fd_socket = s._fd_socket;
+    _fd_connection = s._fd_connection;
+    _addr = s._addr;
+    _request = s._request;
     return *this;
 }
 
-void server::setup()
+// to handle exception thrown by this method,
+// I should set a flag or an enum to know what kind of error I am handling
+void server::setup(server_parser server_config)
 {
-    int      option;
+    int optval = 1;
+
     _fd_socket = socket(AF_INET, SOCK_STREAM, DEFAULT_PROTOCOL);
-    option = 1;
-    setsockopt( _fd_socket, SOL_SOCKET, SO_REUSEADDR, &option, sizeof(option) );
     if (_fd_socket == -1)
+    {
+        _error_flag = 0;
         throw(std::string("ERROR: failed to create the socket."));
+    }
+    //Allow socket descriptor to be reuseable
+    if (setsockopt(_fd_socket, SOL_SOCKET, SO_REUSEADDR, &optval, sizeof(optval)) == -1)
+        throw(std::string("ERROR: faild to set socket option (setsockopt()) for _fd_socket."));
     set_addr();
     if (bind(_fd_socket, (struct sockaddr*)&_addr, sizeof(_addr)) == -1)
         throw(std::string("ERROR: failed to bind the socket."));
     if (listen(_fd_socket, 100) == -1)
         throw(std::string("ERROR: failed to listen."));
-    std::cout << "listening...\n";
+    set_server_config(server_config);
+    std::cout << "host: " << _host << " is listening on port " << _port << "...\n\n";
 }
 
 void    server::set_addr()
@@ -74,90 +95,27 @@ void server::accept()
     _fd_connection = ::accept(_fd_socket, NULL, NULL);
     if (_fd_connection == -1)
         throw(std::string("ERROR: connection faild."));
+    if (fcntl(_fd_connection, F_SETFL, O_NONBLOCK) == -1)
+        throw(std::string("ERROR: fcntl() failed."));
 }
 
 void    server::close()
 {
     ::close(_fd_socket);
-    ::close(_fd_connection);
 }
 
 void    server::receive()
 {
-   
     int     rec;
     char    buffer[RECV_SIZE] = {0};
     
     rec = recv(_fd_connection, buffer, RECV_SIZE, 0);
     if (rec == -1)
-    {
-        close();
-        throw(std::string("ERROR: failed to receive data"));
-    }
+        throw(std::string("ERROR: failed to receive data."));
     _request = std::string(buffer);
-    Request request(_request,servers);
-
-
-    // for(int i = 0 ; i < (int)_request.length() ; i++)
-    //       std::cout <<  _request[i] << "*     *" << (int)_request[i] << std::endl;
-
-    std::cout << "\nThe first line is : \n";
-    std::cout <<  request.get_start_line().method << std::endl;
-    std::cout <<  request.get_start_line().path << std::endl;
-    std::cout <<  request.get_start_line().vertion << std::endl;
-    std::cout << "\n\n";
-    std::map<std::string, std::string>::iterator itr;
-    std::cout << "\nThe heder is : \n";
-    std::cout << "\tKEY\tELEMENT\n";
-    for (itr = request.get_header().begin(); itr != request.get_header().end(); ++itr) {
-        std::cout << '\t' << "*"<< itr->first << "*" << '\t' <<  "*" << itr->second << "*"<< '\n';
-    }
-    std::cout << std::endl;
-    if(!request.get_body().empty())
-    {
-        std::vector<std::string>::iterator itrv;
-        std::cout << "\nThe body is : \n";
-        for (itrv = request.get_body().begin(); itrv != request.get_body().end(); ++itrv) {
-            std::cout << *itrv <<'\n';
-        }
-        // std::string p = request.get_body()[2];
-        // for(int i = 0 ; i < (int)p.length();i++)
-        //     std::cout <<  p[i] << "   " << (int)p[i] << std::endl;
-        // std::cout << p << std::endl;
-    }
-    if(!request.get_body1().empty())
-    {
-        std::cout << "\nThe body is : \n"; 
-         std::cout << request.get_body1() << std::endl;
-         std::cout << request.get_body1().length() << std::endl;
-    }
-
-
-
-
-    
-    // std::cout << _request << std::endl;
-    std::cout << request.get_error() << std::endl;
 }
 
-
-void    server::run()
+void    server::set_server_config(server_parser server_config)
 {
-    while (1)
-    {
-        try
-        {
-            accept();
-            receive();
-            // std::cout << _request << '\n';
-            std::cout << "end" << std::endl;
-        }
-        catch(std::string const & msg)
-        {
-            std::cout << msg << '\n';
-        }
-        if (_fd_connection >= 0)
-            ::close(_fd_connection);
-    }
-    close();
+    _server_config = server_config;
 }

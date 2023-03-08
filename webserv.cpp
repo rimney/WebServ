@@ -6,48 +6,41 @@
 /*   By: eel-ghan <eel-ghan@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/25 20:56:08 by eel-ghan          #+#    #+#             */
-/*   Updated: 2023/02/25 21:00:22 by eel-ghan         ###   ########.fr       */
+/*   Updated: 2023/03/07 23:34:55 by eel-ghan         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "includes/webserv.hpp"
 #include "includes/parsing.hpp"
-#include "srcs/server/server.hpp"
-#include <arpa/inet.h>
+#include "includes/servers.hpp"
 
 int main(int argc, char **argv)
 {
+
     if(argc == 2)
     {
-        config_parser servers(argv[1]);
-        server_parser *p = servers.getServersObject();
-        // server_location *s  =  p[0].getServerLocationsObject();
-        
-        // // config_parser aa = servers;
-        // // std::cout << servers;
-        // std::cout << p[0].getCmbsObject() << std::endl;
-        // std::cout << p[0].getHostObject() << std::endl;
-        // std::cout << s[0].getLocationNameObject() << std::endl;
-        // std::cout << s[0].getLocationRootObject() << std::endl;
-        // std::cout << s[1].getLocationNameObject() << std::endl;
-        // std::cout << s[1].getLocationRootObject() << std::endl;
-
-
         try
         {
-            server  s(p[0].getPortObject(),p[0].getHostObject(),servers);
+            config_parser config(argv[1]);
+            
+            // std::cout << config;
+
+            servers     s(config);
+            if (s.setup(config.getServersObject()))
+            {
+                // system("leaks webserv");
+                return 1;
+            }
             s.run();
+
+            // system("leaks webserv");
         }
-        catch(std::string const & msg)
+        catch(const std::string& msg)
         {
-            std::cout << msg << '\n';
+            std::cerr << msg << '\n';
         }
-
-        
-        // config_parser aa = servers;
-
-        
-        // // system("leaks webserv");
-
     }
+    else
+        std::cout << "ERROR: bad args number\n";
+    
+    return 0;
 }

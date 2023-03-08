@@ -146,6 +146,4 @@ std::ostream& operator<<(std::ostream& os, config_parser& p);
 std::ostream & operator<<(std::ostream & os, server_parser & s);
 std::ostream & operator<<(std::ostream & os, server_location & s);
 
-
-
 #endif
