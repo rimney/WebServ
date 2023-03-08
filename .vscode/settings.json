@@ -82,6 +82,7 @@
         "memory_resource": "cpp",
         "stop_token": "cpp",
         "thread": "cpp",
-        "cinttypes": "cpp"
+        "cinttypes": "cpp",
+        "source_location": "cpp"
     }
 }

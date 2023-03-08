@@ -6,7 +6,7 @@
 /*   By: rimney < rimney@student.1337.ma>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/07 03:50:36 by rimney            #+#    #+#             */
-/*   Updated: 2023/03/08 01:52:30 by rimney           ###   ########.fr       */
+/*   Updated: 2023/03/08 15:24:58 by rimney           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -424,14 +424,12 @@ void    server_parser::getPort(std::string *Port, size_t temp_size)
             std::cout << "Error port has more than one location\n";
             exit(0);
         }
-        
         this->port = stoi(temparray[1]);
-        this->host = ipToInt(temparray[0]);
-        // exit(0);
+        if(strncmp(Port[1].c_str(), "localhost:", 10)) 
+            this->host = ipToInt(temparray[0]);
         delete [] temparray;
-        // exit(0);
     }
-    if (temp_size == 2 && is_digits(Port[1]))
+    else if (temp_size == 2 && is_digits(Port[1]))
     {
         this->port = stoi(Port[1]);
     }
