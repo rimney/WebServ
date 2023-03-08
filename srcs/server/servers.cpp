@@ -12,10 +12,7 @@ servers::servers(servers const & s)
     *this = s;
 }
 
-servers::~servers()
-{
-
-}
+servers::~servers() {}
 
 servers &   servers::operator=(servers const & s)
 {
@@ -48,6 +45,7 @@ int    servers::setup(server_parser *servers_config)
             return 1;
         }
     }
+
     FD_ZERO(&_set_fds);
 
     _max_fd = 0;
@@ -106,6 +104,7 @@ void    servers::run()
                 catch(const std::string& msg)
                 {
                     std::cerr << msg << '\n';
+                    break ;
                 }
                 
                 FD_SET((*it).get_fd_connection(), &_set_fds);
@@ -113,10 +112,7 @@ void    servers::run()
                 if (_max_fd < (*it).get_fd_connection())
                     _max_fd = (*it).get_fd_connection();
                 std::cout << "host: " << (*it).get_host() << ", port: " << (*it).get_port() << " accept a new connections\n\n";
-                // break ;
             }
-            // else
-            //     FD_CLR((*it).get_fd_socket(), &_set_fds);
         }
 
         // receive requests
@@ -139,8 +135,5 @@ void    servers::run()
                 }
             }
         }
-
-        // for (std::vector<server>::iterator it = _servers.begin(); it != _servers.end(); it++)
-        //     close((*it).get_fd_connection());
     }
 }
