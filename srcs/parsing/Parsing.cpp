@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Parsing.cpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: rimney < rimney@student.1337.ma>           +#+  +:+       +#+        */
+/*   By: eel-ghan <eel-ghan@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/07 03:50:36 by rimney            #+#    #+#             */
-/*   Updated: 2023/03/09 02:16:48 by rimney           ###   ########.fr       */
+/*   Updated: 2023/03/09 21:28:40 by eel-ghan         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -666,7 +666,6 @@ config_parser::config_parser(std::string filename)
     }
     file.close();
     this->server_count = getServersCount(tempConf);
-    std::cout << this->server_count << " <<\n";
     this->servers = new server_parser[this->server_count]; // server allocation
     this->servers_index_init(); // indexing the serves depending in their position
 
