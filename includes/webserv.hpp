@@ -3,15 +3,15 @@
 /*                                                        :::      ::::::::   */
 /*   webserv.hpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: rimney < rimney@student.1337.ma>           +#+  +:+       +#+        */
+/*   By: eel-ghan <eel-ghan@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/08 15:59:10 by rimney            #+#    #+#             */
-/*   Updated: 2023/03/08 16:03:26 by rimney           ###   ########.fr       */
+/*   Updated: 2023/03/10 00:36:05 by eel-ghan         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef WEBSERVE_HPP
-# define WEBSEVE_HPP
+# define WEBSERVE_HPP
 
 #include <sys/socket.h>
 #include <unistd.h>
