@@ -6,7 +6,7 @@
 /*   By: rimney < rimney@student.1337.ma>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/09 04:16:59 by rimney            #+#    #+#             */
-/*   Updated: 2023/03/09 07:06:19 by rimney           ###   ########.fr       */
+/*   Updated: 2023/03/09 09:37:01 by rimney           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -106,12 +106,18 @@ int main()
         inet_ntop(AF_INET, &client.sin_addr, host, NI_MAXHOST);
         std::cout << host << " connected on " << ntohs(client.sin_port) << '\n';
     }
-    char buf[4096];
+    char request[4096];
     
     while (1)
     {
-        memset(buf, 0, 4096);
-        int received = recv(clientSocket, buf, 4096, 0);
+        memset(request, 0, 4096);
+        int received = recv(clientSocket, request, 4096, 0);
+        std::cout << request; // request;
+        std::string firstLine;
+
+        std::getline(std::stringstream(request), firstLine); // getting the first line of a request !
+
+        std::cout << "Request : " << firstLine << std::endl;
         if (received == -1)
         {
             std::cerr << "Error receiving data: "  << std::endl;
@@ -123,7 +129,6 @@ int main()
             break;
         } 
         else {
-            std::cout << buf;
             std::ifstream file("index.html");
             if (!file)
             {
@@ -133,7 +138,7 @@ int main()
             std::stringstream buffer;
             buffer << file.rdbuf();
             std::string contents(buffer.str());
-            std::string response = "HTTP/1.1 200 OK\r\nContent-Length: " + std::to_string(contents.size()) + "\r\n\r\n" + contents;
+            std::string response = "HTTP/1.1 200 OK\r\nContent-Length: " + std::to_string(contents.size()) + "\r\n\r\n" + contents; // response must be edited !
             send(clientSocket, response.c_str(), response.size(), 0);
             }
     }
