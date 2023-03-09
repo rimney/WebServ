@@ -127,7 +127,7 @@ void    servers::run()
                 }
                 catch(const std::string& msg)
                 {
-                    std::cerr << msg << "\n\n";
+                    std::cerr << msg << "\n";
                     FD_CLR((*it).first, &_set_read_fds);
                     FD_CLR((*it).first, &_set_fds);
                     _fds_cnx.erase((*it).first);

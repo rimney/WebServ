@@ -3,15 +3,18 @@
 /*                                                        :::      ::::::::   */
 /*   webserv.cpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: eel-ghan <eel-ghan@student.42.fr>          +#+  +:+       +#+        */
+/*   By: rimney < rimney@student.1337.ma>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/25 20:56:08 by eel-ghan          #+#    #+#             */
-/*   Updated: 2023/03/09 00:09:30 by eel-ghan         ###   ########.fr       */
+/*   Updated: 2023/03/09 02:45:32 by rimney           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "includes/parsing.hpp"
 #include "includes/servers.hpp"
+#include "includes/server.hpp"
+#include "includes/webserv.hpp"
+
 
 int main(int argc, char **argv)
 {
