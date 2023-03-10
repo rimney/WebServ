@@ -2,8 +2,9 @@
 
 #include "../../includes/server.hpp"
 
+
 server::server()
-    : _port(DEFAULT_PORT), _host(INADDR_ANY), _error_flag(1) {}
+    : _port(DEFAULT_PORT), _host(INADDR_ANY), _error_flag(1){}
 
 server::server(int port, unsigned int host)
     : _port(port), _host(host), _error_flag(1) {}
@@ -112,10 +113,41 @@ void    server::receive()
     rec = recv(_fd_connection, buffer, RECV_SIZE, 0);
     if (rec == -1)
         throw(std::string("ERROR: failed to receive data."));
-    _request = std::string(buffer);
+    _request = std::string(buffer,rec);
 }
 
 void    server::set_server_config(server_parser server_config)
 {
     _server_config = server_config;
+}
+void    server::process()
+{
+    if(!request.get_wait_body())
+        request.parser(_request);
+    else
+    {
+        request.body_handling(_request);
+    }
+    if(!request.get_wait_body())
+    {
+        std::cout << "\nThe first line is : \n";
+        std::cout <<  request.get_start_line().method << std::endl;
+        std::cout <<  request.get_start_line().path << std::endl;
+        std::cout <<  request.get_start_line().vertion << std::endl;
+
+        std::cout << "\n\n";
+        std::map<std::string, std::string>::iterator itr;
+        std::cout << "\nThe heder is : \n";
+        std::cout << "\tKEY\tELEMENT\n";
+        for (itr = request.get_header().begin(); itr != request.get_header().end(); ++itr) {
+            std::cout << '\t' << "*"<< itr->first << "*" << '\t' <<  "*" << itr->second << "*"<< '\n';
+        }
+        std::cout << std::endl;
+        if(!request.get_body().empty())
+        {
+            std::cout << "\nThe body is : \n"; 
+            std::cout << "*" << request.get_body() << "*"<< std::endl;
+
+        }
+    }
 }

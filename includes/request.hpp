@@ -19,18 +19,15 @@ class Request
 
     private:
         Start_line start_line;
-        std::vector<std::string> body;
-        std::string body1;
+        std::string body;
         std::map<std::string,std::string> header;
         std::string r_error;
+        bool         wait_body;
+        unsigned long          body_size;
     public:
-        Request() {}
-        Request(std::string value,config_parser &s)
-        {
-            parser(value);
-            errors(s);
-        }
+        Request(): wait_body(false),body_size(0){}
         ~Request(){}
+
         void parser(std::string value)
         {
             token _token;
@@ -60,8 +57,6 @@ class Request
                     buffer.erase(buffer.begin());
                     if(!buffer.empty() && !_token.value.empty())
                     header.insert(std::make_pair(_token.value,buffer));
-                    // std::cout << _token.value << buffer   << std::endl;
-                    // std::cout << '\n' << "end" << '\n' << std::endl;
                     buffer.clear();
                 }
                 else if(_token.type == TYPE_END_OF_SSECTION)
@@ -69,31 +64,97 @@ class Request
                     buffer.clear();
                     for (int i = _lexer.get_index(); i < (int)value.length(); i++)
                         buffer += value[i];
-                    body1 = buffer;
+                    body = buffer;
                     break;
                 }
                 _token.value.clear();
             }
-            // std::map<std::string, std::string>::iterator itr;
-            // std::cout << "\nThe heder is : \n";
-            // std::cout << "\tKEY\tELEMENT\n";
-            // for (itr = header.begin(); itr != header.end(); ++itr) {
-            //     std::cout << '\t'  << '*' << itr->first << '*' << '\t' << '*' << itr->second << '*' << '\n';
-            // }
-            // std::cout << "**" << std::endl;
-            // std::cout <<  body.front() << std::endl;
-
-            // std::vector<std::string>::iterator itrv;
-            // std::cout << "\nThe body is : \n";
-            // for (itrv = body.begin(); itrv != body.end(); ++itrv) {
-            //     std::cout << *itrv << '\n';
-            // }
+            
+            if(body.empty())
+                wait_body = false;
+            else
+            {
+                   
+                    if(!header.find("Transfer-Encoding")->first.empty())
+                    {
+                        if(header.find("Transfer-Encoding")->second == "chunked" )
+                        {
+                            body_handling(body);
+                            wait_body = true;
+                        }
+                    }
+                    else if (!header.find("Content-Length")->first.empty())
+                    {
+                        wait_body = true;
+                        body_size = atol(header.find("Content-Length")->second.c_str());
+                    }  
+            }
         }
-        void errors(config_parser &s)
+        void body_handling(std::string buffer)
         {
-            server_parser *serv = s.getServersObject();
+            std::string hexa;
+            if(!header.find("Content-Length")->first.empty())
+            {
+                body += buffer;
+                if((unsigned long)body.length() >= body_size)
+                    wait_body = false;
+            }
+            if(!header.find("Transfer-Encoding")->first.empty())
+            {
+                if(buffer[buffer.length() - 1] == 10 && buffer[buffer.length() - 2] == 13 && buffer[buffer.length() - 3] == 10
+                                        & buffer[buffer.length() - 4] == 13 && buffer[buffer.length() - 5] == '0' && buffer[buffer.length() - 6] == 10 && buffer[buffer.length() - 7] == 13)
+                {
+                
+                    buffer.erase(buffer.length() - 7 , buffer.length() - 1);
+                    wait_body = false;
+                }
+                if(header.find("Transfer-Encoding")->second == "chunked" )
+                {
+                    if(body_size == 0)
+                    {
+                        for(long i = 0 ; i < (long)buffer.length(); i++)
+                        {
+                            if(buffer[i] == 13 && buffer[i + 1] == 10)
+                            {
+                                buffer.erase(0,i + 2);
+                                break;
+                            }
+                            else
+                                hexa += buffer[i];
+                        }
+                        
+                        body_size = std::stoul(hexa, nullptr, 16);
+                        body = buffer;
+                    }
+                    else
+                    {
+                        
+                        for (int  i = 0; i < (int)buffer.length() ; i++)
+                        {
+                            if(buffer[i] == 13 && buffer[i + 1] == 10)
+                            {
+                                for(int j = i + 2 ; j < (int)buffer.length() ; j++)
+                                {
+                                    if(buffer[j] == 13 && buffer[j + 1] == 10)
+                                    {
+                                        body_size = std::stoul(hexa, nullptr, 16);
+                                        i = j + 2;
+                                        break;
+                                    }
+                                    hexa += buffer[j];
+                                    if((buffer[j] < 48 || buffer[j] > 57) &&  (buffer[j] < 65 || buffer[j] > 70) )
+                                                break;
+                                }
+                            }
+                            body += buffer[i];
+                        }
+                    }
+                }
+            }
+        }
+        void errors(server_parser &serv)
+        {
             std::string tmp_path = start_line.path;
-            (void)s;
             if(!header.find("Transfer-Encoding")->first.empty())
             {
                 if(header.find("Transfer-Encoding")->second != "chunked" )
@@ -104,7 +165,7 @@ class Request
                 r_error = "400 Bad Request";
             if(!header.find("Content-Length")->first.empty())
             {
-                if(serv[0].getCmbsObject()  <  stoi(header.find("Content-Length")->second))
+                if(serv.getCmbsObject()  <  stoi(header.find("Content-Length")->second))
                 r_error = "413 Request Entity Too Large";
             }
             if(tmp_path.length() > 2048)
@@ -117,12 +178,21 @@ class Request
             }
         }
 
+        void clear()
+        {
+            start_line.method.clear();
+            start_line.path.clear();
+            start_line.vertion.clear();
+            body.clear();
+            header.clear();
+            r_error.clear();
+        }
         
         Start_line &get_start_line(){return start_line;}
         std::map<std::string,std::string> &get_header(){return header;}
-        std::vector<std::string> &get_body(){return body;}
-        std::string &get_body1(){return body1;}
+        std::string &get_body(){return body;}
         std::string &get_error(){return r_error;}
+        bool &get_wait_body(){return wait_body;}
 
 };
 
