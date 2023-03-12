@@ -17,6 +17,7 @@
 # include <fcntl.h>
 # include "parsing.hpp"
 #include "request.hpp"
+#include <fstream>
 
 // TO BE DELETED //
 #include <string.h>
@@ -56,6 +57,7 @@ class server
         void            set_server_config(server_parser server_config);
         void            setup(server_parser server_config);
         void            process();
+        void            post_method();
     
     private:
         void            set_addr();
