@@ -1,12 +1,13 @@
+
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
 /*   Parsing.cpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: rimney < rimney@student.1337.ma>           +#+  +:+       +#+        */
+/*   By: eel-ghan <eel-ghan@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/07 03:50:36 by rimney            #+#    #+#             */
-/*   Updated: 2023/03/08 15:24:58 by rimney           ###   ########.fr       */
+/*   Updated: 2023/03/09 21:28:40 by eel-ghan         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -92,7 +93,7 @@ server_location::server_location(server_location & s)
     this->error_page = s.error_page;
     // exit();
 }
-server_location server_location::operator=(server_location & s)
+server_location server_location::operator=(server_location const & s)
 {
     this->location_index = s.location_index;
     this->location_name = s.location_name;
@@ -288,7 +289,7 @@ server_parser::server_parser(server_parser & s)
     for(size_t i = 0;i < location_count; i++)
         this->location[i] = s.location[i];
 }
-server_parser & server_parser::operator=(server_parser & s)
+server_parser & server_parser::operator=(server_parser const & s)
 {
     this->port = s.getPortObject();
     this->host = s.getHostObject();
@@ -304,71 +305,71 @@ server_parser & server_parser::operator=(server_parser & s)
         this->location[i] = s.location[i];
     return (*this);
 }
-server_location *server_parser::getServerLocationsObject(void)
+server_location *server_parser::getServerLocationsObject(void) const
 {
     return (this->location);
 }
-std::vector<std::string> server_parser::getServerNamesObject(void)
+std::vector<std::string> server_parser::getServerNamesObject(void) const
 {
     return (this->server_names);
 }
-int server_parser::getPortObject(void)
+int server_parser::getPortObject(void) const
 {
     return (this->port);
 }
-int server_parser::getHostObject(void)
+int server_parser::getHostObject(void) const
 {
     return (this->host);
 }
-int     server_location::getLocationCmbsObject(void)
+int     server_location::getLocationCmbsObject(void) const
 {
     return (this->client_max_body_size);
 }
-int server_parser::getServer_IndexLocationObject(void)
+int server_parser::getServer_IndexLocationObject(void) const
 {
     return (this->location_index);
 }
-size_t server_parser::getLocationCount(void)
+size_t server_parser::getLocationCount(void) const
 {
     return (this->location_count);
 }
-int server_parser::getCmbsObject(void)
+int server_parser::getCmbsObject(void) const
 {
     return (this->client_max_body_size);
 }
-std::vector<int> server_parser::getErrorCodesObject(void)
+std::vector<int> server_parser::getErrorCodesObject(void) const
 {
     return (this->error_codes);
 }
-std::string server_parser::getIndexObject(void)
+std::string server_parser::getIndexObject(void) const
 {
     return (this->index);
 }
-std::string server_parser::getRootObject(void)
+std::string server_parser::getRootObject(void) const
 {
     return (this->root);
 }
-std::string server_parser::getRedirectionObject(void)
+std::string server_parser::getRedirectionObject(void) const
 {
     return (this->redirection);
 }
-server_location *server_parser::getServerLocation(void)
+server_location *server_parser::getServerLocation(void) const
 {
     return (this->location);
 }
-bool server_parser::getIsAutoIndexObject(void)
+bool server_parser::getIsAutoIndexObject(void) const
 {
     return (this->is_auto_index);
 }
-int server_parser::getServerLocationCountObject(void)
+int server_parser::getServerLocationCountObject(void) const
 {
     return (this->location_count);
 }
-int server_parser::getServerIndexObject(void)
+int server_parser::getServerIndexObject(void) const
 {
     return (this->server_index);
 }
-std::string server_parser::getServerErrorPageObject(void)
+std::string server_parser::getServerErrorPageObject(void) const
 {
     return (this->error_page);
 }
@@ -631,7 +632,7 @@ config_parser::config_parser(config_parser & c)
         this->servers[i] = c.servers[i];
 }
 
-config_parser & config_parser::operator=(config_parser & c)
+config_parser & config_parser::operator=(config_parser const & c)
 {
     this->server_count = c.getServerCountObject();
     servers = new config_parser[c.getServerCountObject()];
@@ -640,7 +641,7 @@ config_parser & config_parser::operator=(config_parser & c)
     return (*this);
 }
 /////// GETTERS AND SETTERS //////////
-size_t config_parser::getServerCountObject(void)
+size_t config_parser::getServerCountObject(void) const
 {
     return (this->server_count);
 }
@@ -666,7 +667,6 @@ config_parser::config_parser(std::string filename)
     }
     file.close();
     this->server_count = getServersCount(tempConf);
-    std::cout << this->server_count << " <<\n";
     this->servers = new server_parser[this->server_count]; // server allocation
     this->servers_index_init(); // indexing the serves depending in their position
 
