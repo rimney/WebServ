@@ -140,6 +140,7 @@ void    server::process()
     }
     if(!request.get_wait_body())
     {
+        
         std::cout << "\nThe first line is : \n";
         std::cout <<  request.get_start_line().method << std::endl;
         std::cout <<  request.get_start_line().path << std::endl;
@@ -152,6 +153,7 @@ void    server::process()
         for (itr = request.get_header().begin(); itr != request.get_header().end(); ++itr) {
             std::cout << '\t' << "*"<< itr->first << "*" << '\t' <<  "*" << itr->second << "*"<< '\n';
         }
+
         std::cout << std::endl;
         if(!request.get_body().empty())
         {
@@ -159,5 +161,8 @@ void    server::process()
             std::cout << "*" << request.get_body() << "*"<< std::endl;
              std::cout << "*" << request.get_body().length() << "*"<< std::endl;
         }
+
+        request.errors(_server_config);
+        std::cout <<  request.get_error() << std::endl;
     }
 }
