@@ -147,7 +147,7 @@ void    server::process()
         {
             std::cout << "\nThe body is : \n"; 
             std::cout << "*" << request.get_body() << "*"<< std::endl;
-
+             std::cout << "*" << request.get_body().length() << "*"<< std::endl;
         }
     }
 }
