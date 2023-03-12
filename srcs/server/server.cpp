@@ -164,5 +164,6 @@ void    server::process()
 
         request.errors(_server_config);
         std::cout <<  request.get_error() << std::endl;
+        /// respond !!!! <<<<<<
     }
 }
