@@ -6,7 +6,7 @@
 /*   By: rimney < rimney@student.1337.ma>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/24 21:53:42 by rimney            #+#    #+#             */
-/*   Updated: 2023/03/07 08:08:35 by rimney           ###   ########.fr       */
+/*   Updated: 2023/03/09 02:17:13 by rimney           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,16 +44,16 @@ class server_location
         std::vector<std::string> getLocationMethodsObject(void){return (this->HttpMethods);}
         int getLocationindexObject(void){return (this->location_index);}
         int getCmbsObject(void);
-        std::string getLocationErrorPageObject(void) {return (this->error_page);}
-        std::string getLocationRootObject(void) {return (this->root);}
-        std::string getLocationIndexObject(void) {return (this->index);}
-        std::string getLocationRedirectionObject(void){return (this->redirection);}
-        bool getLocationIsAutoIndexObject(void){return (this->is_auto_index ? true : false);}
-        std::string getLocationNameObject(void) {return this->location_name;}
+        std::string getLocationErrorPageObject(void) const {return (this->error_page);}
+        std::string getLocationRootObject(void) const {return (this->root);}
+        std::string getLocationIndexObject(void) const {return (this->index);}
+        std::string getLocationRedirectionObject(void) const{return (this->redirection);}
+        bool getLocationIsAutoIndexObject(void) const{return (this->is_auto_index ? true : false);}
+        std::string getLocationNameObject(void) const {return this->location_name;}
         server_location(){};
         server_location(server_location & s);
-        server_location operator=(server_location & s);
-        int     getLocationCmbsObject(void);
+        server_location operator=(server_location const & s);
+        int     getLocationCmbsObject(void) const ;
         void    getIndexPage(std::string *keys, size_t size);
         void    getErrorPage(std::string *keys, size_t size);
         void    getAutoIndex(std::string *keys, size_t size);
@@ -88,24 +88,24 @@ class server_parser : public server_location
     public :
         server_parser(){};
         server_parser(server_parser & s);
-        server_parser & operator=(server_parser & s);
+        server_parser & operator=(server_parser const  & s);
         /////// GETTERS AND SETTERS /////////////;
-        server_location *getServerLocationsObject(void);
-        std::vector<std::string> getServerNamesObject(void);
-        int getPortObject(void);
-        int getHostObject(void);
-        int getServer_IndexLocationObject(void);
-        size_t getLocationCount(void);
-        int getCmbsObject(void);
-        std::vector<int> getErrorCodesObject(void);
-        std::string getIndexObject(void);
-        std::string getRootObject(void);
-        std::string getRedirectionObject(void);
-        server_location *getServerLocation(void);
-        bool getIsAutoIndexObject(void);
-        int getServerLocationCountObject(void);
-        int getServerIndexObject(void);
-        std::string getServerErrorPageObject(void);
+        server_location *getServerLocationsObject(void) const;
+        std::vector<std::string> getServerNamesObject(void) const;
+        int getPortObject(void) const;
+        int getHostObject(void) const;
+        int getServer_IndexLocationObject(void) const;
+        size_t getLocationCount(void) const;
+        int getCmbsObject(void) const;
+        std::vector<int> getErrorCodesObject(void) const;
+        std::string getIndexObject(void) const;
+        std::string getRootObject(void) const;
+        std::string getRedirectionObject(void) const;
+        server_location *getServerLocation(void) const;
+        bool getIsAutoIndexObject(void) const;
+        int getServerLocationCountObject(void) const;
+        int getServerIndexObject(void) const;
+        std::string getServerErrorPageObject(void) const;
         bool is_digits(const std::string &str);
         void    getPort(std::string *Port, size_t temp_size);
         void    getErrorPage(std::string *keys, size_t size);
@@ -132,8 +132,8 @@ class config_parser : public server_parser
     public :
         config_parser(){} ;
         config_parser(config_parser & c);
-        config_parser & operator=(config_parser & c);
-        size_t getServerCountObject(void); // server count getter
+        config_parser & operator=(config_parser const & c);
+        size_t getServerCountObject(void) const; // server count getter
         server_parser *getServersObject(void);
         config_parser(std::string filename);
         void    getServerName(std::string *keys, size_t size);
