@@ -56,11 +56,10 @@ server  & server::operator=(server const & s)
     _fd_connection = s._fd_connection;
     _addr = s._addr;
     _request = s._request;
+    // _server_config = s._server_config;
     return *this;
 }
 
-// to handle exception thrown by this method,
-// I should set a flag or an enum to know what kind of error I am handling
 void server::setup(server_parser server_config)
 {
     int optval = 1;
@@ -97,7 +96,10 @@ void server::accept()
     if (_fd_connection == -1)
         throw(std::string("ERROR: connection faild."));
     if (fcntl(_fd_connection, F_SETFL, O_NONBLOCK) == -1)
+    {
+        ::close(_fd_connection);
         throw(std::string("ERROR: fcntl() failed."));
+    }
 }
 
 void    server::close()
@@ -107,13 +109,21 @@ void    server::close()
 
 void    server::receive()
 {
-    int     rec;
+    int     r;
     char    buffer[RECV_SIZE] = {0};
     
-    rec = recv(_fd_connection, buffer, RECV_SIZE, 0);
-    if (rec == -1)
-        throw(std::string("ERROR: failed to receive data."));
-    _request = std::string(buffer,rec);
+    r = recv(_fd_connection, buffer, RECV_SIZE, 0);
+    if (r == -1)
+    {
+        ::close(_fd_connection);
+        throw(std::string("ERROR: failed to receive data, closing connection."));
+    }
+    else if (r == 0)
+    {
+        ::close(_fd_connection);
+        throw(std::string("ERROR: connection closed by client."));
+    }
+    _request = std::string(buffer,r);
 }
 
 void    server::set_server_config(server_parser server_config)
