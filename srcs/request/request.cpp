@@ -40,31 +40,34 @@ void Request::parser(std::string value)
         }
         _token.value.clear();
     }
-    
+
     if(body.empty())
         wait_body = false;
     else
     {
             
-            if(!header.find("Transfer-Encoding")->first.empty())
-            {
-                if(header.find("Transfer-Encoding")->second == "chunked" )
-                {
-                    body_handling(body);
-                    wait_body = true;
-                }
-            }
-            else if (!header.find("Content-Length")->first.empty())
+        if(!header.find("Transfer-Encoding")->first.empty())
+        {
+            if(header.find("Transfer-Encoding")->second == "chunked" )
             {
                 wait_body = true;
-                body_size = atol(header.find("Content-Length")->second.c_str());
-            }  
+                body_handling(body);
+            }
+        }
+        else if (!header.find("Content-Length")->first.empty())
+        {
+            wait_body = true;
+            body_size = atol(header.find("Content-Length")->second.c_str());
+            if((unsigned long)body.length() >= body_size)
+                wait_body = false;
+        }  
     }
 }
 
 void Request::body_handling(std::string buffer)
 {
     std::string hexa;
+
     if(!header.find("Transfer-Encoding")->first.empty())
     {
         if(buffer[buffer.length() - 1] == 10 && buffer[buffer.length() - 2] == 13 && buffer[buffer.length() - 3] == 10
@@ -123,7 +126,6 @@ void Request::body_handling(std::string buffer)
         if((unsigned long)body.length() >= body_size)
             wait_body = false;
     }
-    
 }
 void Request::errors(server_parser &serv)
 {
