@@ -41,35 +41,38 @@ void Request::parser(std::string value)
         }
         _token.value.clear();
     }
-    
+
     if(body.empty())
         wait_body = false;
     else
     {
             
-            if(!header.find("Transfer-Encoding")->first.empty())
-            {
-                if(header.find("Transfer-Encoding")->second == "chunked" )
-                {
-                    body_handling(body);
-                    wait_body = true;
-                }
-            }
-            else if (!header.find("Content-Length")->first.empty())
+        if(!header.find("Transfer-Encoding")->first.empty())
+        {
+            if(header.find("Transfer-Encoding")->second == "chunked" )
             {
                 wait_body = true;
-                body_size = atol(header.find("Content-Length")->second.c_str());
-            }  
+                body_handling(body);
+            }
+        }
+        else if (!header.find("Content-Length")->first.empty())
+        {
+            wait_body = true;
+            body_size = atol(header.find("Content-Length")->second.c_str());
+            if((unsigned long)body.length() >= body_size)
+                wait_body = false;
+        }  
     }
 }
 
 void Request::body_handling(std::string buffer)
 {
     std::string hexa;
+
     if(!header.find("Transfer-Encoding")->first.empty())
     {
         if(buffer[buffer.length() - 1] == 10 && buffer[buffer.length() - 2] == 13 && buffer[buffer.length() - 3] == 10
-                                & buffer[buffer.length() - 4] == 13 && buffer[buffer.length() - 5] == '0' && buffer[buffer.length() - 6] == 10 && buffer[buffer.length() - 7] == 13)
+                                && buffer[buffer.length() - 4] == 13 && buffer[buffer.length() - 5] == '0' && buffer[buffer.length() - 6] == 10 && buffer[buffer.length() - 7] == 13)
         {
         
             buffer.erase(buffer.length() - 7 , buffer.length() - 1);
@@ -89,7 +92,7 @@ void Request::body_handling(std::string buffer)
                     else
                         hexa += buffer[i];
                 }
-                
+                std::cerr << "*"<< hexa << "*"<< std::endl;
                 body_size = std::stoul(hexa, nullptr, 16);
                 body = buffer;
             }
@@ -104,13 +107,21 @@ void Request::body_handling(std::string buffer)
                         {
                             if(buffer[j] == 13 && buffer[j + 1] == 10)
                             {
-                                body_size = std::stoul(hexa, nullptr, 16);
-                                i = j + 2;
-                                break;
+
+                                if(!hexa.empty())
+                                {
+                                    std::cerr << hexa << std::endl;
+                                    body_size = std::stoul(hexa, nullptr, 16);
+                                    i = j + 2;
+                                    break;
+                                }
                             }
                             hexa += buffer[j];
                             if((buffer[j] < 48 || buffer[j] > 57) &&  (buffer[j] < 65 || buffer[j] > 70) )
-                                        break;
+                            {
+                                hexa.clear();
+                                break;
+                            }
                         }
                     }
                     body += buffer[i];
@@ -124,7 +135,6 @@ void Request::body_handling(std::string buffer)
         if((unsigned long)body.length() >= body_size)
             wait_body = false;
     }
-    
 }
 void Request::errors(server_parser &serv)
 {

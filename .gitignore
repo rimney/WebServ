@@ -1,5 +1,4 @@
-.vscode/settings.json
-.DS_Store
+.vscode
 webserv
 a.out
 webserv.dSYM
