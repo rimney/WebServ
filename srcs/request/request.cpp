@@ -71,7 +71,7 @@ void Request::body_handling(std::string buffer)
     if(!header.find("Transfer-Encoding")->first.empty())
     {
         if(buffer[buffer.length() - 1] == 10 && buffer[buffer.length() - 2] == 13 && buffer[buffer.length() - 3] == 10
-                                & buffer[buffer.length() - 4] == 13 && buffer[buffer.length() - 5] == '0' && buffer[buffer.length() - 6] == 10 && buffer[buffer.length() - 7] == 13)
+                                && buffer[buffer.length() - 4] == 13 && buffer[buffer.length() - 5] == '0' && buffer[buffer.length() - 6] == 10 && buffer[buffer.length() - 7] == 13)
         {
         
             buffer.erase(buffer.length() - 7 , buffer.length() - 1);
@@ -91,7 +91,7 @@ void Request::body_handling(std::string buffer)
                     else
                         hexa += buffer[i];
                 }
-                
+                std::cerr << "*"<< hexa << "*"<< std::endl;
                 body_size = std::stoul(hexa, nullptr, 16);
                 body = buffer;
             }
@@ -106,13 +106,21 @@ void Request::body_handling(std::string buffer)
                         {
                             if(buffer[j] == 13 && buffer[j + 1] == 10)
                             {
-                                body_size = std::stoul(hexa, nullptr, 16);
-                                i = j + 2;
-                                break;
+
+                                if(!hexa.empty())
+                                {
+                                    std::cerr << hexa << std::endl;
+                                    body_size = std::stoul(hexa, nullptr, 16);
+                                    i = j + 2;
+                                    break;
+                                }
                             }
                             hexa += buffer[j];
                             if((buffer[j] < 48 || buffer[j] > 57) &&  (buffer[j] < 65 || buffer[j] > 70) )
-                                        break;
+                            {
+                                hexa.clear();
+                                break;
+                            }
                         }
                     }
                     body += buffer[i];

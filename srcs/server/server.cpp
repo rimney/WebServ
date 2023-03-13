@@ -161,9 +161,20 @@ void    server::process()
             std::cout << "*" << request.get_body() << "*"<< std::endl;
              std::cout << "*" << request.get_body().length() << "*"<< std::endl;
         }
-
-        request.errors(_server_config);
-        std::cout <<  request.get_error() << std::endl;
+        // request.errors(_server_config);
+        // std::cout <<  request.get_error() << std::endl;
+        if(request.get_start_line().method == "GET")
+        {
+            //
+        }
+        if(request.get_start_line().method == "POST")
+        {
+            //
+        }
+        if(request.get_start_line().method == "DELET")
+        {
+            //
+        }
         request.clear();
     }
 }
