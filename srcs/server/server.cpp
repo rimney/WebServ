@@ -1,3 +1,15 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   server.cpp                                         :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: eel-ghan <eel-ghan@student.42.fr>          +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2023/03/10 00:38:09 by eel-ghan          #+#    #+#             */
+/*   Updated: 2023/03/13 22:33:14 by eel-ghan         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 
 
 #include "../../includes/server.hpp"
@@ -46,7 +58,6 @@ int server::get_error_flag() const
     return _error_flag;
 }
 
-// TO BE EDITED TO ADD THE OTHER CLASS ARGS
 server  & server::operator=(server const & s)
 {
     _port = s._port;
@@ -55,7 +66,7 @@ server  & server::operator=(server const & s)
     _fd_connection = s._fd_connection;
     _addr = s._addr;
     _request = s._request;
-    // _server_config = s._server_config;
+    _server_config = s._server_config;
     return *this;
 }
 

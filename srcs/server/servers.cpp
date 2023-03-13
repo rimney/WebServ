@@ -1,3 +1,15 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   servers.cpp                                        :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: eel-ghan <eel-ghan@student.42.fr>          +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2023/03/10 00:38:14 by eel-ghan          #+#    #+#             */
+/*   Updated: 2023/03/13 22:31:47 by eel-ghan         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 
 
 #include "../../includes/servers.hpp"
@@ -16,7 +28,12 @@ servers::~servers() {}
 
 servers &   servers::operator=(servers const & s)
 {
-    (void) s;
+    _set_fds = s._set_fds;
+    _set_read_fds = s._set_read_fds;
+    _servers_count = s._servers_count;
+    _max_fd = s._max_fd;
+    _servers = s._servers;
+    _fds_cnx = s._fds_cnx;
     return  *this;
 }
 
