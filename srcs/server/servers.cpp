@@ -140,7 +140,8 @@ void    servers::run()
                 try
                 {
                     (*it).second.receive();
-                    std::cout << (*it).second.get_request() << "\n\n";
+                    (*it).second.process();
+                    
                 }
                 catch(const std::string& msg)
                 {
@@ -150,7 +151,23 @@ void    servers::run()
                     _fds_cnx.erase((*it).first);
                     break ;
                 }
+                //  std::cout <<"**";
+                // std::string tmp = (*it).second.get_request();
+                // for(int i = 0; i < (int)tmp.length(); i++)
+                // {
+                //     if(tmp[i] == 13)
+                //         std::cout <<"</r>";
+                //     else if (tmp[i] == 10)
+                //         std::cout <<"</n>";
+                //     std::cout <<tmp[i];
+                // }
+                // std::cout << tmp << std::endl;
+                // std::cout <<"**";
+                // std::cout <<" *end* " << "\n";
             }
         }
+    
+        // for (std::vector<server>::iterator it = _servers.begin(); it != _servers.end(); it++)
+        //     close((*it).get_fd_connection());
     }
 }
