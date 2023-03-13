@@ -134,19 +134,19 @@ void    servers::run()
                     _fds_cnx.erase((*it).first);
                     break ;
                 }
-                //  std::cout <<"**";
-                // std::string tmp = (*it).second.get_request();
+                 std::cerr <<"**";
+                std::string tmp = (*it).second.get_request();
                 // for(int i = 0; i < (int)tmp.length(); i++)
                 // {
                 //     if(tmp[i] == 13)
-                //         std::cout <<"</r>";
+                //         std::cerr <<"</r>";
                 //     else if (tmp[i] == 10)
                 //         std::cout <<"</n>";
                 //     std::cout <<tmp[i];
                 // }
-                // std::cout << tmp << std::endl;
-                // std::cout <<"**";
-                // std::cout <<" *end* " << "\n";
+                std::cerr << tmp << std::endl;
+                std::cerr <<"**";
+                std::cerr <<" *end* " << "\n";
             }
         }
     

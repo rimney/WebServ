@@ -155,17 +155,17 @@ void    server::process()
         if(!request.get_body().empty())
         {
             std::cout << "\nThe body is : \n"; 
-            // std::cout << "*" << request.get_body() << "*"<< std::endl;
+            std::cout << "*" << request.get_body() << "*"<< std::endl;
              std::cout << "*" << request.get_body().length() << "*"<< std::endl;
         }
 
-        if(request.get_start_line().method == "POST")
-        {
-            post_method();
-        }
+        // if(request.get_start_line().method == "POST")
+        // {
+        //     post_method();
+        // }
         
-        request.errors(_server_config);
-        std::cerr <<  request.get_error() << std::endl;
+        // request.errors(_server_config);
+        // std::cerr <<  request.get_error() << std::endl;
         std::cerr <<  "* done *" << std::endl;
         /// respond !!!! <<<<<<
     }
