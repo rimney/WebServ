@@ -1,4 +1,5 @@
-#include "/Users/brmohamm/Desktop/WebServ/includes/request.hpp"
+#include "../../includes/request.hpp"
+
 void Request::parser(std::string value)
 {
     token _token;
