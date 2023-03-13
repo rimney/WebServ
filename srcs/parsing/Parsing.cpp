@@ -1,3 +1,4 @@
+
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
@@ -708,4 +709,3 @@ int    config_parser::getServersCount(std::vector<std::string> vec)
         }
         return (count);
     }
-
