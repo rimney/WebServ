@@ -1,12 +1,11 @@
-
 #include "../../includes/server.hpp"
 
 
 server::server()
     : _port(DEFAULT_PORT), _host(INADDR_ANY), _error_flag(1){}
 
-server::server(int port, unsigned int host)
-    : _port(port), _host(host), _error_flag(1) {}
+server::server(int port, unsigned int host, server_parser s)
+    : _port(port), _host(host), _server_config(s) ,_error_flag(1) {}
 
 server::server(server const & s)
     : _error_flag(1)
@@ -55,7 +54,7 @@ server  & server::operator=(server const & s)
     _fd_connection = s._fd_connection;
     _addr = s._addr;
     _request = s._request;
-    // _server_config = s._server_config;
+    _server_config = s._server_config;
     return *this;
 }
 
@@ -161,7 +160,7 @@ void    server::process()
 
         if(request.get_start_line().method == "POST")
             post_method();
-        // request.errors(_server_config);
+        request.errors(_server_config);
         // std::cerr <<  request.get_error() << std::endl;
         std::cerr <<  "* done *" << std::endl;
         /// respond !!!! <<<<<<
