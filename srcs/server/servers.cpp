@@ -65,6 +65,7 @@ void    servers::run()
     int r;
     int fd;
     struct timeval time;
+    server_parser server_data;
 
     time.tv_sec = 5;
     time.tv_usec = 0;
@@ -113,6 +114,7 @@ void    servers::run()
                 if (_max_fd < (*it).get_fd_connection())
                     _max_fd = (*it).get_fd_connection();
                 std::cout << "host: " << (*it).get_host() << ", port: " << (*it).get_port() << " accept a new connections\n\n";
+                server_data = (*it).getServerData();
             }
         }
 
@@ -125,7 +127,7 @@ void    servers::run()
                 {
                     (*it).second.receive();
                     (*it).second.process();
-                    
+                    std::cout << server_data.getServerIndexObject() << "server index\n";
                 }
                 catch(const std::string& msg)
                 {

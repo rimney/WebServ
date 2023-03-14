@@ -55,6 +55,7 @@ class server
         void            receive();
         void            set_server_config(server_parser server_config);
         void            setup(server_parser server_config);
+        server_parser   getServerData(void) {return this->_server_config;}
         void            process();
     
     private:
