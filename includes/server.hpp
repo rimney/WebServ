@@ -39,7 +39,7 @@ class server
 
     public:
         server();
-        server(int port, unsigned int host);
+        server(int port, unsigned int host, server_parser s);
         server(server const & s);
         ~server();
 

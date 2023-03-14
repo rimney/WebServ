@@ -128,6 +128,7 @@ void Request::body_handling(std::string buffer)
 }
 void Request::errors(server_parser &serv)
 {
+    std::cout << serv ;
     std::string tmp_path = start_line.path;
     if(!header.find("Transfer-Encoding")->first.empty())
     {

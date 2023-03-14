@@ -20,7 +20,7 @@ servers &   servers::operator=(servers const & s)
     return  *this;
 }
 
-int    servers::setup(server_parser *servers_config)
+int servers::setup(server_parser *servers_config)
 {
     int fd, i;
 
@@ -29,7 +29,8 @@ int    servers::setup(server_parser *servers_config)
         try
         {
             _servers.push_back(server(servers_config[i].getPortObject(),
-                servers_config[i].getHostObject()));
+                servers_config[i].getHostObject(), servers_config[i]));
+            
             _servers[i].setup(servers_config[i]);
         }
         catch(const std::string& msg)
