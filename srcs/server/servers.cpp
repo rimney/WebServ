@@ -128,25 +128,27 @@ void    servers::run()
                 }
                 catch(const std::string& msg)
                 {
-                    std::cerr << msg << "\n";
+                    std::cerr << msg << std::endl;
                     FD_CLR((*it).first, &_set_read_fds);
                     FD_CLR((*it).first, &_set_fds);
                     _fds_cnx.erase((*it).first);
                     break ;
                 }
-                 std::cerr <<"**";
                 std::string tmp = (*it).second.get_request();
+                // std::cerr <<"**";
                 // for(int i = 0; i < (int)tmp.length(); i++)
                 // {
                 //     if(tmp[i] == 13)
                 //         std::cerr <<"</r>";
                 //     else if (tmp[i] == 10)
-                //         std::cout <<"</n>";
-                //     std::cout <<tmp[i];
+                //         std::cerr <<"</n>";
+                //     if (tmp[i] != 13)
+                //         std::cerr <<tmp[i];
+                    
                 // }
-                std::cerr << tmp << std::endl;
-                std::cerr <<"**";
-                std::cerr <<" *end* " << "\n";
+                // // std::cerr << tmp << std::endl;
+                // std::cerr <<"**";
+                // std::cerr <<" *end* " << "\n";
             }
         }
     

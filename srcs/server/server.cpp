@@ -138,32 +138,29 @@ void    server::process()
     if(!request.get_wait_body())
     {
         
-        std::cout << "\nThe first line is : \n";
-        std::cout <<  request.get_start_line().method << std::endl;
-        std::cout <<  request.get_start_line().path << std::endl;
-        std::cout <<  request.get_start_line().vertion << std::endl;
+        // std::cout << "\nThe first line is : \n";
+        // std::cout <<  request.get_start_line().method << std::endl;
+        // std::cout <<  request.get_start_line().path << std::endl;
+        // std::cout <<  request.get_start_line().vertion << std::endl;
 
-        std::cout << "\n\n";
-        std::map<std::string, std::string>::iterator itr;
-        std::cout << "\nThe heder is : \n";
-        std::cout << "\tKEY\tELEMENT\n";
-        for (itr = request.get_header().begin(); itr != request.get_header().end(); ++itr) {
-            std::cout << '\t' << "*"<< itr->first << "*" << '\t' <<  "*" << itr->second << "*"<< '\n';
-        }
-
-        std::cout << std::endl;
-        if(!request.get_body().empty())
-        {
-            std::cout << "\nThe body is : \n"; 
-            std::cout << "*" << request.get_body() << "*"<< std::endl;
-             std::cout << "*" << request.get_body().length() << "*"<< std::endl;
-        }
-
-        // if(request.get_start_line().method == "POST")
-        // {
-        //     post_method();
+        // std::cout << "\n\n";
+        // std::map<std::string, std::string>::iterator itr;
+        // std::cout << "\nThe heder is : \n";
+        // std::cout << "\tKEY\tELEMENT\n";
+        // for (itr = request.get_header().begin(); itr != request.get_header().end(); ++itr) {
+        //     std::cout << '\t' << "*"<< itr->first << "*" << '\t' <<  "*" << itr->second << "*"<< '\n';
         // }
-        
+
+        // std::cout << std::endl;
+        // if(!request.get_body().empty())
+        // {
+        //     std::cout << "\nThe body is : \n"; 
+        //     std::cout << "*" << request.get_body() << "*"<< std::endl;
+        //      std::cout << "*" << request.get_body().length() << "*"<< std::endl;
+        // }
+
+        if(request.get_start_line().method == "POST")
+            post_method();
         // request.errors(_server_config);
         // std::cerr <<  request.get_error() << std::endl;
         std::cerr <<  "* done *" << std::endl;
