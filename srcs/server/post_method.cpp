@@ -22,7 +22,7 @@ size_t remove_header(std::string &request, size_t i,std::string &buffer,std::str
         if(i >= request.length() )
         {
             std::ofstream post(filename);
-            buffer.erase(request.length() - 3 , request.length() - 1);
+            buffer.erase(buffer.length() - 2 , 2);
             post << buffer;
             post.close();
             filename.clear();
@@ -45,6 +45,7 @@ size_t remove_header(std::string &request, size_t i,std::string &buffer,std::str
                     if(!filename.empty())
                     {
                         std::ofstream post(filename);
+                        buffer.erase(buffer.length() - 2 , 2);
                         post << buffer;
                         post.close();
                         filename.clear();
@@ -64,27 +65,38 @@ size_t remove_header(std::string &request, size_t i,std::string &buffer,std::str
 
 void    server::post_method()
 {
-
+    std::string extention;
     std::string filename;
     std::string buffer;
     
     if(!request.get_body().empty())
     {
-        // std::cout << "\nThe body is : \n"; 
-        // std::cout << "*" << request.get_body() << "*"<< std::endl;
-        //  std::cout << "*" << request.get_body().length() << "*"<< std::endl;
-        for (size_t i = 0 ; i < (size_t)request.get_body().length();i++)
+        if(!request.get_header().find("Content-Type")->first.empty())
         {
-            if(request.get_body()[i] == '-')
-                i = remove_header(request.get_body(),i,buffer,filename);
-            if(i < (size_t)request.get_body().length())
+            if(strncmp(request.get_header().find("Content-Type")->second.c_str(),"multipart",9) == 0)
             {
-                buffer += request.get_body()[i];
-                std::cout << request.get_body()[i];
+                std::cerr << "end" << std::endl;
+                for (size_t i = 0 ; i < (size_t)request.get_body().length();i++)
+                {
+                    if(request.get_body()[i] == '-')
+                        i = remove_header(request.get_body(),i,buffer,filename);
+                    if(i < (size_t)request.get_body().length())
+                        buffer += request.get_body()[i];
+                }
             }
-
-        }
+            else
+            {
+                buffer = request.get_header().find("Content-Type")->second;
+                for(int i = 0 ; i < (int)buffer.length();i++)
+                    if(buffer[i] == '/')
+                        for(int j = i + 1 ; j < (int)buffer.length();j++)
+                            extention += buffer[j];
+                    std::ofstream post(request.get_header().find("Postman-Token")->second +'.'+ extention);
+                    post << request.get_body();
+                    post.close();
+            }
+        } 
     }
-
+   
 }
 
