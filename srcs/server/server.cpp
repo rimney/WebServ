@@ -6,7 +6,7 @@
 /*   By: eel-ghan <eel-ghan@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/10 00:38:09 by eel-ghan          #+#    #+#             */
-/*   Updated: 2023/03/13 22:33:14 by eel-ghan         ###   ########.fr       */
+/*   Updated: 2023/03/15 01:17:20 by eel-ghan         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -67,11 +67,11 @@ server  & server::operator=(server const & s)
     _fd_connection = s._fd_connection;
     _addr = s._addr;
     _request = s._request;
-    _server_config = s._server_config;
+    // _server_config = s._server_config; //abort
     return *this;
 }
 
-void server::setup(server_parser server_config)
+void server::setup(server_parser & server_config)
 {
     int optval = 1;
 
@@ -132,15 +132,77 @@ void    server::receive()
     else if (r == 0)
     {
         ::close(_fd_connection);
-        throw(std::string("ERROR: connection closed by client."));
+        throw(std::string("NOTE: connection closed by client."));
     }
     _request = std::string(buffer,r);
 }
 
-void    server::set_server_config(server_parser server_config)
+void    server::set_server_config(server_parser & server_config)
 {
     _server_config = server_config;
 }
+
+int is_path_exist(std::string & path)
+{
+    if (access(path.c_str(), F_OK) == 0)
+        return 1;
+    return 0;
+}
+
+int is_file_or_dir(std::string & path)
+{
+    struct stat file_info;
+
+    if (stat(path.c_str(), &file_info) == -1)
+        return -1;
+    if (file_info.st_mode & S_IFDIR)
+        return 2;
+    if (file_info.st_mode & S_IFREG)
+        return 1;
+    return -1;
+}
+
+void    server::delete_method(std::string  & path)
+{
+    
+    if (is_path_exist(path))
+    {
+        int r = is_file_or_dir(path);
+        if (r == 1) // handle file cases
+        {
+            if (remove(path.c_str()) == 0)
+            {
+                std::cout << "HTTP/1.1 204 No Content\r\n";
+                std::cout << "Content-Type: text/plain\r\n";
+                std::cout << "\r\n";
+                std::cout << "Content deleted\n";
+                return ;
+            }
+            std::cout << "HTTP/1.1 500 Internal Server Error\r\n";
+            std::cout << "Content-Type: text/plain\r\n";
+            std::cout << "\r\n";
+            std::cout << "Internal Server Error\n";
+            return ;
+        }
+        else if (r == 2) // handle dir cases
+        {
+
+        }
+        else // error
+        {
+            std::cout << "500 Internal Server Error\r\n";
+            std::cout << "Content-Type: text/plain\r\n";
+            std::cout << "\r\n";
+            std::cout << "Internal Server Error\n";
+            return ;
+        }
+    }
+    std::cout << "HTTP/1.1 404 Not Found\r\n";
+    std::cout << "Content-Type: text/plain\r\n";
+    std::cout << "\r\n";
+    std::cout << "Not Found\n";
+}
+
 void    server::process()
 {
     if(!request.get_wait_body())
@@ -152,6 +214,7 @@ void    server::process()
     if(!request.get_wait_body())
     {
         
+
         std::cout << "\nThe first line is : \n";
         std::cout <<  request.get_start_line().method << std::endl;
         std::cout <<  request.get_start_line().path << std::endl;
@@ -170,11 +233,14 @@ void    server::process()
         {
             std::cout << "\nThe body is : \n"; 
             std::cout << "*" << request.get_body() << "*"<< std::endl;
-             std::cout << "*" << request.get_body().length() << "*"<< std::endl;
+            std::cout << "*" << request.get_body().length() << "*"<< std::endl;
         }
 
         request.errors(_server_config);
         std::cout <<  request.get_error() << std::endl;
+        std::string path = "/Users/eel-ghan/Desktop/work_space/WebServ/srcs/server/index.html";
+        if (request.get_start_line().method == "DELETE")
+            delete_method(path);// delete_method(request.get_start_line().path);
         /// respond !!!! <<<<<<
     }
 }
