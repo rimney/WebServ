@@ -60,7 +60,7 @@ server  & server::operator=(server const & s)
     return *this;
 }
 
-void server::setup(server_parser server_config)
+void server::setup(server_parser & server_config)
 {
     int optval = 1;
 
@@ -126,7 +126,7 @@ void    server::receive()
     _request = std::string(buffer,r);
 }
 
-void    server::set_server_config(server_parser server_config)
+void    server::set_server_config(server_parser  & server_config)
 {
     _server_config = server_config;
 }
