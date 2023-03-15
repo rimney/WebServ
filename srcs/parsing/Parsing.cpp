@@ -301,7 +301,6 @@ server_parser & server_parser::operator=(server_parser const & s)
     this->is_auto_index = s.getIsAutoIndexObject();
     this->root = s.getRootObject();
     this->server_names = s.getServerNamesObject();
-    std::cout << this->location_count << "\n";
     this->location = new server_location[this->location_count];
     for(size_t i = 0;i < location_count; i++)
         this->location[i] = s.location[i];
