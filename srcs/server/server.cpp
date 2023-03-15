@@ -6,7 +6,7 @@
 /*   By: eel-ghan <eel-ghan@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/10 00:38:09 by eel-ghan          #+#    #+#             */
-/*   Updated: 2023/03/15 16:45:39 by eel-ghan         ###   ########.fr       */
+/*   Updated: 2023/03/15 18:32:33 by eel-ghan         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -67,7 +67,7 @@ server  & server::operator=(server const & s)
     _fd_connection = s._fd_connection;
     _addr = s._addr;
     _request = s._request;
-    // _server_config = s._server_config; //abort
+    _server_config = s._server_config; //abort
     return *this;
 }
 
