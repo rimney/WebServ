@@ -6,7 +6,7 @@
 /*   By: rimney < rimney@student.1337.ma>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/24 21:53:42 by rimney            #+#    #+#             */
-/*   Updated: 2023/03/09 02:17:13 by rimney           ###   ########.fr       */
+/*   Updated: 2023/03/15 01:23:34 by rimney           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -106,6 +106,8 @@ class server_parser : public server_location
         int getServerLocationCountObject(void) const;
         int getServerIndexObject(void) const;
         std::string getServerErrorPageObject(void) const;
+        /////// GETTERS AND SETTERS /////////////;
+        
         bool is_digits(const std::string &str);
         void    getPort(std::string *Port, size_t temp_size);
         void    getErrorPage(std::string *keys, size_t size);

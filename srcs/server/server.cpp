@@ -6,7 +6,7 @@
 /*   By: eel-ghan <eel-ghan@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/10 00:38:09 by eel-ghan          #+#    #+#             */
-/*   Updated: 2023/03/15 18:32:33 by eel-ghan         ###   ########.fr       */
+/*   Updated: 2023/03/15 19:41:19 by eel-ghan         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -67,11 +67,11 @@ server  & server::operator=(server const & s)
     _fd_connection = s._fd_connection;
     _addr = s._addr;
     _request = s._request;
-    _server_config = s._server_config; //abort
+    _server_config = s._server_config;
     return *this;
 }
 
-void server::setup(server_parser & server_config)
+void server::setup(server_parser *server_config, int index)
 {
     int optval = 1;
 
@@ -89,7 +89,7 @@ void server::setup(server_parser & server_config)
         throw(std::string("ERROR: failed to bind the socket."));
     if (listen(_fd_socket, 100) == -1)
         throw(std::string("ERROR: failed to listen."));
-    set_server_config(server_config);
+    set_server_config(server_config, index);
     std::cout << "host: " << _host << " is listening on port " << _port << "...\n\n";
 }
 
@@ -137,9 +137,10 @@ void    server::receive()
     _request = std::string(buffer,r);
 }
 
-void    server::set_server_config(server_parser & server_config)
+void    server::set_server_config(server_parser *server_config, int index)
 {
-    _server_config = server_config;
+
+    _server_config = server_config[index];
 }
 
 int is_path_exist(std::string & path)
@@ -270,12 +271,21 @@ void    server::process()
             std::cout << "*" << request.get_body() << "*"<< std::endl;
             std::cout << "*" << request.get_body().length() << "*"<< std::endl;
         }
-
-        request.errors(_server_config);
-        std::cout <<  request.get_error() << std::endl;
-        std::string path = "/Users/eel-ghan/Desktop/work_space/WebServ/srcs/server/dir";
-        if (request.get_start_line().method == "DELETE")
+        // request.errors(_server_config);
+        // std::cout <<  request.get_error() << std::endl;
+        if(request.get_start_line().method == "GET")
+        {
+            //
+        }
+        if(request.get_start_line().method == "POST")
+        {
+            //
+        }
+        if(request.get_start_line().method == "DELET")
+        {
+            std::string path = "/Users/eel-ghan/Desktop/work_space/WebServ/srcs/server/dir";
             delete_method(path);// delete_method(request.get_start_line().path);
-        /// respond !!!! <<<<<<
+        }
+        request.clear();
     }
 }

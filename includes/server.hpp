@@ -55,8 +55,8 @@ class server
         void            accept();
         void            close();
         void            receive();
-        void            set_server_config(server_parser & server_config);
-        void            setup(server_parser & server_config);
+        void            set_server_config(server_parser *server_config, int index);
+        void            setup(server_parser *server_config, int index);
         void            delete_method(std::string & path);
         void            process();
     

@@ -47,7 +47,7 @@ int    servers::setup(server_parser *servers_config)
         {
             _servers.push_back(server(servers_config[i].getPortObject(),
                 servers_config[i].getHostObject()));
-            _servers[i].setup(servers_config[i]);
+            _servers[i].setup(servers_config, i);
         }
         catch(const std::string& msg)
         {
