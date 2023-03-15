@@ -161,18 +161,22 @@ void    server::process()
         // }
         request.errors(_server_config);
         std::cout <<  request.get_error() << std::endl;
-        if(request.get_start_line().method == "GET")
+        if(request.get_error().empty())
         {
-            //
+            if(request.get_start_line().method == "GET")
+            {
+                //
+            }
+            if(request.get_start_line().method == "POST")
+            {
+                //
+            }
+            if(request.get_start_line().method == "DELET")
+            {
+                //
+            }
         }
-        if(request.get_start_line().method == "POST")
-        {
-            //
-        }
-        if(request.get_start_line().method == "DELET")
-        {
-            //
-        }
+        //respond  
         request.clear();
     }
 }
