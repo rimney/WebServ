@@ -56,11 +56,11 @@ server  & server::operator=(server const & s)
     _fd_connection = s._fd_connection;
     _addr = s._addr;
     _request = s._request;
-    // _server_config = s._server_config;
+    _server_config = s._server_config;
     return *this;
 }
 
-void server::setup(server_parser server_config)
+void server::setup(server_parser *server_config, int index)
 {
     int optval = 1;
 
@@ -78,7 +78,7 @@ void server::setup(server_parser server_config)
         throw(std::string("ERROR: failed to bind the socket."));
     if (listen(_fd_socket, 100) == -1)
         throw(std::string("ERROR: failed to listen."));
-    set_server_config(server_config);
+    set_server_config(server_config, index);
     std::cout << "host: " << _host << " is listening on port " << _port << "...\n\n";
 }
 
@@ -126,9 +126,10 @@ void    server::receive()
     _request = std::string(buffer,r);
 }
 
-void    server::set_server_config(server_parser server_config)
+void    server::set_server_config(server_parser *server_config, int index)
 {
-    _server_config = server_config;
+
+    _server_config = server_config[index];
 }
 void    server::process()
 {
