@@ -6,7 +6,7 @@
 /*   By: eel-ghan <eel-ghan@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/10 00:38:09 by eel-ghan          #+#    #+#             */
-/*   Updated: 2023/03/15 19:41:19 by eel-ghan         ###   ########.fr       */
+/*   Updated: 2023/03/15 19:44:20 by eel-ghan         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -281,7 +281,7 @@ void    server::process()
         {
             //
         }
-        if(request.get_start_line().method == "DELET")
+        if(request.get_start_line().method == "DELETE")
         {
             std::string path = "/Users/eel-ghan/Desktop/work_space/WebServ/srcs/server/dir";
             delete_method(path);// delete_method(request.get_start_line().path);
