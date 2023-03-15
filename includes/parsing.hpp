@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   parsing.hpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: rimney < rimney@student.1337.ma>           +#+  +:+       +#+        */
+/*   By: rimney <rimney@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/24 21:53:42 by rimney            #+#    #+#             */
-/*   Updated: 2023/03/14 15:38:33 by rimney           ###   ########.fr       */
+/*   Updated: 2023/03/15 01:47:07 by rimney           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -67,7 +67,7 @@ class server_location
         void    getCmds(std::string *keys, size_t size);
         void    getMethods(std::string *Keys, size_t size);
         void    getLocationName(std::string *Keys, size_t size);
-        void construct_location(std::vector<std::string>::iterator first, std::vector<std::string>::iterator last);
+        void    construct_location(std::vector<std::string>::iterator first, std::vector<std::string>::iterator last);
 		////////////// Parsing Fucntions //////////////
 };
 

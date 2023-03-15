@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Parsing.cpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: rimney < rimney@student.1337.ma>           +#+  +:+       +#+        */
+/*   By: rimney <rimney@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/07 03:50:36 by rimney            #+#    #+#             */
-/*   Updated: 2023/03/14 15:38:22 by rimney           ###   ########.fr       */
+/*   Updated: 2023/03/15 01:52:16 by rimney           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -299,7 +299,7 @@ server_parser::server_parser(server_parser & s)
 {
     this->port = s.getPortObject();
     this->host = s.getHostObject();
-    this->server_index = s.getServer_IndexLocationObject();
+    this->server_index = s.getServerIndexObject();
     this->location_count = s.getLocationCount();
     this->client_max_body_size = s.getCmbsObject();
     this->redirection = s.getRedirectionObject();
@@ -315,7 +315,7 @@ server_parser & server_parser::operator=(server_parser const & s)
 {
     this->port = s.getPortObject();
     this->host = s.getHostObject();
-    this->server_index = s.getServer_IndexLocationObject();
+    this->server_index = s.getServerIndexObject();
     this->location_count = s.getLocationCount();
     this->client_max_body_size = s.getCmbsObject();
     this->redirection = s.getRedirectionObject();
@@ -742,7 +742,6 @@ config_parser::config_parser(std::string filename)
     }
     file.close();
     this->server_count = getServersCount(tempConf);
-    std::cout << this->server_count << " <<\n";
     this->servers = new server_parser[this->server_count]; // server allocation
     this->servers_index_init(); // indexing the serves depending in their position
 

@@ -163,8 +163,25 @@ void    server::process()
         }
 
         request.errors(this->_server_config);
-        std::cout << _server_config.getServerIndexObject() << " <<<\n";
         std::cout <<  request.get_error() << std::endl;
+        std::cout << _server_config.getServerIndexObject() << " < server index\n";
         // std::cout << _server_config;
+
+        request.errors(_server_config);
+
+        // std::cout <<  request.get_error() << std::endl;
+        if(request.get_start_line().method == "GET")
+        {
+            //
+        }
+        if(request.get_start_line().method == "POST")
+        {
+            //
+        }
+        if(request.get_start_line().method == "DELET")
+        {
+            //
+        }
+        request.clear();
     }
 }
