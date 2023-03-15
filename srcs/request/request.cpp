@@ -92,8 +92,8 @@ void Request::body_handling(std::string buffer)
                     else
                         hexa += buffer[i];
                 }
-                std::cerr << "*"<< hexa << "*"<< std::endl;
-                body_size = std::stoul(hexa, nullptr, 16);
+                //std::cerr << "*"<< hexa << "*"<< std::endl;
+                body_size = std::stoul(hexa, nullptr, 16);//hexa
                 body = buffer;
             }
             else
@@ -107,10 +107,9 @@ void Request::body_handling(std::string buffer)
                         {
                             if(buffer[j] == 13 && buffer[j + 1] == 10)
                             {
-
                                 if(!hexa.empty())
                                 {
-                                    std::cerr << hexa << std::endl;
+                                    // std::cerr << hexa << std::endl;
                                     body_size = std::stoul(hexa, nullptr, 16);
                                     i = j + 2;
                                     break;
@@ -149,6 +148,7 @@ void Request::errors(server_parser &serv)
         r_error = "400 Bad Request";
     if(!header.find("Content-Length")->first.empty())
     {
+        std::cout << serv.getCmbsObject() << "*o*" << std::endl;
         if(serv.getCmbsObject()  <  stoi(header.find("Content-Length")->second))
             r_error = "413 Request Entity Too Large";
     }
@@ -158,7 +158,10 @@ void Request::errors(server_parser &serv)
     {
         if(((tmp_path[i] < 95 || tmp_path[i] > 'z') && (tmp_path[i] < 33 || tmp_path[i] > 90))
             || tmp_path[i] == 34 || tmp_path[i] == 60 || tmp_path[i] == 62 || tmp_path[i] == 96)
-                r_error = "400 Bad Request";
+        {
+            r_error = "400 Bad Request";
+            break;
+        }
     }
 }
 void Request::clear()

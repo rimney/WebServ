@@ -13,6 +13,7 @@ struct Start_line
     std::string method;
     std::string path;
     std::string vertion;
+    
 };
 
 class Request 
