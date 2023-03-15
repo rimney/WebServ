@@ -6,7 +6,7 @@
 /*   By: eel-ghan <eel-ghan@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/10 00:38:09 by eel-ghan          #+#    #+#             */
-/*   Updated: 2023/03/15 01:17:20 by eel-ghan         ###   ########.fr       */
+/*   Updated: 2023/03/15 16:45:39 by eel-ghan         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -170,12 +170,14 @@ void    server::delete_method(std::string  & path)
         int r = is_file_or_dir(path);
         if (r == 1) // handle file cases
         {
+            // if location has cgi
+            // call cgi to handle this case
+            // else if :
             if (remove(path.c_str()) == 0)
             {
                 std::cout << "HTTP/1.1 204 No Content\r\n";
                 std::cout << "Content-Type: text/plain\r\n";
                 std::cout << "\r\n";
-                std::cout << "Content deleted\n";
                 return ;
             }
             std::cout << "HTTP/1.1 500 Internal Server Error\r\n";
@@ -186,7 +188,40 @@ void    server::delete_method(std::string  & path)
         }
         else if (r == 2) // handle dir cases
         {
-
+            if (path.back() == '/')
+            {
+                // if location has cgi
+                // call cgi to handle this case
+                // else if :
+                if (access(path.c_str(), W_OK) == 0)
+                {
+                    if (remove(path.c_str()) == 0)
+                    {
+                        std::cout << "HTTP/1.1 204 No Content\r\n";
+                        std::cout << "Content-Type: text/plain\r\n";
+                        std::cout << "\r\n";
+                        return ;
+                    }
+                    std::cout << "500 Internal Server Error\r\n";
+                    std::cout << "Content-Type: text/plain\r\n";
+                    std::cout << "\r\n";
+                    std::cout << "Internal Server Error\n";
+                    return ;
+                }
+                std::cout << "HTTP/1.1 403 Forbidden\r\n";
+                std::cout << "Content-Type: text/plain\r\n";
+                std::cout << "\r\n";
+                std::cout << "Forbidden\n";
+                return ;
+            }
+            else
+            {
+                std::cout << "HTTP/1.1 409 Conflict\r\n";
+                std::cout << "Content-Type: text/plain\r\n";
+                std::cout << "\r\n";
+                std::cout << "Conflict\n";
+                return ;
+            }
         }
         else // error
         {
@@ -238,7 +273,7 @@ void    server::process()
 
         request.errors(_server_config);
         std::cout <<  request.get_error() << std::endl;
-        std::string path = "/Users/eel-ghan/Desktop/work_space/WebServ/srcs/server/index.html";
+        std::string path = "/Users/eel-ghan/Desktop/work_space/WebServ/srcs/server/dir";
         if (request.get_start_line().method == "DELETE")
             delete_method(path);// delete_method(request.get_start_line().path);
         /// respond !!!! <<<<<<
