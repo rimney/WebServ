@@ -163,6 +163,7 @@ void    server::process()
         }
 
         request.errors(this->_server_config);
+        std::cout << _server_config.getServerIndexObject() << " <<<\n";
         std::cout <<  request.get_error() << std::endl;
         // std::cout << _server_config;
     }
