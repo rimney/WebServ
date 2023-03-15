@@ -17,6 +17,7 @@
 # include <fcntl.h>
 # include "parsing.hpp"
 #include "request.hpp"
+#include "respond.hpp"
 
 // TO BE DELETED //
 #include <string.h>
@@ -35,6 +36,7 @@ class server
         //
         std::string         _request;
         Request             request;
+        respond             respond;
         //
 
     public:

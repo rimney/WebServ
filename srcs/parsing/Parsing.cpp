@@ -6,7 +6,7 @@
 /*   By: rimney < rimney@student.1337.ma>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/07 03:50:36 by rimney            #+#    #+#             */
-/*   Updated: 2023/03/15 18:56:04 by rimney           ###   ########.fr       */
+/*   Updated: 2023/03/15 19:39:39 by rimney           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -614,9 +614,10 @@ void    server_parser::construct_server(std::vector<std::string>::iterator first
             locationn.construct_location(serverVec.begin() + opening_bracket, serverVec.begin() + closing_bracket);   
             this->location.push_back(locationn);
             location_index++;          
-            // getServerDataFromRootLocation();
         }
     }
+        this->getServerDataFromRootLocation();
+
     // exit(0);
 
 }
@@ -684,7 +685,18 @@ void    server_parser::restoreIndexObject(int i)
     std::cout << "Index : " << this->index << '\n';
 }
 
-
+void    server_parser::getServerDataFromRootLocation(void)
+{
+    for(size_t i = 0; i < location.size(); i++)
+    {
+        if(this->location[i].getLocationNameObject() == "/")
+        {
+            this->restoreRootObject(i);
+            this->restoreIndexObject(i);
+            
+        }
+    }
+}
 
 config_parser::config_parser(config_parser & c)
 {
@@ -711,7 +723,7 @@ config_parser::config_parser(std::string filename)
 {
     std::vector<std::string> tempConf;
     std::vector<server_parser> holder;
-    server_parser server;
+
     std::ifstream file(filename);
     std::string line;
     int         opening_bracket;
@@ -742,16 +754,16 @@ config_parser::config_parser(std::string filename)
                 i++;
             }
             closing_bracket = i;
-            
+            server_parser server;
             server.setServerIndex(server_index);
             server.construct_server(tempConf.begin() + opening_bracket, tempConf.begin() + closing_bracket + 1);
             this->servers.push_back(server);
             server_index += 1;
         }
         
-    }
-
-
+    }  
+    for(size_t i = 0; i < servers.size(); i++)
+        std::cout << servers[i];
 }
 
 void    config_parser::servers_index_init()

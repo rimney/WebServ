@@ -161,18 +161,15 @@ void    server::process()
             std::cout << "*" << request.get_body() << "*"<< std::endl;
              std::cout << "*" << request.get_body().length() << "*"<< std::endl;
         }
-
         request.errors(this->_server_config);
         std::cout <<  request.get_error() << std::endl;
         std::cout << _server_config.getServerIndexObject() << " < server index\n";
-        // std::cout << _server_config;
 
         request.errors(_server_config);
 
-        // std::cout <<  request.get_error() << std::endl;
         if(request.get_start_line().method == "GET")
         {
-            //
+            respond.setRespond(this->_server_config, request.get_start_line().method, request.get_start_line().path, request.get_start_line().vertion);
         }
         if(request.get_start_line().method == "POST")
         {
