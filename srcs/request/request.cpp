@@ -136,7 +136,31 @@ void Request::body_handling(std::string buffer)
             wait_body = false;
     }
 }
+
 void Request::errors(server_parser &serv)
+{
+    request_well_formed(serv);
+    location_well(serv);
+}
+
+void Request::location_well(server_parser &serv)
+{
+    // std::cout <<  "***" << serv.getLocationCount()<< "***" << std::endl;
+    // std::cout << serv.getServerLocationsObject()[0].getLocationNameObject()<< std::endl;
+
+    (void)serv;
+  // Find first occurrence of "geeks"
+  size_t found = start_line.path.find(serv.getServerLocationsObject()[0].getLocationNameObject());
+  if (found != (size_t)-1)
+  {
+        std::cout << "First occurrence is " <<
+             found << std::endl;
+  }
+
+   
+}
+
+void Request::request_well_formed(server_parser &serv)
 {
     std::string tmp_path = start_line.path;
     if(!header.find("Transfer-Encoding")->first.empty())
@@ -144,15 +168,15 @@ void Request::errors(server_parser &serv)
         if(header.find("Transfer-Encoding")->second != "chunked")
             r_error = "501 Not Implemented";
     }
-    if((start_line.method == "POST" && header.find("Transfer-Encoding")->first.empty() && header.find("Content-Length")->first.empty())
+    else if((start_line.method == "POST" && header.find("Transfer-Encoding")->first.empty() && header.find("Content-Length")->first.empty())
         || (start_line.method == "POST" && !header.find("Transfer-Encoding")->first.empty() && !header.find("Content-Length")->first.empty()))
         r_error = "400 Bad Request";
-    if(!header.find("Content-Length")->first.empty())
+    else if(!header.find("Content-Length")->first.empty())
     {
-        if(serv.getCmbsObject()  <  stoi(header.find("Content-Length")->second))
+        if(serv.getCmbsObject()  > 0 && serv.getCmbsObject()  <  stoi(header.find("Content-Length")->second))
             r_error = "413 Request Entity Too Large";
     }
-    if(tmp_path.length() > 2048)
+    else if(tmp_path.length() > 2048)
         r_error = "414 Request-URI Too Long";
     for(int i = 0 ; i < (int)tmp_path.length() ; i++)
     {
@@ -161,6 +185,7 @@ void Request::errors(server_parser &serv)
                 r_error = "400 Bad Request";
     }
 }
+
 void Request::clear()
 {
     start_line.method.clear();

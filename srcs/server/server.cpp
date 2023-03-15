@@ -1,13 +1,11 @@
-
-
 #include "../../includes/server.hpp"
 
 
 server::server()
     : _port(DEFAULT_PORT), _host(INADDR_ANY), _error_flag(1){}
 
-server::server(int port, unsigned int host)
-    : _port(port), _host(host), _error_flag(1) {}
+server::server(int port, unsigned int host, server_parser s)
+    : _port(port), _host(host), _server_config(s) ,_error_flag(1) {}
 
 server::server(server const & s)
     : _error_flag(1)
@@ -60,7 +58,7 @@ server  & server::operator=(server const & s)
     return *this;
 }
 
-void server::setup(server_parser *server_config, int index)
+void server::setup(server_parser server_config)
 {
     int optval = 1;
 
@@ -78,7 +76,7 @@ void server::setup(server_parser *server_config, int index)
         throw(std::string("ERROR: failed to bind the socket."));
     if (listen(_fd_socket, 100) == -1)
         throw(std::string("ERROR: failed to listen."));
-    set_server_config(server_config, index);
+    set_server_config(server_config);
     std::cout << "host: " << _host << " is listening on port " << _port << "...\n\n";
 }
 
@@ -126,10 +124,9 @@ void    server::receive()
     _request = std::string(buffer,r);
 }
 
-void    server::set_server_config(server_parser *server_config, int index)
+void    server::set_server_config(server_parser server_config)
 {
-
-    _server_config = server_config[index];
+    _server_config = server_config;
 }
 void    server::process()
 {
@@ -147,21 +144,21 @@ void    server::process()
         std::cout <<  request.get_start_line().path << std::endl;
         std::cout <<  request.get_start_line().vertion << std::endl;
 
-        std::cout << "\n\n";
-        std::map<std::string, std::string>::iterator itr;
-        std::cout << "\nThe heder is : \n";
-        std::cout << "\tKEY\tELEMENT\n";
-        for (itr = request.get_header().begin(); itr != request.get_header().end(); ++itr) {
-            std::cout << '\t' << "*"<< itr->first << "*" << '\t' <<  "*" << itr->second << "*"<< '\n';
-        }
+        // std::cout << "\n\n";
+        // std::map<std::string, std::string>::iterator itr;
+        // std::cout << "\nThe heder is : \n";
+        // std::cout << "\tKEY\tELEMENT\n";
+        // for (itr = request.get_header().begin(); itr != request.get_header().end(); ++itr) {
+        //     std::cout << '\t' << "*"<< itr->first << "*" << '\t' <<  "*" << itr->second << "*"<< '\n';
+        // }
 
-        std::cout << std::endl;
-        if(!request.get_body().empty())
-        {
-            std::cout << "\nThe body is : \n"; 
-            std::cout << "*" << request.get_body() << "*"<< std::endl;
-             std::cout << "*" << request.get_body().length() << "*"<< std::endl;
-        }
+        // std::cout << std::endl;
+        // if(!request.get_body().empty())
+        // {
+        //     std::cout << "\nThe body is : \n"; 
+        //     std::cout << "*" << request.get_body() << "*"<< std::endl;
+        //      std::cout << "*" << request.get_body().length() << "*"<< std::endl;
+        // }
         // request.errors(_server_config);
         // std::cout <<  request.get_error() << std::endl;
         if(request.get_start_line().method == "GET")
