@@ -167,9 +167,10 @@ void    server::process()
 
         request.errors(_server_config);
 
+        respond.setRespond(this->_server_config, request.get_start_line().method, request.get_start_line().path, request.get_start_line().vertion, request.get_error());
         if(request.get_start_line().method == "GET")
         {
-            respond.setRespond(this->_server_config, request.get_start_line().method, request.get_start_line().path, request.get_start_line().vertion);
+            std::cout << "eeee\n";
         }
         if(request.get_start_line().method == "POST")
         {

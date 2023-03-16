@@ -6,7 +6,7 @@
 /*   By: rimney < rimney@student.1337.ma>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/24 21:53:42 by rimney            #+#    #+#             */
-/*   Updated: 2023/03/15 19:33:50 by rimney           ###   ########.fr       */
+/*   Updated: 2023/03/16 15:29:36 by rimney           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -166,7 +166,7 @@ class config_parser : public server_parser
 std::ostream &	operator<<(std::ostream& os, config_parser& p);
 std::ostream &	operator<<(std::ostream & os, server_parser & s);
 std::ostream &	operator<<(std::ostream & os, server_location & s);
-std::string		fileExist(server_parser server, std::string root, std::string file);
+std::string		fileExist(std::string root, std::string file);
 char			*toIp(int ip);
 std::string *stringSplit(std::string split, char c, size_t *index_save);
 

@@ -6,7 +6,7 @@
 /*   By: rimney < rimney@student.1337.ma>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/15 20:32:17 by rimney            #+#    #+#             */
-/*   Updated: 2023/03/16 00:32:52 by rimney           ###   ########.fr       */
+/*   Updated: 2023/03/16 16:31:11 by rimney           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -72,38 +72,64 @@ void    respond::setFinalString(std::string finalString)
     this->finalString = finalString;
 }
 
-std::string checkFileExist(std::string root, std::string file)
-{
-    std::string fileHolder;
-    std::ifstream init(file);
-    if(init.good())
-        return (file);
-    else
-    {
-        // std::string s = "/";
-        fileHolder = root + file;
-        std::ifstream file(fileHolder);
-        if (file.good())
-            return (fileHolder);
-        else
-        {
-            return ("not found");
-        }
-    }
-    return ("not found");
-}
 
-void    respond::setRespond(server_parser server, std::string method, std::string path, std::string httpVersion)
+void    respond::setRespond(server_parser server, std::string method, std::string path, std::string httpVersion, std::string error)
 {
-    if(path == "/")
-        path = "index.html";
-    
-    std::string fileHolder = checkFileExist(server.getRootObject(), path);
-    std::cout << fileHolder;
-    this->sethttpVersion(httpVersion);
-    if(method == "GET")
+    if(!error.empty())
     {
-        std::cout << path << ">> path\n";
+        if(error == "501 Not Implemented")
+        {
+            this->sethttpVersion(httpVersion);
+            this->setstatusCode("501");
+            this->setstatusDescription("Not Implemented");
+            this->setBody("<h1>\n501 Not Implemented\n</h1>");
+            this->setContentLenght(std::to_string(this->getBody().size()));
+            // set final string !!
+        }
+        else if(error == "400 Bad Request")
+        {
+            this->sethttpVersion(httpVersion);
+            this->setstatusCode("400");
+            this->setstatusDescription("Bad Request");
+            this->setBody("<h1>\n400 Bad Request\n</h1>");
+            this->setContentLenght(std::to_string(this->getBody().size()));
+            // set final string !!
+        }
+        else if(error == "413 Request Entity Too Large")
+        {
+            this->sethttpVersion(httpVersion);
+            this->setstatusCode("413");
+            this->setstatusDescription("Request Entity Too Large");
+            this->setBody("<h1>\n413 Request Entity Too Large\n</h1>");
+            this->setContentLenght(std::to_string(this->getBody().size()));
+            // set final string !!
+        }
+        else if(error == "414 Request-URI Too Long")
+        {
+            this->sethttpVersion(httpVersion);
+            this->setstatusCode("414");
+            this->setstatusDescription("Request-URI Too Long");
+            this->setBody("<h1>\n414 Request-URI Too Long\n</h1>");
+            this->setContentLenght(std::to_string(this->getBody().size()));
+            // set final string !!
+        }
+        else if(error == "400 Bad Request")
+        {
+            this->sethttpVersion(httpVersion);
+            this->setstatusCode("400");
+            this->setstatusDescription("400 Bad Request");
+            this->setBody("<h1>\n400 Bad Request\n</h1>");
+            this->setContentLenght(std::to_string(this->getBody().size()));
+            // set final string !!
+        }
+            
+    }
+    if(error.empty() && method == "GET")
+    {
+        std::file
+        std::string fileHolder = fileExist(server.getRootObject(), path);
+        
         exit(0);
     }
+    
 }

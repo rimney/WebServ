@@ -6,7 +6,7 @@
 /*   By: rimney < rimney@student.1337.ma>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/07 03:50:36 by rimney            #+#    #+#             */
-/*   Updated: 2023/03/16 12:49:25 by rimney           ###   ########.fr       */
+/*   Updated: 2023/03/16 15:34:18 by rimney           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,7 +22,7 @@ char *toIp(int ip)
     return(ip_address);
 }
 
-std::string fileExist(server_parser server, std::string root, std::string file)
+std::string fileExist(std::string root, std::string file)
 {
     std::string fileHolder;
     std::ifstream init(file);
@@ -32,17 +32,16 @@ std::string fileExist(server_parser server, std::string root, std::string file)
         return (file);
     else
     {
-        std::string s = "/";
-        fileHolder = root + s + file;
+        fileHolder = root + file;
         std::ifstream file(fileHolder);
         if (file.good())
             return (fileHolder);
         else
         {
-            return (server.getServerErrorPageObject());
+            return ("Error");
         }
     }
-    return (server.getServerErrorPageObject());
+    return ("Error");
 }
 
 std::ostream & operator<<(std::ostream & os, server_location & s)

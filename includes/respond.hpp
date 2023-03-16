@@ -6,7 +6,7 @@
 /*   By: rimney < rimney@student.1337.ma>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/14 17:42:24 by rimney            #+#    #+#             */
-/*   Updated: 2023/03/15 22:37:14 by rimney           ###   ########.fr       */
+/*   Updated: 2023/03/16 13:59:14 by rimney           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,7 +44,7 @@ class respond
         void        setContentLenght(std::string ContentLenght);
         void        setBody(std::string Body);
         void        setFinalString(std::string finalString);
-        void    setRespond(server_parser server, std::string method, std::string path, std::string httpVersion);
+        void    setRespond(server_parser server, std::string method, std::string path, std::string httpVersion, std::string error);
 
         
 };
