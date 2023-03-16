@@ -6,7 +6,7 @@
 /*   By: rimney < rimney@student.1337.ma>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/07 03:50:36 by rimney            #+#    #+#             */
-/*   Updated: 2023/03/15 19:39:39 by rimney           ###   ########.fr       */
+/*   Updated: 2023/03/16 12:49:25 by rimney           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -113,6 +113,7 @@ server_location::server_location(server_location const  & s)
     this->cgiExt = s.cgiExt;
     this->error_codes = s.error_codes;
     this->error_page = s.error_page;
+    this->client_max_body_size = s.client_max_body_size;
     // exit();
 }
 server_location server_location::operator=(server_location const & s)
@@ -227,10 +228,10 @@ void server_location::construct_location(std::vector<std::string>::iterator firs
 {
     std::vector<std::string> locationVec(first, last);
     size_t temp_size;
-    this->client_max_body_size = 0;
-    this->is_auto_index = false;
     for(size_t i = 0; i < locationVec.size(); i++)
     {
+        this->is_auto_index = false;
+        this->client_max_body_size = 0;
         if(!strncmp(locationVec[i].c_str(), "location", 8) && locationVec[i].back() == '{')
         {
             getLocationName(stringSplit(locationVec[i], ' ', &temp_size), temp_size);
@@ -265,6 +266,7 @@ void server_location::construct_location(std::vector<std::string>::iterator firs
         {
             getMethods(stringSplit(locationVec[i], ' ', &temp_size), temp_size);
         }
+        
     }
 }
 std::string *stringSplit(std::string split, char c, size_t *index_save)
@@ -342,6 +344,7 @@ int server_parser::getHostObject(void) const
 }
 int     server_location::getLocationCmbsObject(void) const
 {
+    
     return (this->client_max_body_size);
 }
 int server_parser::getServer_IndexLocationObject(void) const
@@ -545,8 +548,6 @@ void    server_parser::getCmds(std::string *keys, size_t size)
 }
 void    server_parser::construct_server(std::vector<std::string>::iterator first, std::vector<std::string>::iterator last)
 {
-    // exit(0);
-    server_location locationn;
     this->port = 8080;
     this->is_auto_index = false;
     this->client_max_body_size = 0;
@@ -599,7 +600,6 @@ void    server_parser::construct_server(std::vector<std::string>::iterator first
         else if (!strncmp(serverVec[i].c_str(), "client_max_body_size", 19))
         {
             getCmds(stringSplit(serverVec[i], ' ', &temp_size), temp_size);
-            // exit(0);
         }
         else if (!strncmp(serverVec[i].c_str(), "location ", 9) && serverVec[i].back() == '{')
         {
@@ -610,6 +610,7 @@ void    server_parser::construct_server(std::vector<std::string>::iterator first
                 i++;
             }
             closing_bracket = i;
+            server_location locationn;
             locationn.setLocationIndex(location_index);
             locationn.construct_location(serverVec.begin() + opening_bracket, serverVec.begin() + closing_bracket);   
             this->location.push_back(locationn);
@@ -618,7 +619,6 @@ void    server_parser::construct_server(std::vector<std::string>::iterator first
     }
         this->getServerDataFromRootLocation();
 
-    // exit(0);
 
 }
 void    server_parser::setLocationsIndex(std::vector<server_location> location)
@@ -693,7 +693,6 @@ void    server_parser::getServerDataFromRootLocation(void)
         {
             this->restoreRootObject(i);
             this->restoreIndexObject(i);
-            
         }
     }
 }
