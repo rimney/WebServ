@@ -23,15 +23,12 @@ servers &   servers::operator=(servers const & s)
 int servers::setup(std::vector<server_parser> servers_config)
 {
     int fd, i;
-
     for (i = 0; (size_t)i < servers_config.size(); i++)
     {
         try
         {
             _servers.push_back(server(servers_config[i].getPortObject(),
                 servers_config[i].getHostObject(), servers_config[i]));
-            std::cout <<  servers_config[i].getServerIndexObject() << '\n';
-            std::cout << servers_config[i].getPortObject() << '\n';
             _servers[i].setup(servers_config[i]);
         }
         catch(const std::string& msg)

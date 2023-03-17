@@ -6,7 +6,7 @@
 /*   By: rimney < rimney@student.1337.ma>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/14 17:42:24 by rimney            #+#    #+#             */
-/*   Updated: 2023/03/16 13:59:14 by rimney           ###   ########.fr       */
+/*   Updated: 2023/03/17 21:14:32 by rimney           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,14 +24,17 @@ class respond
 	    std::string ContentLenght; // len of body
         std::string Body; // content
         std::string finalString; //
+        server_parser server;
     public:
-        respond(){};
+        respond() {};
+        respond(server_parser const & s): server(s) {};
         respond(respond const & r) {*this = r;}
         // respond & operator=(respond const & r)
         // {
         //     *this = r;
         //     return (*this);
         // }
+        void        setRespondServer(server_parser s) {this->server = s;}
         std::string gethttpVersion(void);
         std::string getstatusCode(void);
         std::string getstatusDescription(void);
@@ -44,10 +47,16 @@ class respond
         void        setContentLenght(std::string ContentLenght);
         void        setBody(std::string Body);
         void        setFinalString(std::string finalString);
-        void    setRespond(server_parser server, std::string method, std::string path, std::string httpVersion, std::string error);
-
+        void        setRespond(std::string path, std::string httpVersion, std::string error);
+        std::string setErrorBody(std::string status_code);
+        bool        isAmongErrorCodes(int error_code);
+        std::string fileToSring(std::string path);
+        std::string errorStringToString(int error);
         
 };
+
+bool theFileExists(const std::string& fileName);
+
 
 
 #endif

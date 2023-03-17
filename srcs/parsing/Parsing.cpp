@@ -6,7 +6,7 @@
 /*   By: rimney < rimney@student.1337.ma>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/07 03:50:36 by rimney            #+#    #+#             */
-/*   Updated: 2023/03/16 15:34:18 by rimney           ###   ########.fr       */
+/*   Updated: 2023/03/17 18:47:04 by rimney           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -296,7 +296,7 @@ std::string *stringSplit(std::string split, char c, size_t *index_save)
 
 
 
-server_parser::server_parser(server_parser const & s)
+server_parser::server_parser(server_parser const & s) : server_location(s)
 {
     this->port = s.getPortObject();
     this->host = s.getHostObject();
@@ -309,7 +309,10 @@ server_parser::server_parser(server_parser const & s)
     this->server_names = s.getServerNamesObject();
     this->error_page = s.getServerErrorPageObject();
     this->location = s.getServerLocation();
+    this->error_codes = s.getErrorCodesObject();
+
 }
+
 server_parser & server_parser::operator=(server_parser const & s)
 {
     this->port = s.getPortObject();
@@ -322,6 +325,7 @@ server_parser & server_parser::operator=(server_parser const & s)
     this->root = s.getRootObject();
     this->server_names = s.getServerNamesObject();
     this->error_page = s.getServerErrorPageObject();
+    this->error_codes = s.getErrorCodesObject();
         this->location = s.getServerLocationsObject();
     return (*this);
 }
@@ -352,7 +356,7 @@ int server_parser::getServer_IndexLocationObject(void) const
 }
 size_t server_parser::getLocationCount(void) const
 {
-    return (this->location_count);
+    return (this->location.size());
 }
 int server_parser::getCmbsObject(void) const
 {
@@ -476,6 +480,8 @@ void    server_parser::getServerName(std::string *keys, size_t size)
 }
 void    server_parser::getErrorPage(std::string *keys, size_t size)
 {
+    for(size_t i = 0;i < size ; i++)
+       std::cout <<  keys[i] << " <\n";
     if (size <= 1)
     {
         std::cout << "Error Error Page Not Found\n";
@@ -549,6 +555,9 @@ void    server_parser::construct_server(std::vector<std::string>::iterator first
 {
     this->port = 8080;
     this->is_auto_index = false;
+    this->server_had_delete_method = true;
+    this->server_has_get_method = true;
+    this->server_has_post_method = true;
     this->client_max_body_size = 0;
     this->host = 0;
     int location_index = 0;
@@ -574,6 +583,7 @@ void    server_parser::construct_server(std::vector<std::string>::iterator first
         }
         else if(!strncmp(serverVec[i].c_str(), "error", 5))
         {
+
             getErrorPage(stringSplit(serverVec[i], ' ', &temp_size), temp_size);
             if(error_codes.size() == 0)
                 error_codes.push_back(404);
@@ -627,7 +637,6 @@ void    server_parser::setLocationsIndex(std::vector<server_location> location)
 }
 void    server_parser::setServerIndex(int index)
 {
-    // std::cout << "CALLED\n";
     this->server_index = index;
 }
 size_t server_parser::getLocationCount(std::vector<std::string> vec)
@@ -647,12 +656,10 @@ void    server_parser::restoreRootObject(int i)
 
     if(this->root.size() == 0 && this->location[i].getLocationRootObject().size() != 0)
     {
-        std::cout << "root restored\n";
         this->root = this->location[i].getLocationRootObject();
     }
     else if(this->root.size() != 0 && this->location[i].getLocationRootObject().size() != 0)
     {
-        std::cout << this->root << " this root <<\n";
         std::cerr << "Error : Duplicate Root Path\n";
         exit(0);
     }
@@ -661,14 +668,12 @@ void    server_parser::restoreRootObject(int i)
         std::cerr << "Error : There's No Root In Server\n";
         exit(0);   
     }
-    std::cout << "Root : " << this->root << '\n';
 }
 
 void    server_parser::restoreIndexObject(int i)
 {
     if(this->index.size() == 0 && this->location[i].getLocationIndexObject().size() != 0)
     {
-        std::cout << "index restored\n";
         this->index = this->location[i].getLocationIndexObject();
     }
     else if(this->index.size() != 0 && this->location[i].getLocationIndexObject().size() != 0)
@@ -681,8 +686,21 @@ void    server_parser::restoreIndexObject(int i)
         std::cerr << "Error : There's No Index In Server\n";
         exit(0);   
     }
-    std::cout << "Index : " << this->index << '\n';
 }
+
+void    server_parser::restoreAutoIndex(int i)
+{
+    if(this->is_auto_index == false && this->location[i].getLocationIsAutoIndexObject() == true)
+    {
+        this->is_auto_index = true;
+    }
+    else if(this->is_auto_index == true && this->location[i].getLocationIsAutoIndexObject() == true)
+    {
+        std::cerr << "Error : There's Two True AutoIndex Bool !\n";
+        exit(0);
+    }
+}
+
 
 void    server_parser::getServerDataFromRootLocation(void)
 {
@@ -690,6 +708,7 @@ void    server_parser::getServerDataFromRootLocation(void)
     {
         if(this->location[i].getLocationNameObject() == "/")
         {
+            this->restoreAutoIndex(i);
             this->restoreRootObject(i);
             this->restoreIndexObject(i);
         }
@@ -753,15 +772,14 @@ config_parser::config_parser(std::string filename)
             }
             closing_bracket = i;
             server_parser server;
-            server.setServerIndex(server_index);
             server.construct_server(tempConf.begin() + opening_bracket, tempConf.begin() + closing_bracket + 1);
+            server.setServerIndex(server_index);
+            
             this->servers.push_back(server);
             server_index += 1;
         }
         
     }  
-    for(size_t i = 0; i < servers.size(); i++)
-        std::cout << servers[i];
 }
 
 void    config_parser::servers_index_init()

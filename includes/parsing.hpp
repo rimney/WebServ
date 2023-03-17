@@ -6,7 +6,7 @@
 /*   By: rimney < rimney@student.1337.ma>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/24 21:53:42 by rimney            #+#    #+#             */
-/*   Updated: 2023/03/16 15:29:36 by rimney           ###   ########.fr       */
+/*   Updated: 2023/03/17 00:43:22 by rimney           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -85,6 +85,9 @@ class server_parser : public server_location
         std::string 				redirection; // return /eee/rrr
         std::vector<int>			error_codes; // list of error codes linked with error path
         std::vector<std::string>	server_names; // obvious
+        bool                        server_has_get_method;
+        bool                        server_has_post_method;
+        bool                        server_had_delete_method;
 
         std::vector<server_location> location; // location objects
         bool is_auto_index; // is autoindex or not ? 
@@ -137,6 +140,8 @@ class server_parser : public server_location
 		void			getServerDataFromRootLocation(void);
         void            restoreRootObject(int i);
         void            restoreIndexObject(int i);
+        void            restoreAutoIndex(int i);
+        void restoreServerMethods(int i);
 
 		////////////// Parsing Fucntions //////////////		
 
