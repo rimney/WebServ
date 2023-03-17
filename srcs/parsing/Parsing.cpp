@@ -60,8 +60,8 @@ std::ostream & operator<<(std::ostream & os, server_location & s)
     os << "     | Location Redirection : " << s.getLocationRedirectionObject() << '\n';
     for(size_t i = 0; i < locationMethods.size(); i++)
         os << "     | Location Methods : "<< locationMethods[i] << '\n';
-        os << "     | Location AutoIndex : " << s.getLocationIsAutoIndexObject() << '\n'; 
-        os << "     |------------->>\n";
+    os << "     | Location AutoIndex : " << s.getLocationIsAutoIndexObject() << '\n'; 
+    os << "     |------------->>\n";
         return (os);
 }
 

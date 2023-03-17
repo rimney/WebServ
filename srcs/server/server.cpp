@@ -160,7 +160,7 @@ void    server::process()
         //      std::cout << "*" << request.get_body().length() << "*"<< std::endl;
         // }
         if(request.get_start_line().method == "POST")
-            post_method();
+            post_method(_server_config);
         request.errors(_server_config);
         // std::cerr <<  request.get_error() << std::endl;
         std::cerr <<  "* done *" << std::endl;

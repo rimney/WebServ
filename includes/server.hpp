@@ -56,7 +56,7 @@ class server
         void            setup(server_parser & server_config);
         server_parser   getServerData(void) {return this->_server_config;}
         void            process();
-        void            post_method();
+        void            post_method(server_parser &serv);
     
     private:
         void            set_addr();

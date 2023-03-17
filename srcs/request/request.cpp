@@ -92,8 +92,7 @@ void Request::body_handling(std::string buffer)
                     else
                         hexa += buffer[i];
                 }
-                //std::cerr << "*"<< hexa << "*"<< std::endl;
-                body_size = std::stoul(hexa, nullptr, 16);//hexa
+                body_size = std::strtoul(hexa.c_str(), 0, 16);//hexa
                 body = buffer;
             }
             else
@@ -109,8 +108,7 @@ void Request::body_handling(std::string buffer)
                             {
                                 if(!hexa.empty())
                                 {
-                                    // std::cerr << hexa << std::endl;
-                                    body_size = std::stoul(hexa, nullptr, 16);
+                                    body_size = std::strtoul(hexa.c_str(), 0, 16);
                                     i = j + 2;
                                     break;
                                 }
@@ -148,7 +146,7 @@ void Request::location_well(server_parser &serv)
     long index = start_line.location_index = -1;
     size_t index_of_charachter = 0;
     bool method_allowed = false;
-    for(size_t i = 0 ; i < (size_t)serv.getServerLocationsObject().size(); i++)
+    for(size_t i = 0 ; i < (size_t)serv.getServerLocationsObject().size(); i++)//serche path
     {
         found = start_line.path.find(serv.getServerLocationsObject()[i].getLocationNameObject());
         if (found != (size_t) -1  && index_of_charachter <= serv.getServerLocationsObject()[i].getLocationNameObject().length())
