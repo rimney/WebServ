@@ -20,16 +20,18 @@ servers &   servers::operator=(servers const & s)
     return  *this;
 }
 
-int    servers::setup(server_parser *servers_config)
+int servers::setup(std::vector<server_parser> servers_config)
 {
     int fd, i;
 
-    for (i = 0; i < _servers_count; i++)
+    for (i = 0; (size_t)i < servers_config.size(); i++)
     {
         try
         {
             _servers.push_back(server(servers_config[i].getPortObject(),
                 servers_config[i].getHostObject(), servers_config[i]));
+            std::cout <<  servers_config[i].getServerIndexObject() << '\n';
+            std::cout << servers_config[i].getPortObject() << '\n';
             _servers[i].setup(servers_config[i]);
         }
         catch(const std::string& msg)
@@ -49,7 +51,7 @@ int    servers::setup(server_parser *servers_config)
     FD_ZERO(&_set_fds);
 
     _max_fd = 0;
-    for (i = 0; i < _servers_count; i++)
+    for (i = 0; (size_t)i < servers_config.size(); i++)
     {
         fd = _servers[i].get_fd_socket();
         FD_SET(fd, &_set_fds);
@@ -58,7 +60,6 @@ int    servers::setup(server_parser *servers_config)
     }
     return 0;
 }
-
 void    servers::run()
 {
     int r;

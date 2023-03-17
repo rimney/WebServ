@@ -6,7 +6,7 @@
 /*   By: rimney < rimney@student.1337.ma>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/24 21:53:42 by rimney            #+#    #+#             */
-/*   Updated: 2023/03/14 15:38:33 by rimney           ###   ########.fr       */
+/*   Updated: 2023/03/17 21:38:01 by rimney           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,7 +39,7 @@ class server_location
 		////////////// Constructors and Overloads //////////////
         server_location(){};
         ~server_location(){};
-        server_location(server_location & s);
+        server_location(server_location const & s);
         server_location operator=(server_location const & s);
 		////////////// Constructors and Overloads //////////////
 		
@@ -67,7 +67,7 @@ class server_location
         void    getCmds(std::string *keys, size_t size);
         void    getMethods(std::string *Keys, size_t size);
         void    getLocationName(std::string *Keys, size_t size);
-        void construct_location(std::vector<std::string>::iterator first, std::vector<std::string>::iterator last);
+        void    construct_location(std::vector<std::string>::iterator first, std::vector<std::string>::iterator last);
 		////////////// Parsing Fucntions //////////////
 };
 
@@ -86,13 +86,17 @@ class server_parser : public server_location
         std::vector<int>			error_codes; // list of error codes linked with error path
         std::vector<std::string>	server_names; // obvious
 
-        server_location *location; // location objects
+        std::vector<server_location> location; // location objects
         bool is_auto_index; // is autoindex or not ? 
     public :
 		////////////// Constructors and Overloads //////////////
         server_parser(){};
+        server_parser(std::vector<std::string>::iterator first, std::vector<std::string>::iterator last){
+            this->construct_server(first, last);
+        }
+        
         ~server_parser() {} ;
-        server_parser(server_parser & s);
+        server_parser(server_parser const & s);
         server_parser & operator=(server_parser const  & s);
 		////////////// Constructors and Overloads //////////////
 
@@ -108,7 +112,7 @@ class server_parser : public server_location
         std::string					getRootObject(void) const;
         std::string					getRedirectionObject(void) const;
         std::string					getServerErrorPageObject(void) const;
-        server_location				*getServerLocationsObject(void) const;
+        std::vector<server_location> getServerLocationsObject(void) const;
         std::vector<int>			getErrorCodesObject(void) const;
         std::vector<std::string>	getServerNamesObject(void) const;
 		////////////// Getters and Setters //////////////
@@ -124,12 +128,12 @@ class server_parser : public server_location
         void			getAutoIndex(std::string *keys, size_t size);
         void			getServerName(std::string *keys, size_t size);
         void			getRedirection(std::string *keys, size_t size);
-        void			setLocationsIndex(server_location *location);
+        void			setLocationsIndex(std::vector<server_location> location);
         void			construct_server(std::vector<std::string>::iterator first, std::vector<std::string>::iterator last);
         bool			is_digits(const std::string &str);
         size_t			getLocationCount(void) const;
         size_t 			getLocationCount(std::vector<std::string> vec);
-        server_location	*getServerLocation(void) const;
+        std::vector<server_location>	getServerLocation(void) const;
 		void			getServerDataFromRootLocation(void);
         void            restoreRootObject(int i);
         void            restoreIndexObject(int i);
@@ -143,7 +147,7 @@ class config_parser : public server_parser
 {
     private :
         size_t			server_count;
-        server_parser	*servers;
+        std::vector<server_parser>	servers;
     public :
 	////////////// Constructors //////////////
         config_parser(){} ;
@@ -153,7 +157,7 @@ class config_parser : public server_parser
 	////////////// Constructors //////////////
         config_parser & operator=(config_parser const & c);
         size_t			getServerCountObject(void) const; // server count getter
-        server_parser	*getServersObject(void);
+        std::vector<server_parser>	getServersObject(void) const;
         void			getServerName(std::string *keys, size_t size);
         void			servers_index_init();
         int				getServersCount(std::vector<std::string> vec);
@@ -162,7 +166,7 @@ class config_parser : public server_parser
 std::ostream &	operator<<(std::ostream& os, config_parser& p);
 std::ostream &	operator<<(std::ostream & os, server_parser & s);
 std::ostream &	operator<<(std::ostream & os, server_location & s);
-std::string		fileExist(server_parser server, std::string root, std::string file);
+std::string		fileExist(std::string root, std::string file);
 char			*toIp(int ip);
 std::string *stringSplit(std::string split, char c, size_t *index_save);
 

@@ -146,10 +146,10 @@ void Request::errors(server_parser &serv)
 void Request::location_well(server_parser &serv)
 {
     size_t found = 0;
-    long index = -1;
+    long index = start_line.location_index = -1;
     size_t index_of_charachter = 0;
     bool method_allowed = false;
-    for(size_t i = 0 ; i < (size_t)serv.getLocationCount(); i++)
+    for(size_t i = 0 ; i < (size_t)serv.getServerLocationsObject().size(); i++)
     {
         found = start_line.path.find(serv.getServerLocationsObject()[i].getLocationNameObject());
         if (found != (size_t) -1  && index_of_charachter <= serv.getServerLocationsObject()[i].getLocationNameObject().length())

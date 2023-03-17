@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   webserv.cpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: eel-ghan <eel-ghan@student.42.fr>          +#+  +:+       +#+        */
+/*   By: rimney < rimney@student.1337.ma>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/25 20:56:08 by eel-ghan          #+#    #+#             */
-/*   Updated: 2023/03/09 21:49:45 by eel-ghan         ###   ########.fr       */
+/*   Updated: 2023/03/15 18:54:00 by rimney           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,24 +15,19 @@
 
 int main(int argc, char **argv)
 {
-
     if(argc == 2)
     {
         try
         {
             config_parser config(argv[1]);
             
-            // std::cout << config;
-
             servers     s(config);
             if (s.setup(config.getServersObject()))
             {
-                // system("leaks webserv");
                 return 1;
             }
             s.run();
 
-            // system("leaks webserv");
         }
         catch(const std::string& msg)
         {
