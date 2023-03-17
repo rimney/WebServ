@@ -13,6 +13,8 @@ struct Start_line
     std::string method;
     std::string path;
     std::string vertion;
+    std::string full_path;
+    int location_index;
 };
 
 class Request 
@@ -27,11 +29,29 @@ class Request
         unsigned long          body_size;
     public:
         Request(): wait_body(false),body_size(0){}
+        Request(Request const & r)
+        {*this = r;}
+        Request operator=(Request const & r)
+        {
+            this->start_line.method = r.start_line.method;
+            this->start_line.path = r.start_line.path;
+            this->start_line.full_path = r.start_line.full_path;
+            this->start_line.vertion = r.start_line.vertion;
+            this->start_line.location_index = r.start_line.location_index;
+            this->body = r.body;
+            this->header = r.header;
+            this->r_error = r.r_error;
+            this->body_size = r.body_size;
+            this->wait_body = r.wait_body;
+            return (*this); 
+        }
         ~Request(){}
 
         void parser(std::string value);
         void body_handling(std::string buffer);
         void errors(server_parser &serv);
+        void request_well_formed(server_parser &serv);
+        void location_well(server_parser &serv);
         void clear();
         Start_line &get_start_line(){return start_line;}
         std::map<std::string,std::string> &get_header(){return header;}

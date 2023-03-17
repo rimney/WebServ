@@ -1,5 +1,3 @@
-
-
 #ifndef SERVER_HPP
 # define SERVER_HPP
 
@@ -17,6 +15,7 @@
 # include <fcntl.h>
 # include "parsing.hpp"
 #include "request.hpp"
+
 
 // TO BE DELETED //
 #include <string.h>
@@ -39,7 +38,7 @@ class server
 
     public:
         server();
-        server(int port, unsigned int host);
+        server(int port, unsigned int host, server_parser s);
         server(server const & s);
         ~server();
 
@@ -53,8 +52,9 @@ class server
         void            accept();
         void            close();
         void            receive();
-        void            set_server_config(server_parser *server_config, int index);
-        void            setup(server_parser *server_config, int index);
+        void            set_server_config(server_parser & server_config);
+        void            setup(server_parser & server_config);
+        server_parser   getServerData(void) {return this->_server_config;}
         void            process();
     
     private:

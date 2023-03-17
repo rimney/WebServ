@@ -1,13 +1,12 @@
-
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
 /*   Parsing.cpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: eel-ghan <eel-ghan@student.42.fr>          +#+  +:+       +#+        */
+/*   By: rimney < rimney@student.1337.ma>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/07 03:50:36 by rimney            #+#    #+#             */
-/*   Updated: 2023/03/09 21:28:40 by eel-ghan         ###   ########.fr       */
+/*   Updated: 2023/03/16 15:34:18 by rimney           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,6 +20,28 @@ char *toIp(int ip)
     char* ip_address = inet_ntoa(addr);
 
     return(ip_address);
+}
+
+std::string fileExist(std::string root, std::string file)
+{
+    std::string fileHolder;
+    std::ifstream init(file);
+
+
+    if(init.good())
+        return (file);
+    else
+    {
+        fileHolder = root + file;
+        std::ifstream file(fileHolder);
+        if (file.good())
+            return (fileHolder);
+        else
+        {
+            return ("Error");
+        }
+    }
+    return ("Error");
 }
 
 std::ostream & operator<<(std::ostream & os, server_location & s)
@@ -43,11 +64,12 @@ std::ostream & operator<<(std::ostream & os, server_location & s)
         os << "     |------------->>\n";
         return (os);
 }
+
 std::ostream & operator<<(std::ostream & os, server_parser & s)
 {
     std::vector<int> serverErrorCodes = s.getErrorCodesObject();
     std::vector<std::string> serverNames = s.getServerNamesObject();
-    server_location *serverLocations = s.getServerLocationsObject();
+    std::vector<server_location> serverLocations = s.getServerLocationsObject();
     os << "|------------->>\n";
     os << "| Server index : " << s.getServerIndexObject() << '\n';
     os << "| Server Port : " << s.getPortObject() << '\n';
@@ -63,7 +85,7 @@ std::ostream & operator<<(std::ostream & os, server_parser & s)
     for(size_t i = 0; i < serverNames.size(); i++)
         os << "| Server Names : "<< serverNames[i] << '\n';
         os << "| Server AutoIndex : " << s.getIsAutoIndexObject() << '\n';
-    for(size_t i = 0; i < s.getLocationCount(); i++)
+    for(size_t i = 0; i < serverLocations.size(); i++)
         os << serverLocations[i] << '\n';
     os << "|------------->>\n";
     return (os);
@@ -71,13 +93,13 @@ std::ostream & operator<<(std::ostream & os, server_parser & s)
 
 std::ostream& operator<<(std::ostream& os, config_parser& p)
 {
-    server_parser *servers = p.getServersObject();
-    for(size_t i = 0; i < p.getServerCountObject(); i++)
+    std::vector<server_parser>  servers = p.getServersObject();
+    for(size_t i = 0; i < servers.size(); i++)
         os << servers[i] << '\n';
     return (os);
 }
 
-server_location::server_location(server_location & s)
+server_location::server_location(server_location const  & s)
 {
 
     this->location_index = s.location_index;
@@ -86,11 +108,11 @@ server_location::server_location(server_location & s)
     this->is_auto_index = s.is_auto_index;
     this->HttpMethods = s.HttpMethods;
     this->index = s.index;
-    this->alias = s.alias;
     this->cgiPath = s.cgiPath;
     this->cgiExt = s.cgiExt;
     this->error_codes = s.error_codes;
     this->error_page = s.error_page;
+    this->client_max_body_size = s.client_max_body_size;
     // exit();
 }
 server_location server_location::operator=(server_location const & s)
@@ -101,7 +123,6 @@ server_location server_location::operator=(server_location const & s)
     this->is_auto_index = s.is_auto_index;
     this->HttpMethods = s.HttpMethods;
     this->index = s.index;
-    this->alias = s.alias;
     this->cgiPath = s.cgiPath;
     this->cgiExt = s.cgiExt;
     this->error_codes = s.error_codes;
@@ -206,10 +227,10 @@ void server_location::construct_location(std::vector<std::string>::iterator firs
 {
     std::vector<std::string> locationVec(first, last);
     size_t temp_size;
-    this->client_max_body_size = 0;
-    this->is_auto_index = false;
     for(size_t i = 0; i < locationVec.size(); i++)
     {
+        this->is_auto_index = false;
+        this->client_max_body_size = 0;
         if(!strncmp(locationVec[i].c_str(), "location", 8) && locationVec[i].back() == '{')
         {
             getLocationName(stringSplit(locationVec[i], ' ', &temp_size), temp_size);
@@ -244,9 +265,10 @@ void server_location::construct_location(std::vector<std::string>::iterator firs
         {
             getMethods(stringSplit(locationVec[i], ' ', &temp_size), temp_size);
         }
+        
     }
 }
-std::string *server_location::stringSplit(std::string split, char c, size_t *index_save)
+std::string *stringSplit(std::string split, char c, size_t *index_save)
 {
     std::vector<std::string> tokens;
     size_t start = 0;
@@ -274,40 +296,36 @@ std::string *server_location::stringSplit(std::string split, char c, size_t *ind
 
 
 
-server_parser::server_parser(server_parser & s)
+server_parser::server_parser(server_parser const & s)
 {
     this->port = s.getPortObject();
     this->host = s.getHostObject();
-    this->server_index = s.getServer_IndexLocationObject();
+    this->server_index = s.getServerIndexObject();
     this->location_count = s.getLocationCount();
     this->client_max_body_size = s.getCmbsObject();
     this->redirection = s.getRedirectionObject();
     this->is_auto_index = s.getIsAutoIndexObject();
     this->root = s.getRootObject();
     this->server_names = s.getServerNamesObject();
-    this->location = new server_location[this->location_count];
-    for(size_t i = 0;i < location_count; i++)
-        this->location[i] = s.location[i];
+    this->error_page = s.getServerErrorPageObject();
+    this->location = s.getServerLocation();
 }
 server_parser & server_parser::operator=(server_parser const & s)
 {
-    
     this->port = s.getPortObject();
     this->host = s.getHostObject();
-    this->server_index = s.getServer_IndexLocationObject();
+    this->server_index = s.getServerIndexObject();
     this->location_count = s.getLocationCount();
     this->client_max_body_size = s.getCmbsObject();
     this->redirection = s.getRedirectionObject();
     this->is_auto_index = s.getIsAutoIndexObject();
     this->root = s.getRootObject();
     this->server_names = s.getServerNamesObject();
-    std::cout << this->location_count << "\n";
-    this->location = new server_location[this->location_count];
-    for(size_t i = 0;i < location_count; i++)
-        this->location[i] = s.location[i];
+    this->error_page = s.getServerErrorPageObject();
+        this->location = s.getServerLocationsObject();
     return (*this);
 }
-server_location *server_parser::getServerLocationsObject(void) const
+std::vector<server_location> server_parser::getServerLocationsObject(void) const
 {
     return (this->location);
 }
@@ -325,6 +343,7 @@ int server_parser::getHostObject(void) const
 }
 int     server_location::getLocationCmbsObject(void) const
 {
+    
     return (this->client_max_body_size);
 }
 int server_parser::getServer_IndexLocationObject(void) const
@@ -355,7 +374,7 @@ std::string server_parser::getRedirectionObject(void) const
 {
     return (this->redirection);
 }
-server_location *server_parser::getServerLocation(void) const
+std::vector<server_location> server_parser::getServerLocation(void) const
 {
     return (this->location);
 }
@@ -454,7 +473,6 @@ void    server_parser::getServerName(std::string *keys, size_t size)
         this->server_names.push_back(keys[i]);
 
     delete [] keys;
-    // exit(0);
 }
 void    server_parser::getErrorPage(std::string *keys, size_t size)
 {
@@ -467,7 +485,6 @@ void    server_parser::getErrorPage(std::string *keys, size_t size)
     for(size_t i = 1; i < size - 1;i++)
         this->error_codes.push_back(stoi(keys[i]));
     delete [] keys;
-    // exit(0);
 }
 void    server_parser::getIndexPage(std::string *keys, size_t size)
 {
@@ -530,19 +547,15 @@ void    server_parser::getCmds(std::string *keys, size_t size)
 }
 void    server_parser::construct_server(std::vector<std::string>::iterator first, std::vector<std::string>::iterator last)
 {
-    // exit(0);
     this->port = 8080;
     this->is_auto_index = false;
     this->client_max_body_size = 0;
     this->host = 0;
+    int location_index = 0;
     std::vector<std::string> serverVec(first, last);
     size_t opening_bracket = 0;
     size_t closing_bracket = 0;
-    size_t location_index = 0;
     size_t temp_size;
-    this->location_count = getLocationCount(serverVec);
-    this->location = new server_location[this->location_count]; // locations allocation
-    setLocationsIndex(this->location);
 
     for(size_t i = 1; i < serverVec.size(); i++)
     {
@@ -586,7 +599,6 @@ void    server_parser::construct_server(std::vector<std::string>::iterator first
         else if (!strncmp(serverVec[i].c_str(), "client_max_body_size", 19))
         {
             getCmds(stringSplit(serverVec[i], ' ', &temp_size), temp_size);
-            // exit(0);
         }
         else if (!strncmp(serverVec[i].c_str(), "location ", 9) && serverVec[i].back() == '{')
         {
@@ -597,19 +609,25 @@ void    server_parser::construct_server(std::vector<std::string>::iterator first
                 i++;
             }
             closing_bracket = i;
-            this->location[location_index++].construct_location(serverVec.begin() + opening_bracket, serverVec.begin() + closing_bracket);                    
+            server_location locationn;
+            locationn.setLocationIndex(location_index);
+            locationn.construct_location(serverVec.begin() + opening_bracket, serverVec.begin() + closing_bracket);   
+            this->location.push_back(locationn);
+            location_index++;          
         }
-        
     }
+        this->getServerDataFromRootLocation();
+
 
 }
-void    server_parser::setLocationsIndex(server_location *location)
+void    server_parser::setLocationsIndex(std::vector<server_location> location)
 {
-    for(size_t i = 0; i < this->location_count;i++)
+    for(size_t i = 0; i < location.size();i++)
         location[i].setLocationIndex(i);
 }
 void    server_parser::setServerIndex(int index)
 {
+    // std::cout << "CALLED\n";
     this->server_index = index;
 }
 size_t server_parser::getLocationCount(std::vector<std::string> vec)
@@ -623,23 +641,70 @@ size_t server_parser::getLocationCount(std::vector<std::string> vec)
     return (count);
 }
 
+void    server_parser::restoreRootObject(int i)
+{
+    // std::cout << this->location[i] ;
 
+    if(this->root.size() == 0 && this->location[i].getLocationRootObject().size() != 0)
+    {
+        std::cout << "root restored\n";
+        this->root = this->location[i].getLocationRootObject();
+    }
+    else if(this->root.size() != 0 && this->location[i].getLocationRootObject().size() != 0)
+    {
+        std::cout << this->root << " this root <<\n";
+        std::cerr << "Error : Duplicate Root Path\n";
+        exit(0);
+    }
+    else if(this->root.size() == 0 && this->location[i].getLocationRootObject().size() == 0)
+    {
+        std::cerr << "Error : There's No Root In Server\n";
+        exit(0);   
+    }
+    std::cout << "Root : " << this->root << '\n';
+}
+
+void    server_parser::restoreIndexObject(int i)
+{
+    if(this->index.size() == 0 && this->location[i].getLocationIndexObject().size() != 0)
+    {
+        std::cout << "index restored\n";
+        this->index = this->location[i].getLocationIndexObject();
+    }
+    else if(this->index.size() != 0 && this->location[i].getLocationIndexObject().size() != 0)
+    {
+        std::cerr << "Error : Duplicate Index Path\n";
+        exit(0);
+    }
+    else if(this->index.size() == 0 && this->location[i].getLocationIndexObject().size() == 0)
+    {
+        std::cerr << "Error : There's No Index In Server\n";
+        exit(0);   
+    }
+    std::cout << "Index : " << this->index << '\n';
+}
+
+void    server_parser::getServerDataFromRootLocation(void)
+{
+    for(size_t i = 0; i < location.size(); i++)
+    {
+        if(this->location[i].getLocationNameObject() == "/")
+        {
+            this->restoreRootObject(i);
+            this->restoreIndexObject(i);
+        }
+    }
+}
 
 config_parser::config_parser(config_parser & c)
 {
-    // if()
-    this->server_count = c.getServerCountObject();
-    servers = new config_parser[c.getServerCountObject()];
-    for(size_t i = 0; i < this->server_count; i++)
-        this->servers[i] = c.servers[i];
+    this->servers = c.getServersObject();
 }
 
 config_parser & config_parser::operator=(config_parser const & c)
 {
     this->server_count = c.getServerCountObject();
-    servers = new config_parser[c.getServerCountObject()];
-    for(size_t i = 0; i < this->server_count; i++)
-        this->servers[i] = c.servers[i];
+    this->servers = c.getServersObject();
     return (*this);
 }
 /////// GETTERS AND SETTERS //////////
@@ -647,18 +712,21 @@ size_t config_parser::getServerCountObject(void) const
 {
     return (this->server_count);
 }
-server_parser *config_parser::getServersObject(void)
+std::vector<server_parser> config_parser::getServersObject(void) const
 {
     return (this->servers);
 }
+
 config_parser::config_parser(std::string filename)
 {
     std::vector<std::string> tempConf;
+    std::vector<server_parser> holder;
+
     std::ifstream file(filename);
     std::string line;
-    int         server_index = 0;
     int         opening_bracket;
     int         closing_bracket;
+    int         server_index = 0;
     while(std::getline(file, line))
     {
         line.erase(0, line.find_first_not_of(" \t\r\n"));
@@ -668,10 +736,7 @@ config_parser::config_parser(std::string filename)
         tempConf.push_back(line);
     }
     file.close();
-    this->server_count = getServersCount(tempConf);
-    this->servers = new server_parser[this->server_count]; // server allocation
-    this->servers_index_init(); // indexing the serves depending in their position
-
+    
     for(std::vector<std::string>::size_type i = 0; i < tempConf.size(); i++)
     {
         if ((!strncmp(tempConf[i].c_str(), "server", 6) && tempConf[i].back() == '{') || (!strncmp(tempConf[i].c_str(), "server", 6) && tempConf[i + 1] == "{"))
@@ -687,20 +752,24 @@ config_parser::config_parser(std::string filename)
                 i++;
             }
             closing_bracket = i;
-            if (servers + server_index)
-            {
-                servers[server_index].construct_server(tempConf.begin() + opening_bracket, tempConf.begin() + closing_bracket + 1); // constructing server
-            }
+            server_parser server;
+            server.setServerIndex(server_index);
+            server.construct_server(tempConf.begin() + opening_bracket, tempConf.begin() + closing_bracket + 1);
+            this->servers.push_back(server);
             server_index += 1;
         }
-    }
-
+        
+    }  
+    for(size_t i = 0; i < servers.size(); i++)
+        std::cout << servers[i];
 }
+
 void    config_parser::servers_index_init()
 {
-    for(size_t i = 0;i < this->server_count; i++)
+    for(size_t i = 0;i < this->servers.size(); i++)
         this->servers[i].setServerIndex(i);
 }
+
 int    config_parser::getServersCount(std::vector<std::string> vec)
 {
     int count = 0;
@@ -710,4 +779,4 @@ int    config_parser::getServersCount(std::vector<std::string> vec)
                 count++;  
         }
         return (count);
-    }
+}

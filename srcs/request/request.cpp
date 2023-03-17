@@ -136,7 +136,56 @@ void Request::body_handling(std::string buffer)
             wait_body = false;
     }
 }
+
 void Request::errors(server_parser &serv)
+{
+    request_well_formed(serv);
+    location_well(serv);
+}
+
+void Request::location_well(server_parser &serv)
+{
+    size_t found = 0;
+    long index = start_line.location_index = -1;
+    size_t index_of_charachter = 0;
+    bool method_allowed = false;
+    for(size_t i = 0 ; i < (size_t)serv.getServerLocationsObject().size(); i++)
+    {
+        found = start_line.path.find(serv.getServerLocationsObject()[i].getLocationNameObject());
+        if (found != (size_t) -1  && index_of_charachter <= serv.getServerLocationsObject()[i].getLocationNameObject().length())
+        {
+            index_of_charachter = serv.getServerLocationsObject()[i].getLocationNameObject().length();
+            index = (long)i;
+        }
+    }
+    if(index != -1)
+    {
+        start_line.location_index = index;
+        if(!serv.getServerLocationsObject()[index].getLocationRedirectionObject().empty()) //301 Moved Permanently
+            r_error = "301";
+        if(!serv.getServerLocationsObject()[index].getLocationMethodsObject().empty())//405 Method Not Allowed
+        {
+            for(size_t i = 0; i < serv.getServerLocationsObject()[index].getLocationMethodsObject().size() ; i++)
+            {
+                if(serv.getServerLocationsObject()[index].getLocationMethodsObject()[i] == start_line.method)
+                    method_allowed = true;
+            }
+            if(!method_allowed)
+                r_error = "405";
+        }
+        if(!serv.getServerLocationsObject()[index].getLocationRootObject().empty())//404 Not Found
+            start_line.full_path = serv.getServerLocationsObject()[index].getLocationRootObject() + start_line.path;
+        else if(!serv.getRootObject().empty())
+            start_line.full_path = serv.getRootObject() + start_line.path;
+        else
+            r_error = "404";
+    }
+    else
+        r_error = "404";
+   
+}
+
+void Request::request_well_formed(server_parser &serv)
 {
     std::string tmp_path = start_line.path;
     if(!header.find("Transfer-Encoding")->first.empty())
@@ -144,15 +193,15 @@ void Request::errors(server_parser &serv)
         if(header.find("Transfer-Encoding")->second != "chunked")
             r_error = "501 Not Implemented";
     }
-    if((start_line.method == "POST" && header.find("Transfer-Encoding")->first.empty() && header.find("Content-Length")->first.empty())
+    else if((start_line.method == "POST" && header.find("Transfer-Encoding")->first.empty() && header.find("Content-Length")->first.empty())
         || (start_line.method == "POST" && !header.find("Transfer-Encoding")->first.empty() && !header.find("Content-Length")->first.empty()))
         r_error = "400 Bad Request";
-    if(!header.find("Content-Length")->first.empty())
+    else if(!header.find("Content-Length")->first.empty())
     {
-        if(serv.getCmbsObject()  <  stoi(header.find("Content-Length")->second))
+        if(serv.getCmbsObject()  > 0 && serv.getCmbsObject()  <  stoi(header.find("Content-Length")->second))
             r_error = "413 Request Entity Too Large";
     }
-    if(tmp_path.length() > 2048)
+    else if(tmp_path.length() > 2048)
         r_error = "414 Request-URI Too Long";
     for(int i = 0 ; i < (int)tmp_path.length() ; i++)
     {
@@ -161,6 +210,7 @@ void Request::errors(server_parser &serv)
                 r_error = "400 Bad Request";
     }
 }
+
 void Request::clear()
 {
     start_line.method.clear();
