@@ -1,3 +1,5 @@
+
+
 #include "../../includes/server.hpp"
 
 
@@ -58,7 +60,7 @@ server  & server::operator=(server const & s)
     return *this;
 }
 
-void server::setup(server_parser server_config)
+void server::setup(server_parser & server_config)
 {
     int optval = 1;
 
@@ -124,7 +126,7 @@ void    server::receive()
     _request = std::string(buffer,r);
 }
 
-void    server::set_server_config(server_parser server_config)
+void    server::set_server_config(server_parser  & server_config)
 {
     _server_config = server_config;
 }
@@ -137,10 +139,10 @@ void    server::process()
     if(!request.get_wait_body())
     {
         
-        // std::cout << "\nThe first line is : \n";
-        // std::cout <<  request.get_start_line().method << std::endl;
-        // std::cout <<  request.get_start_line().path << std::endl;
-        // std::cout <<  request.get_start_line().vertion << std::endl;
+        std::cout << "\nThe first line is : \n";
+        std::cout <<  request.get_start_line().method << std::endl;
+        std::cout <<  request.get_start_line().path << std::endl;
+        std::cout <<  request.get_start_line().vertion << std::endl;
 
         // std::cout << "\n\n";
         // std::map<std::string, std::string>::iterator itr;
@@ -157,7 +159,6 @@ void    server::process()
         //     std::cout << "*" << request.get_body() << "*"<< std::endl;
         //      std::cout << "*" << request.get_body().length() << "*"<< std::endl;
         // }
-
         if(request.get_start_line().method == "POST")
             post_method();
         request.errors(_server_config);

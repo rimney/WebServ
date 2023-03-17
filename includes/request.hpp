@@ -13,7 +13,8 @@ struct Start_line
     std::string method;
     std::string path;
     std::string vertion;
-    
+    std::string full_path;
+    int location_index;
 };
 
 class Request 
@@ -33,6 +34,8 @@ class Request
         void parser(std::string value);
         void body_handling(std::string buffer);
         void errors(server_parser &serv);
+        void request_well_formed(server_parser &serv);
+        void location_well(server_parser &serv);
         void clear();
         Start_line &get_start_line(){return start_line;}
         std::map<std::string,std::string> &get_header(){return header;}

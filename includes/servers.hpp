@@ -28,7 +28,7 @@ class servers
 
         servers &   operator=(servers const & s);
 
-        int    setup(server_parser *servers_config);
+        int    setup(std::vector<server_parser> servers_config);
         void    run();
 };
 
