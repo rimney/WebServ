@@ -15,11 +15,14 @@
 # include <fcntl.h>
 # include "parsing.hpp"
 #include "request.hpp"
-
+# include <cstring>
+# include <sys/stat.h>
+# include <stdio.h>
 
 // TO BE DELETED //
 #include <string.h>
 //______________//
+
 
 class server
 {

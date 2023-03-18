@@ -1,6 +1,20 @@
 #include "../../includes/server.hpp"
 #include "../../includes/request.hpp"
 
+
+int is_file_or_dir(std::string & path)
+{
+    struct stat file_info;
+
+    if (stat(path.c_str(), &file_info) == -1)
+        return -1;
+    if (file_info.st_mode & S_IFDIR)
+        return 2;
+    if (file_info.st_mode & S_IFREG)
+        return 1;
+    return -1;
+}
+
 size_t remove_header(std::string &request, size_t i,std::string &buffer,std::string &filename,std::string &upload)
 {
     int count_qouet = 0;
@@ -43,7 +57,8 @@ void    server::post_method(server_parser &serv)
     std::string filename;
     std::string buffer;
     bool is_boundary = false;
-    (void)serv;
+    int is_dir_or_not = 0;
+    int error;
     std::string upload = "/Users/brmohamm/Desktop/WebServ/upload/";
     // std::cout << request.get_body() << std::endl;
     if(!request.get_body().empty())
@@ -94,10 +109,31 @@ void    server::post_method(server_parser &serv)
                         post.close();
                 }
             } 
+            error = 201;
         }
         else
         {
-            //cgi
+           is_dir_or_not =  is_file_or_dir(request.get_start_line().full_path);
+           if(is_dir_or_not == -1 )//notfound
+                error = 404;
+           else if(is_dir_or_not == 2 ) //dir
+           {
+                if(request.get_start_line().full_path[request.get_start_line().full_path.length() - 1] != '/')
+                {
+                    error = 301;
+                    //add "/" to uri and return it
+                }
+                else if(!serv.getServerLocationsObject()[request.get_start_line().location_index].getLocationIndexObject().empty())
+                {
+                    //cgi
+                }
+                else
+                 error = 403;//dosent have index file
+           }
+           else//file
+           {
+                //cgi
+           }
         }
 
     }
