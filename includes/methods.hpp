@@ -6,7 +6,7 @@
 /*   By: rimney < rimney@student.1337.ma>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/18 18:28:10 by rimney            #+#    #+#             */
-/*   Updated: 2023/03/18 19:13:28 by rimney           ###   ########.fr       */
+/*   Updated: 2023/03/18 19:15:44 by rimney           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,14 +32,16 @@ class Get
             this->_location = this->_server.getOneLocationObject(location_index);
             std::string isFOrD = isFileOrDirectory(path);
             std::cout << _respond.getstatusCode() << " code\n";
-            if(isFOrD == "file")
+            if(_respond.getstatusCode() == "200")
             {
-                if()
-                std::cout << "IS A FILE\n";
-            }
-            else if(isFOrD == "directory")
-            {
-                std::cout << "IS A DIRECTORY\n";
+                if(isFOrD == "file")
+                {
+                    std::cout << "IS A FILE\n";
+                }
+                else if(isFOrD == "directory")
+                {
+                    std::cout << "IS A DIRECTORY\n";
+                }
             }
             exit(0);
         }
