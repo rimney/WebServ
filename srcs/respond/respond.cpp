@@ -6,7 +6,7 @@
 /*   By: rimney < rimney@student.1337.ma>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/15 20:32:17 by rimney            #+#    #+#             */
-/*   Updated: 2023/03/18 00:51:09 by rimney           ###   ########.fr       */
+/*   Updated: 2023/03/18 16:29:17 by rimney           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -98,8 +98,7 @@ std::string     respond::fileToSring(std::string path)
     std::stringstream buffer;
     buffer << file.rdbuf();
     std::string content = buffer.str();
-    std::cout << content;
-    exit(0);
+    return (content);
 }
 
 std::string     respond::errorStringToString(int error)
@@ -116,18 +115,24 @@ std::string     respond::errorStringToString(int error)
         return ("<h1>\n400 Bad Request\n</h1>\n");
     else if(error == 404)
         return ("<h1>\n404 Page Not Found\n</h1>\n");
-    return ("<h1>\nUndifined Error !!\n</h1>\n");
+    return ("OK");
 }
 
-std::string    respond::setErrorBody(std::string status_code)
+std::string		respond::setErrorBody(std::string status_code)
 {
-    std::cout << status_code << '\n';
     if(theFileExists(this->server.getServerErrorPageObject()) && this->isAmongErrorCodes(atoi(status_code.c_str())))
         return (fileToSring(this->server.getServerErrorPageObject()));
     return (errorStringToString(atoi(status_code.c_str())));
 }
 
-void    respond::setRespond(std::string path, std::string httpVersion, std::string error)
+std::string		respond::mergeRespondStrings(void)
+{
+	std::string response = this->gethttpVersion() + " " + this->getstatusCode() + " " + this->getstatusDescription() + "\r\nContent-Length: " + this->getContentLenght() + "\r\n\r\n" + this->getBody(); 
+	std::cout << response << "END POINT <<<<<<\n";
+	exit(0);
+}
+
+void	respond::setRespond(std::string path, std::string httpVersion, std::string error)
 {
     if(!error.empty())
     {
@@ -138,7 +143,7 @@ void    respond::setRespond(std::string path, std::string httpVersion, std::stri
             this->setstatusDescription("Not Implemented");
             this->setBody(this->setErrorBody(this->getstatusCode()));
             this->setContentLenght(std::to_string(this->getBody().size()));
-            // set final string !!
+            this->mergeRespondStrings();
         }
         else if(error == "400 Bad Request")
         {
@@ -147,7 +152,7 @@ void    respond::setRespond(std::string path, std::string httpVersion, std::stri
             this->setstatusDescription("Bad Request");
             this->setBody(this->setErrorBody(this->getstatusCode()));
             this->setContentLenght(std::to_string(this->getBody().size()));
-            // set final string !!
+            this->mergeRespondStrings();
         }
         else if(error == "413 Request Entity Too Large")
         {
@@ -156,7 +161,7 @@ void    respond::setRespond(std::string path, std::string httpVersion, std::stri
             this->setstatusDescription("Request Entity Too Large");
             this->setBody(this->setErrorBody(this->getstatusCode()));
             this->setContentLenght(std::to_string(this->getBody().size()));
-            // set final string !!
+            this->mergeRespondStrings();
         }
         else if(error == "414 Request-URI Too Long")
         {
@@ -165,7 +170,7 @@ void    respond::setRespond(std::string path, std::string httpVersion, std::stri
             this->setstatusDescription("Request-URI Too Long");
             this->setBody(this->setErrorBody(this->getstatusCode()));
             this->setContentLenght(std::to_string(this->getBody().size()));
-            // set final string !!
+            this->mergeRespondStrings();
         }
         else if(error == "400 Bad Request")
         {
@@ -174,7 +179,7 @@ void    respond::setRespond(std::string path, std::string httpVersion, std::stri
             this->setstatusDescription("400 Bad Request");
             this->setBody(this->setErrorBody(this->getstatusCode()));
             this->setContentLenght(std::to_string(this->getBody().size()));
-            // set final string !!
+			this->mergeRespondStrings();
         }
         else if(error == "404")
         {
@@ -183,7 +188,8 @@ void    respond::setRespond(std::string path, std::string httpVersion, std::stri
             this->setstatusDescription("Not Found");
             this->setBody(this->setErrorBody(this->getstatusCode()));
             this->setContentLenght(std::to_string(this->getBody().size()));
-            // set final string !!
+			this->mergeRespondStrings();
+            this->mergeRespondStrings();
         }
         else if(error == "405")
         {
@@ -192,7 +198,8 @@ void    respond::setRespond(std::string path, std::string httpVersion, std::stri
             this->setstatusDescription("Method Not Allowed");
             this->setBody(this->setErrorBody(this->getstatusCode()));
             this->setContentLenght(std::to_string(this->getBody().size()));
-            // set final string !!
+			this->mergeRespondStrings();
+        
         }
         else if(error == "301")
         {
@@ -201,17 +208,18 @@ void    respond::setRespond(std::string path, std::string httpVersion, std::stri
             this->setstatusDescription("Moved Permanently");
             this->setBody(this->setErrorBody(this->getstatusCode()));
             this->setContentLenght(std::to_string(this->getBody().size()));
-            // set final string !!
+			this->mergeRespondStrings();
+            
         }   
     }
     if(theFileExists(path) == false)
     {
-        std::cout << " file dosent exist !\n";
         this->sethttpVersion(httpVersion);
         this->setstatusCode("404");
         this->setstatusDescription("Not Found");
         this->setBody(this->setErrorBody(this->getstatusCode()));
         this->setContentLenght(std::to_string(this->getBody().size()));
+		this->mergeRespondStrings();
     }
     else
     {
@@ -220,5 +228,6 @@ void    respond::setRespond(std::string path, std::string httpVersion, std::stri
         this->setstatusDescription("OK");
         this->setBody(this->setErrorBody(this->getstatusCode()));   
         this->setContentLenght(std::to_string(this->getBody().size()));
-    }  
+		this->mergeRespondStrings();
+    }
 }

@@ -6,7 +6,7 @@
 /*   By: rimney < rimney@student.1337.ma>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/14 17:42:24 by rimney            #+#    #+#             */
-/*   Updated: 2023/03/17 21:14:32 by rimney           ###   ########.fr       */
+/*   Updated: 2023/03/18 16:05:39 by rimney           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -52,6 +52,7 @@ class respond
         bool        isAmongErrorCodes(int error_code);
         std::string fileToSring(std::string path);
         std::string errorStringToString(int error);
+        std::string mergeRespondStrings(void);
         
 };
 
