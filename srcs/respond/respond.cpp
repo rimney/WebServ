@@ -6,7 +6,7 @@
 /*   By: rimney < rimney@student.1337.ma>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/15 20:32:17 by rimney            #+#    #+#             */
-/*   Updated: 2023/03/18 16:29:17 by rimney           ###   ########.fr       */
+/*   Updated: 2023/03/18 18:19:06 by rimney           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -93,7 +93,6 @@ bool respond::isAmongErrorCodes(int error_code)
 
 std::string     respond::fileToSring(std::string path)
 {
-    std::cout << "Path >> " << path;
     std::ifstream file(path);
     std::stringstream buffer;
     buffer << file.rdbuf();
@@ -127,9 +126,9 @@ std::string		respond::setErrorBody(std::string status_code)
 
 std::string		respond::mergeRespondStrings(void)
 {
-	std::string response = this->gethttpVersion() + " " + this->getstatusCode() + " " + this->getstatusDescription() + "\r\nContent-Length: " + this->getContentLenght() + "\r\n\r\n" + this->getBody(); 
-	std::cout << response << "END POINT <<<<<<\n";
-	exit(0);
+	std::string response = this->gethttpVersion() + " " + this->getstatusCode() + " " + this->getstatusDescription() + "\r\nContent-Length: " + this->getContentLenght() + "\r\n\r\n" + this->getBody();
+	this->finalString = response;
+	return (response); 
 }
 
 void	respond::setRespond(std::string path, std::string httpVersion, std::string error)
@@ -189,7 +188,6 @@ void	respond::setRespond(std::string path, std::string httpVersion, std::string 
             this->setBody(this->setErrorBody(this->getstatusCode()));
             this->setContentLenght(std::to_string(this->getBody().size()));
 			this->mergeRespondStrings();
-            this->mergeRespondStrings();
         }
         else if(error == "405")
         {
@@ -230,4 +228,24 @@ void	respond::setRespond(std::string path, std::string httpVersion, std::string 
         this->setContentLenght(std::to_string(this->getBody().size()));
 		this->mergeRespondStrings();
     }
+}
+
+bool isDirectory(const char* path) {
+    struct stat file_stat;
+    if (stat(path, &file_stat) != 0) {
+        return false;
+    }
+    return S_ISDIR(file_stat.st_mode);
+}
+
+std::string	isFileOrDirectory(std::string path)
+{
+    if (isDirectory(path.c_str()))
+	{
+        return ("directory");
+    }
+	else {
+        return ("file");
+    }
+	return ("error");
 }

@@ -6,7 +6,7 @@
 /*   By: rimney < rimney@student.1337.ma>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/14 17:42:24 by rimney            #+#    #+#             */
-/*   Updated: 2023/03/18 16:05:39 by rimney           ###   ########.fr       */
+/*   Updated: 2023/03/18 18:19:28 by rimney           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,6 +14,7 @@
 # define RESPOND_HPP
 
 # include "../includes/parsing.hpp"
+# include "sys/stat.h"
 
 class respond
 {
@@ -57,7 +58,8 @@ class respond
 };
 
 bool theFileExists(const std::string& fileName);
-
+bool isDirectory(const char* path);
+std::string	isFileOrDirectory(std::string path);
 
 
 #endif

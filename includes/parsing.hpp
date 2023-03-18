@@ -6,7 +6,7 @@
 /*   By: rimney < rimney@student.1337.ma>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/24 21:53:42 by rimney            #+#    #+#             */
-/*   Updated: 2023/03/18 17:59:29 by rimney           ###   ########.fr       */
+/*   Updated: 2023/03/18 19:06:20 by rimney           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -126,6 +126,7 @@ class server_parser : public server_location
         std::vector<server_location> getServerLocationsObject(void) const;
         std::vector<int>			getErrorCodesObject(void) const;
         std::vector<std::string>	getServerNamesObject(void) const;
+        server_location             getOneLocationObject(int index) const;
 		////////////// Getters and Setters //////////////
 
 		////////////// Parsing Fucntions //////////////		

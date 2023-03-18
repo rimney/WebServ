@@ -1,5 +1,5 @@
 #include "../../includes/server.hpp"
-
+#include "../../includes/methods.hpp"
 
 server::server()
     : _port(DEFAULT_PORT), _host(INADDR_ANY), _error_flag(1){}
@@ -141,12 +141,12 @@ void    server::process()
     {
         
         request.errors(_server_config);
-        std::cout << request.get_start_line().method << std::endl;
-        std::cout << request.get_start_line().path << std::endl;
-        std::cout << request.get_start_line().vertion << std::endl;
+        // std::cout << request.get_start_line().method << std::endl;
+        // std::cout << request.get_start_line().path << std::endl;
+        // std::cout << request.get_start_line().vertion << std::endl;
         std::cout << request.get_start_line().full_path << std::endl;
-        std::cout << request.get_start_line().location_index << std::endl;
-        std::cout <<  request.get_error() << std::endl;
+        // std::cout << request.get_start_line().location_index << std::endl;
+        // std::cout <<  request.get_error() << std::endl;
         respond.setRespond(request.get_start_line().full_path, request.get_start_line().vertion, request.get_error());
         // std::cout << "\n\n";
         // std::map<std::string, std::string>::iterator itr;
@@ -167,7 +167,12 @@ void    server::process()
         {
             if(request.get_start_line().method == "GET")
             {
-                //
+                std::cout << "MUST WORK HERE\n";
+                std::cout << this->respond.getfinalString();
+                Get get(_server_config, respond,
+                    request.get_start_line().location_index,
+                    request.get_start_line().full_path);
+                exit(0);
             }
             if(request.get_start_line().method == "POST")
             {

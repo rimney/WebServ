@@ -6,7 +6,7 @@
 /*   By: rimney < rimney@student.1337.ma>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/07 03:50:36 by rimney            #+#    #+#             */
-/*   Updated: 2023/03/18 18:02:54 by rimney           ###   ########.fr       */
+/*   Updated: 2023/03/18 19:09:33 by rimney           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -127,7 +127,8 @@ server_location server_location::operator=(server_location const & s)
     this->cgiExt = s.cgiExt;
     this->error_codes = s.error_codes;
     this->error_page = s.error_page;
-    
+    this->client_max_body_size = s.client_max_body_size;
+
     return (*this);
 }
 void    server_location::getErrorPage(std::string *keys, size_t size)
@@ -313,8 +314,6 @@ void server_location::construct_location(std::vector<std::string>::iterator firs
         else if (!strncmp(locationVec[i].c_str(), "upload ", 7))
         {
             getUpload(stringSplit(locationVec[i], ' ', &temp_size), temp_size);
-            std::cout << this->upload << "  upload <\n";
-            exit(0);
         }
 
     }
@@ -342,6 +341,11 @@ std::string *stringSplit(std::string split, char c, size_t *index_save)
     }
     *index_save = tokens.size();
     return (ret);
+}
+
+server_location server_parser::getOneLocationObject(int index) const
+{
+    return (this->location[index]);
 }
 
 server_parser::server_parser(server_parser const & s) : server_location(s)
