@@ -15,6 +15,7 @@ struct Start_line
     std::string vertion;
     std::string full_path;
     int location_index;
+    std::string query;
 };
 
 class Request 
