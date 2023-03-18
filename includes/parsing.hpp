@@ -6,7 +6,7 @@
 /*   By: rimney < rimney@student.1337.ma>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/24 21:53:42 by rimney            #+#    #+#             */
-/*   Updated: 2023/03/17 00:43:22 by rimney           ###   ########.fr       */
+/*   Updated: 2023/03/18 17:59:29 by rimney           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,15 +26,17 @@ class server_location
         int							location_index;
         int							client_max_body_size; // buffer of what im supposed so send in response
         bool						is_auto_index; // is autoindex
+        bool                        has_cgi;
         std::string					location_name; // /location/example
         std::string					root; // root key
         std::string					index; // index 
         std::string					redirection; // return aaa/aaaa/html
         std::string					cgiPath; // location of the interpreter 
-        std::string					cgiExt; // cgi extension
         std::string					error_page; // same as the previous class
         std::vector<int>			error_codes; // // // // 
+        std::vector<std::string>	cgiExt; // cgi extension
         std::vector<std::string>	HttpMethods; // GET, POST, DELETE
+        std::string                 upload;
     public :
 		////////////// Constructors and Overloads //////////////
         server_location(){};
@@ -55,6 +57,9 @@ class server_location
         std::string					getLocationNameObject(void) const {return this->location_name;}
         std::vector<int>			getLocationErrorCodesObject(void) {return (this->error_codes);}
         std::vector<std::string>	getLocationMethodsObject(void){return (this->HttpMethods);}
+        std::string                 getCgiPathObject(void) {return (this->cgiPath);}
+        std::string                 getUploadObject(void) {return (this->upload);}
+        
 		////////////// Getters and Setters //////////////
 
 		////////////// Parsing Fucntions //////////////		
@@ -66,6 +71,9 @@ class server_location
         void    getRedirection(std::string *keys, size_t size);
         void    getCmds(std::string *keys, size_t size);
         void    getMethods(std::string *Keys, size_t size);
+        void    getCgiPath(std::string *Keys, size_t size);
+        void    getCgiExec(std::string *Keys, size_t size);
+        void    getUpload(std::string *Keys, size_t size);
         void    getLocationName(std::string *Keys, size_t size);
         void    construct_location(std::vector<std::string>::iterator first, std::vector<std::string>::iterator last);
 		////////////// Parsing Fucntions //////////////

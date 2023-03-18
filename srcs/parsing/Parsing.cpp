@@ -6,7 +6,7 @@
 /*   By: rimney < rimney@student.1337.ma>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/07 03:50:36 by rimney            #+#    #+#             */
-/*   Updated: 2023/03/17 18:47:04 by rimney           ###   ########.fr       */
+/*   Updated: 2023/03/18 18:02:54 by rimney           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -213,20 +213,56 @@ void    server_location::getMethods(std::string *Keys, size_t size)
     }
     delete [] Keys;
 }
+
+void    server_location::getCgiPath(std::string *Keys, size_t size)
+{
+    if(size <= 1 || size > 2)
+    {
+        std::cout << "Error Cgi Path Assignemt\n";
+        exit(0);
+    }
+    this->cgiPath = Keys[size - 1];
+    delete [] Keys;
+}
+
+void    server_location::getCgiExec(std::string *Keys, size_t size)
+{
+    if(size <= 1)
+    {
+        std::cout << "Error Cgi Exec Assinment\n";
+        exit(0);
+    }
+    for(size_t i = 1; i < size; i++)
+        this->cgiExt.push_back(Keys[i]);
+    delete[] Keys;
+}
+
 void    server_location::getLocationName(std::string *Keys, size_t size)
 {
     if(size <= 1 || size > 3)
     {
-        std::cout << "Error Location Name Arguments";
+        std::cout << "Error Location Name Arguments\n";
         exit(0);
     }
     this->location_name = Keys[size - 2];
     delete [] Keys;
 }
+
+void    server_location::getUpload(std::string *Keys, size_t size)
+{
+    if(size <= 1 || size > 2)
+    {
+        std::cout << "Error Upload Arguments\n";
+        exit(0);
+    }
+    this->upload = Keys[size - 1];
+    delete [] Keys; 
+}
 void server_location::construct_location(std::vector<std::string>::iterator first, std::vector<std::string>::iterator last)
 {
     std::vector<std::string> locationVec(first, last);
     size_t temp_size;
+    this->has_cgi = false;
     for(size_t i = 0; i < locationVec.size(); i++)
     {
         this->is_auto_index = false;
@@ -265,7 +301,22 @@ void server_location::construct_location(std::vector<std::string>::iterator firs
         {
             getMethods(stringSplit(locationVec[i], ' ', &temp_size), temp_size);
         }
-        
+        else if (!strncmp(locationVec[i].c_str(), "cgi_path ", 9))
+        {
+            this->has_cgi = true;
+            getCgiPath(stringSplit(locationVec[i], ' ', &temp_size), temp_size);
+        }
+        else if (!strncmp(locationVec[i].c_str(), "cgi_exec ", 9))
+        {
+            getCgiExec(stringSplit(locationVec[i], ' ', &temp_size), temp_size);
+        }
+        else if (!strncmp(locationVec[i].c_str(), "upload ", 7))
+        {
+            getUpload(stringSplit(locationVec[i], ' ', &temp_size), temp_size);
+            std::cout << this->upload << "  upload <\n";
+            exit(0);
+        }
+
     }
 }
 std::string *stringSplit(std::string split, char c, size_t *index_save)
@@ -292,9 +343,6 @@ std::string *stringSplit(std::string split, char c, size_t *index_save)
     *index_save = tokens.size();
     return (ret);
 }
-
-
-
 
 server_parser::server_parser(server_parser const & s) : server_location(s)
 {
@@ -480,8 +528,6 @@ void    server_parser::getServerName(std::string *keys, size_t size)
 }
 void    server_parser::getErrorPage(std::string *keys, size_t size)
 {
-    for(size_t i = 0;i < size ; i++)
-       std::cout <<  keys[i] << " <\n";
     if (size <= 1)
     {
         std::cout << "Error Error Page Not Found\n";
@@ -573,7 +619,6 @@ void    server_parser::construct_server(std::vector<std::string>::iterator first
             getPort(stringSplit(serverVec[i], ' ', &temp_size), temp_size); // host and port parsing;
             if(this->host == 0)
                 host = 2130706433;
-
         }
         else if(!strncmp(serverVec[i].c_str(), "server_name", 11))
         {
@@ -583,15 +628,11 @@ void    server_parser::construct_server(std::vector<std::string>::iterator first
         }
         else if(!strncmp(serverVec[i].c_str(), "error", 5))
         {
-
             getErrorPage(stringSplit(serverVec[i], ' ', &temp_size), temp_size);
-            if(error_codes.size() == 0)
-                error_codes.push_back(404);
         }
         else if(!strncmp(serverVec[i].c_str(), "index", 5))
         {
             getIndexPage(stringSplit(serverVec[i], ' ', &temp_size), temp_size);
-                
         }
         else if(!strncmp(serverVec[i].c_str(), "root", 4))
         {
@@ -601,7 +642,6 @@ void    server_parser::construct_server(std::vector<std::string>::iterator first
         {
             getAutoIndex(stringSplit(serverVec[i], ' ', &temp_size), temp_size);
         }
-
         else if (!strncmp(serverVec[i].c_str(), "return", 6))
         {
             getRedirection(stringSplit(serverVec[i], ' ', &temp_size), temp_size);
@@ -627,8 +667,6 @@ void    server_parser::construct_server(std::vector<std::string>::iterator first
         }
     }
         this->getServerDataFromRootLocation();
-
-
 }
 void    server_parser::setLocationsIndex(std::vector<server_location> location)
 {
@@ -652,8 +690,6 @@ size_t server_parser::getLocationCount(std::vector<std::string> vec)
 
 void    server_parser::restoreRootObject(int i)
 {
-    // std::cout << this->location[i] ;
-
     if(this->root.size() == 0 && this->location[i].getLocationRootObject().size() != 0)
     {
         this->root = this->location[i].getLocationRootObject();

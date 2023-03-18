@@ -148,7 +148,6 @@ void    server::process()
         std::cout << request.get_start_line().location_index << std::endl;
         std::cout <<  request.get_error() << std::endl;
         respond.setRespond(request.get_start_line().full_path, request.get_start_line().vertion, request.get_error());
-        std::cout << respond.getBody() << " < body\n";
         // std::cout << "\n\n";
         // std::map<std::string, std::string>::iterator itr;
         // std::cout << "\nThe heder is : \n";
