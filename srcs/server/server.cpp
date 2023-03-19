@@ -81,6 +81,31 @@ void server::setup(server_parser server_config)
     std::cout << "host: " << _host << " is listening on port " << _port << "...\n\n";
 }
 
+
+void server::Get(int location_index , std::string path) 
+{
+    server_location location = _server_config.getOneLocationObject(location_index);
+    std::string isFOrD = isFileOrDirectory(path);
+    if(respond.getstatusCode() == "200")
+    {
+        if(isFOrD == "file")
+        {
+            std::cout << "IS A FILE\n";
+            if(location.getHasCgi())
+                std::cout << "location has CGI !!\n";  // BARAE << 
+            else
+            {
+                respond.setBody(respond.fileToSring(path));
+                respond.mergeRespondStrings();
+            }
+        }
+        else if(isFOrD == "directory")
+        {
+            std::cout << "IS A DIRECTORY\n";
+        }
+    }
+}
+
 void    server::set_addr()
 {
     memset((char *)&_addr, 0, sizeof(_addr)); // use ft_memset() of libft
@@ -144,7 +169,6 @@ void    server::process()
         // std::cout << request.get_start_line().method << std::endl;
         // std::cout << request.get_start_line().path << std::endl;
         // std::cout << request.get_start_line().vertion << std::endl;
-        std::cout << request.get_start_line().full_path << std::endl;
         // std::cout << request.get_start_line().location_index << std::endl;
         // std::cout <<  request.get_error() << std::endl;
         respond.setRespond(request.get_start_line().full_path, request.get_start_line().vertion, request.get_error());
@@ -168,10 +192,8 @@ void    server::process()
             if(request.get_start_line().method == "GET")
             {
                 std::cout << "MUST WORK HERE\n";
-                std::cout << this->respond.getfinalString();
-                Get get(_server_config, respond,
-                    request.get_start_line().location_index,
-                    request.get_start_line().full_path);
+                Get(request.get_start_line().location_index, request.get_start_line().full_path);
+                std::cout << respond.getfinalString() << " <<\n";
                 exit(0);
             }
             if(request.get_start_line().method == "POST")

@@ -6,7 +6,7 @@
 /*   By: rimney < rimney@student.1337.ma>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/24 21:53:42 by rimney            #+#    #+#             */
-/*   Updated: 2023/03/18 19:06:20 by rimney           ###   ########.fr       */
+/*   Updated: 2023/03/18 21:21:15 by rimney           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -59,6 +59,8 @@ class server_location
         std::vector<std::string>	getLocationMethodsObject(void){return (this->HttpMethods);}
         std::string                 getCgiPathObject(void) {return (this->cgiPath);}
         std::string                 getUploadObject(void) {return (this->upload);}
+        bool                        getHasCgi(void) {return (has_cgi);}
+        
         
 		////////////// Getters and Setters //////////////
 

@@ -6,7 +6,7 @@
 /*   By: rimney < rimney@student.1337.ma>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/07 03:50:36 by rimney            #+#    #+#             */
-/*   Updated: 2023/03/18 19:09:33 by rimney           ###   ########.fr       */
+/*   Updated: 2023/03/19 01:06:08 by rimney           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -113,6 +113,8 @@ server_location::server_location(server_location const  & s)
     this->error_codes = s.error_codes;
     this->error_page = s.error_page;
     this->client_max_body_size = s.client_max_body_size;
+    this->has_cgi = s.has_cgi;
+
     // exit();
 }
 server_location server_location::operator=(server_location const & s)
@@ -128,7 +130,7 @@ server_location server_location::operator=(server_location const & s)
     this->error_codes = s.error_codes;
     this->error_page = s.error_page;
     this->client_max_body_size = s.client_max_body_size;
-
+    this->has_cgi = s.has_cgi;
     return (*this);
 }
 void    server_location::getErrorPage(std::string *keys, size_t size)
