@@ -6,7 +6,7 @@
 /*   By: rimney < rimney@student.1337.ma>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/07 03:50:36 by rimney            #+#    #+#             */
-/*   Updated: 2023/03/19 01:06:08 by rimney           ###   ########.fr       */
+/*   Updated: 2023/03/19 02:02:00 by rimney           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -48,7 +48,7 @@ std::ostream & operator<<(std::ostream & os, server_location & s)
 {
     std::vector<int> locationErrorCodes = s.getLocationErrorCodesObject();
     std::vector<std::string> locationMethods = s.getLocationMethodsObject();
-    os << "     |------------->>\n";
+    os <<  "     |------------->>\n";
     os << "     | Location index : " << s.getLocationindexObject() << '\n';
     os << "     | Location  Name : " << s.getLocationNameObject() << '\n';
     os << "     | Location CMBS : " << s.getLocationCmbsObject() << '\n';
@@ -105,7 +105,6 @@ server_location::server_location(server_location const  & s)
     this->location_index = s.location_index;
     this->location_name = s.location_name;
     this->root = s.root;
-    this->is_auto_index = s.is_auto_index;
     this->HttpMethods = s.HttpMethods;
     this->index = s.index;
     this->cgiPath = s.cgiPath;
@@ -113,6 +112,7 @@ server_location::server_location(server_location const  & s)
     this->error_codes = s.error_codes;
     this->error_page = s.error_page;
     this->client_max_body_size = s.client_max_body_size;
+    this->is_auto_index = s.is_auto_index;
     this->has_cgi = s.has_cgi;
 
     // exit();
@@ -122,7 +122,6 @@ server_location server_location::operator=(server_location const & s)
     this->location_index = s.location_index;
     this->location_name = s.location_name;
     this->root = s.root;
-    this->is_auto_index = s.is_auto_index;
     this->HttpMethods = s.HttpMethods;
     this->index = s.index;
     this->cgiPath = s.cgiPath;
@@ -131,6 +130,7 @@ server_location server_location::operator=(server_location const & s)
     this->error_page = s.error_page;
     this->client_max_body_size = s.client_max_body_size;
     this->has_cgi = s.has_cgi;
+    this->is_auto_index = s.is_auto_index;
     return (*this);
 }
 void    server_location::getErrorPage(std::string *keys, size_t size)
@@ -266,9 +266,9 @@ void server_location::construct_location(std::vector<std::string>::iterator firs
     std::vector<std::string> locationVec(first, last);
     size_t temp_size;
     this->has_cgi = false;
+        this->is_auto_index = false;
     for(size_t i = 0; i < locationVec.size(); i++)
     {
-        this->is_auto_index = false;
         this->client_max_body_size = 0;
         if(!strncmp(locationVec[i].c_str(), "location", 8) && locationVec[i].back() == '{')
         {

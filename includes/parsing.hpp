@@ -6,7 +6,7 @@
 /*   By: rimney < rimney@student.1337.ma>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/24 21:53:42 by rimney            #+#    #+#             */
-/*   Updated: 2023/03/18 21:21:15 by rimney           ###   ########.fr       */
+/*   Updated: 2023/03/19 01:50:59 by rimney           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -49,7 +49,7 @@ class server_location
         int							getCmbsObject(void);
         int							getLocationindexObject(void){return (this->location_index);}
         int							getLocationCmbsObject(void) const ;
-        bool						getLocationIsAutoIndexObject(void) const{return (this->is_auto_index ? true : false);}
+        bool						getLocationIsAutoIndexObject(void) const {return (this->is_auto_index);}
         std::string					getLocationIndexObject(void) const {return (this->index);}
         std::string					getLocationRedirectionObject(void) const{return (this->redirection);}
         std::string					getLocationErrorPageObject(void) const {return (this->error_page);}

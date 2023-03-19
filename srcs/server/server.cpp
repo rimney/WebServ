@@ -1,5 +1,4 @@
 #include "../../includes/server.hpp"
-#include "../../includes/methods.hpp"
 
 server::server()
     : _port(DEFAULT_PORT), _host(INADDR_ANY), _error_flag(1){}
@@ -101,7 +100,11 @@ void server::Get(int location_index , std::string path)
         }
         else if(isFOrD == "directory")
         {
-            std::cout << "IS A DIRECTORY\n";
+            std::cout << "DDD\n";
+            if(location.getLocationIsAutoIndexObject())
+                Get(location_index, location.getLocationIndexObject()); // must handle the file well
+            else
+                respond.setRespond(path, respond.gethttpVersion(), "403");
         }
     }
 }

@@ -6,7 +6,7 @@
 /*   By: rimney < rimney@student.1337.ma>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/15 21:01:07 by rimney            #+#    #+#             */
-/*   Updated: 2023/03/18 18:37:08 by rimney           ###   ########.fr       */
+/*   Updated: 2023/03/19 01:39:33 by rimney           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,5 +19,5 @@
 #include "parsing.hpp"
 #include "request.hpp"
 #include "respond.hpp"
-#include "methods.hpp"
+
 #endif
