@@ -6,7 +6,7 @@
 /*   By: rimney < rimney@student.1337.ma>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/15 20:32:17 by rimney            #+#    #+#             */
-/*   Updated: 2023/03/19 02:18:39 by rimney           ###   ########.fr       */
+/*   Updated: 2023/03/19 15:49:38 by rimney           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -93,6 +93,7 @@ bool respond::isAmongErrorCodes(int error_code)
 
 std::string     respond::fileToSring(std::string path)
 {
+    std::cout << path << " << path\n";
     std::ifstream file(path);
     std::stringstream buffer;
     buffer << file.rdbuf();
@@ -137,6 +138,8 @@ std::string		respond::mergeRespondStrings(void)
 
 void	respond::setRespond(std::string path, std::string httpVersion, std::string error)
 {
+    std::cout << "PATH >> " << path;
+    exit(0); 
     if(!error.empty())
     {
         if(error == "501 Not Implemented")
@@ -232,8 +235,9 @@ void	respond::setRespond(std::string path, std::string httpVersion, std::string 
             return ;
         }   
     }
-    if(theFileExists(path) == false)
+    if(theFileExists(path) == false && isFileOrDirectory(path) == "file")
     {
+        std::cout << path << " < PASSED\n";
         this->sethttpVersion(httpVersion);
         this->setstatusCode("404");
         this->setstatusDescription("Not Found");
@@ -250,7 +254,7 @@ void	respond::setRespond(std::string path, std::string httpVersion, std::string 
         this->setBody(this->setErrorBody(this->getstatusCode()));   
         this->setContentLenght(std::to_string(this->getBody().size()));
 		this->mergeRespondStrings();
-            return ;
+        return ;
     }
 }
 

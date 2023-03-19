@@ -94,13 +94,13 @@ void server::Get(int location_index , std::string path)
                 std::cout << "location has CGI !!\n";  // BARAE << 
             else
             {
+                std::cout << path << "PATH <<<<<\n";
                 respond.setBody(respond.fileToSring(path));
                 respond.mergeRespondStrings();
             }
         }
         else if(isFOrD == "directory")
         {
-            std::cout << "DDD\n";
             if(location.getLocationIsAutoIndexObject())
                 Get(location_index, location.getLocationIndexObject()); // must handle the file well
             else
