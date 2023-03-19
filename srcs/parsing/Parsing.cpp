@@ -6,7 +6,7 @@
 /*   By: rimney < rimney@student.1337.ma>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/07 03:50:36 by rimney            #+#    #+#             */
-/*   Updated: 2023/03/19 02:02:00 by rimney           ###   ########.fr       */
+/*   Updated: 2023/03/19 17:03:59 by rimney           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -114,8 +114,9 @@ server_location::server_location(server_location const  & s)
     this->client_max_body_size = s.client_max_body_size;
     this->is_auto_index = s.is_auto_index;
     this->has_cgi = s.has_cgi;
+    this->has_redirection = s.has_redirection;
+    this->redirection = s.redirection;
 
-    // exit();
 }
 server_location server_location::operator=(server_location const & s)
 {
@@ -131,6 +132,8 @@ server_location server_location::operator=(server_location const & s)
     this->client_max_body_size = s.client_max_body_size;
     this->has_cgi = s.has_cgi;
     this->is_auto_index = s.is_auto_index;
+    this->has_redirection = s.has_redirection;
+    this->redirection = s.redirection;
     return (*this);
 }
 void    server_location::getErrorPage(std::string *keys, size_t size)
@@ -266,7 +269,8 @@ void server_location::construct_location(std::vector<std::string>::iterator firs
     std::vector<std::string> locationVec(first, last);
     size_t temp_size;
     this->has_cgi = false;
-        this->is_auto_index = false;
+    this->is_auto_index = false;
+    this->has_redirection = false;
     for(size_t i = 0; i < locationVec.size(); i++)
     {
         this->client_max_body_size = 0;
@@ -295,6 +299,8 @@ void server_location::construct_location(std::vector<std::string>::iterator firs
         else if (!strncmp(locationVec[i].c_str(), "return", 6))
         {
             getRedirection(stringSplit(locationVec[i], ' ', &temp_size), temp_size);
+            this->has_redirection = true;
+            std::cout << this->redirection << " redirection\n";
         }
         else if (!strncmp(locationVec[i].c_str(), "client_max_body_size", 19))
         {
@@ -364,7 +370,6 @@ server_parser::server_parser(server_parser const & s) : server_location(s)
     this->error_page = s.getServerErrorPageObject();
     this->location = s.getServerLocation();
     this->error_codes = s.getErrorCodesObject();
-
 }
 
 server_parser & server_parser::operator=(server_parser const & s)
@@ -380,7 +385,7 @@ server_parser & server_parser::operator=(server_parser const & s)
     this->server_names = s.getServerNamesObject();
     this->error_page = s.getServerErrorPageObject();
     this->error_codes = s.getErrorCodesObject();
-        this->location = s.getServerLocationsObject();
+    this->location = s.getServerLocationsObject();
     return (*this);
 }
 std::vector<server_location> server_parser::getServerLocationsObject(void) const
@@ -553,7 +558,6 @@ void    server_parser::getIndexPage(std::string *keys, size_t size)
     }
     this->index = keys[size - 1];
     delete [] keys;
-    // exit(9);
 }
 void    server_parser::getAutoIndex(std::string *keys, size_t size)
 {

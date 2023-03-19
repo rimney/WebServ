@@ -85,26 +85,41 @@ void server::Get(int location_index , std::string path)
 {
     server_location location = _server_config.getOneLocationObject(location_index);
     std::string isFOrD = isFileOrDirectory(path);
-    if(respond.getstatusCode() == "200")
+    if(location.getHasRedirection())
+    {
+        respond.setBody(respond.fileToSring(location.getLocationRedirectionObject()));
+        respond.mergeRespondStrings();
+        return ;
+    }
+    else if(respond.getstatusCode() == "200")
     {
         if(isFOrD == "file")
         {
             std::cout << "IS A FILE\n";
             if(location.getHasCgi())
+            {
                 std::cout << "location has CGI !!\n";  // BARAE << 
+                return ;
+            }
             else
             {
-                std::cout << path << "PATH <<<<<\n";
                 respond.setBody(respond.fileToSring(path));
                 respond.mergeRespondStrings();
+                return ;
             }
         }
         else if(isFOrD == "directory")
         {
             if(location.getLocationIsAutoIndexObject())
-                Get(location_index, location.getLocationIndexObject()); // must handle the file well
+            {
+                Get(location_index, path + "/" + location.getLocationIndexObject()); // must handle the file well
+                return;
+            }
             else
+            {
                 respond.setRespond(path, respond.gethttpVersion(), "403");
+                return ;
+            }
         }
     }
 }
@@ -171,9 +186,11 @@ void    server::process()
         request.errors(_server_config);
         // std::cout << request.get_start_line().method << std::endl;
         // std::cout << request.get_start_line().path << std::endl;
+        std::cout << request.get_start_line().full_path << std::endl;
         // std::cout << request.get_start_line().vertion << std::endl;
         // std::cout << request.get_start_line().location_index << std::endl;
         // std::cout <<  request.get_error() << std::endl;
+        // exit(0);
         respond.setRespond(request.get_start_line().full_path, request.get_start_line().vertion, request.get_error());
         // std::cout << "\n\n";
         // std::map<std::string, std::string>::iterator itr;
@@ -190,7 +207,8 @@ void    server::process()
         //     std::cout << "*" << request.get_body() << "*"<< std::endl;
         //      std::cout << "*" << request.get_body().length() << "*"<< std::endl;
         // }
-        if(request.get_error().empty())
+        // std::cout << respond.getfinalString();
+        if(request.get_error().empty() || respond.getstatusCode() == "301")
         {
             if(request.get_start_line().method == "GET")
             {

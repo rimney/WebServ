@@ -6,7 +6,7 @@
 /*   By: rimney < rimney@student.1337.ma>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/24 21:53:42 by rimney            #+#    #+#             */
-/*   Updated: 2023/03/19 01:50:59 by rimney           ###   ########.fr       */
+/*   Updated: 2023/03/19 16:47:34 by rimney           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,6 +27,7 @@ class server_location
         int							client_max_body_size; // buffer of what im supposed so send in response
         bool						is_auto_index; // is autoindex
         bool                        has_cgi;
+        bool                        has_redirection;
         std::string					location_name; // /location/example
         std::string					root; // root key
         std::string					index; // index 
@@ -37,6 +38,7 @@ class server_location
         std::vector<std::string>	cgiExt; // cgi extension
         std::vector<std::string>	HttpMethods; // GET, POST, DELETE
         std::string                 upload;
+        
     public :
 		////////////// Constructors and Overloads //////////////
         server_location(){};
@@ -60,6 +62,7 @@ class server_location
         std::string                 getCgiPathObject(void) {return (this->cgiPath);}
         std::string                 getUploadObject(void) {return (this->upload);}
         bool                        getHasCgi(void) {return (has_cgi);}
+        bool                        getHasRedirection(void) {return (this->has_redirection);}
         
         
 		////////////// Getters and Setters //////////////

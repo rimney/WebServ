@@ -6,7 +6,7 @@
 /*   By: rimney < rimney@student.1337.ma>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/15 20:32:17 by rimney            #+#    #+#             */
-/*   Updated: 2023/03/19 15:49:38 by rimney           ###   ########.fr       */
+/*   Updated: 2023/03/19 17:12:42 by rimney           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -93,8 +93,9 @@ bool respond::isAmongErrorCodes(int error_code)
 
 std::string     respond::fileToSring(std::string path)
 {
-    std::cout << path << " << path\n";
     std::ifstream file(path);
+    if(!file.good())
+        return (setErrorBody("404"));
     std::stringstream buffer;
     buffer << file.rdbuf();
     std::string content = buffer.str();
@@ -138,8 +139,6 @@ std::string		respond::mergeRespondStrings(void)
 
 void	respond::setRespond(std::string path, std::string httpVersion, std::string error)
 {
-    std::cout << "PATH >> " << path;
-    exit(0); 
     if(!error.empty())
     {
         if(error == "501 Not Implemented")
@@ -224,7 +223,7 @@ void	respond::setRespond(std::string path, std::string httpVersion, std::string 
             return ;
         
         }
-        else if(error == "301")
+        else if(error == "301") // << HERE
         {
             this->sethttpVersion(httpVersion);
             this->setstatusCode("301");
