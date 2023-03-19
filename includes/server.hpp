@@ -15,6 +15,7 @@
 # include <fcntl.h>
 # include "parsing.hpp"
 #include "request.hpp"
+#include "respond.hpp"
 
 
 // TO BE DELETED //
@@ -34,6 +35,7 @@ class server
         //
         std::string         _request;
         Request             request;
+        respond             respond;
         //
 
     public:
@@ -56,6 +58,7 @@ class server
         void            setup(server_parser & server_config);
         server_parser   getServerData(void) {return this->_server_config;}
         void            process();
+        void            Get(int location_index , std::string path);
     
     private:
         void            set_addr();
