@@ -186,13 +186,13 @@ void    server::process()
         request.errors(_server_config);
         
         std::cout << "\nThe first line is : \n";
-        std::cout <<  request.get_error() << std::endl;
+        std::cout <<  request.get_start_line().vertion << std::endl;
         std::cout <<  request.get_start_line().method << std::endl;
         std::cout <<  request.get_start_line().path << std::endl;
         std::cout <<  request.get_start_line().vertion << std::endl;
         std::cout <<  request.get_start_line().full_path << std::endl;
         std::cout <<  request.get_start_line().query << std::endl;
-
+        respond.setRespond(request.get_start_line().full_path, request.get_start_line().vertion, request.get_start_line().vertion);
         // std::cout << "\n\n";
         // std::map<std::string, std::string>::iterator itr;
         // std::cout << "\nThe heder is : \n";
@@ -213,6 +213,7 @@ void    server::process()
             if(request.get_start_line().method == "GET")
             {
                 Get(request.get_start_line().location_index, request.get_start_line().full_path);
+                std::cout << respond.getfinalString() << " <<\n";
             }
             if(request.get_start_line().method == "POST")
             {
