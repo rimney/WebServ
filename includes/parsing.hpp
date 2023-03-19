@@ -59,11 +59,11 @@ class server_location
         std::string					getLocationNameObject(void) const {return this->location_name;}
         std::vector<int>			getLocationErrorCodesObject(void) {return (this->error_codes);}
         std::vector<std::string>	getLocationMethodsObject(void){return (this->HttpMethods);}
+
         std::string                 getCgiPathObject(void) {return (this->cgiPath);}
         std::string                 getUploadObject(void) {return (this->upload);}
         bool                        getHasCgi(void) {return (has_cgi);}
         bool                        getHasRedirection(void) {return (this->has_redirection);}
-        
         
 		////////////// Getters and Setters //////////////
 
@@ -156,6 +156,7 @@ class server_parser : public server_location
         void            restoreIndexObject(int i);
         void            restoreAutoIndex(int i);
         void restoreServerMethods(int i);
+
 
 		////////////// Parsing Fucntions //////////////		
 

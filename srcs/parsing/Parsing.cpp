@@ -116,7 +116,6 @@ server_location::server_location(server_location const  & s)
     this->has_cgi = s.has_cgi;
     this->has_redirection = s.has_redirection;
     this->redirection = s.redirection;
-
 }
 server_location server_location::operator=(server_location const & s)
 {
@@ -268,6 +267,7 @@ void server_location::construct_location(std::vector<std::string>::iterator firs
 {
     std::vector<std::string> locationVec(first, last);
     size_t temp_size;
+
     this->has_cgi = false;
     this->is_auto_index = false;
     this->has_redirection = false;
@@ -323,7 +323,6 @@ void server_location::construct_location(std::vector<std::string>::iterator firs
         {
             getUpload(stringSplit(locationVec[i], ' ', &temp_size), temp_size);
         }
-
     }
 }
 std::string *stringSplit(std::string split, char c, size_t *index_save)
@@ -678,6 +677,7 @@ void    server_parser::construct_server(std::vector<std::string>::iterator first
     }
         this->getServerDataFromRootLocation();
 }
+
 void    server_parser::setLocationsIndex(std::vector<server_location> location)
 {
     for(size_t i = 0; i < location.size();i++)
@@ -685,6 +685,7 @@ void    server_parser::setLocationsIndex(std::vector<server_location> location)
 }
 void    server_parser::setServerIndex(int index)
 {
+    // std::cout << "CALLED\n";
     this->server_index = index;
 }
 size_t server_parser::getLocationCount(std::vector<std::string> vec)
@@ -746,7 +747,6 @@ void    server_parser::restoreAutoIndex(int i)
         exit(0);
     }
 }
-
 
 void    server_parser::getServerDataFromRootLocation(void)
 {
@@ -820,7 +820,6 @@ config_parser::config_parser(std::string filename)
             server_parser server;
             server.construct_server(tempConf.begin() + opening_bracket, tempConf.begin() + closing_bracket + 1);
             server.setServerIndex(server_index);
-            
             this->servers.push_back(server);
             server_index += 1;
         }

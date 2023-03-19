@@ -23,6 +23,7 @@ servers &   servers::operator=(servers const & s)
 int servers::setup(std::vector<server_parser> servers_config)
 {
     int fd, i;
+
     for (i = 0; (size_t)i < servers_config.size(); i++)
     {
         try
@@ -57,7 +58,6 @@ int servers::setup(std::vector<server_parser> servers_config)
     }
     return 0;
 }
-
 void    servers::run()
 {
     int r;

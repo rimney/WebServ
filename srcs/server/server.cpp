@@ -54,11 +54,12 @@ server  & server::operator=(server const & s)
     _addr = s._addr;
     _request = s._request;
     _server_config = s._server_config;
+
     this->respond.setRespondServer(_server_config);
     return *this;
 }
 
-void server::setup(server_parser server_config)
+void server::setup(server_parser & server_config)
 {
     int optval = 1;
 
@@ -168,7 +169,7 @@ void    server::receive()
     _request = std::string(buffer,r);
 }
 
-void    server::set_server_config(server_parser server_config)
+void    server::set_server_config(server_parser  & server_config)
 {
     _server_config = server_config;
 }
@@ -182,16 +183,16 @@ void    server::process()
     }
     if(!request.get_wait_body())
     {
-        
         request.errors(_server_config);
-        // std::cout << request.get_start_line().method << std::endl;
-        // std::cout << request.get_start_line().path << std::endl;
-        std::cout << request.get_start_line().full_path << std::endl;
-        // std::cout << request.get_start_line().vertion << std::endl;
-        // std::cout << request.get_start_line().location_index << std::endl;
-        // std::cout <<  request.get_error() << std::endl;
-        // exit(0);
-        respond.setRespond(request.get_start_line().full_path, request.get_start_line().vertion, request.get_error());
+        
+        std::cout << "\nThe first line is : \n";
+        std::cout <<  request.get_error() << std::endl;
+        std::cout <<  request.get_start_line().method << std::endl;
+        std::cout <<  request.get_start_line().path << std::endl;
+        std::cout <<  request.get_start_line().vertion << std::endl;
+        std::cout <<  request.get_start_line().full_path << std::endl;
+        std::cout <<  request.get_start_line().query << std::endl;
+
         // std::cout << "\n\n";
         // std::map<std::string, std::string>::iterator itr;
         // std::cout << "\nThe heder is : \n";
@@ -207,21 +208,17 @@ void    server::process()
         //     std::cout << "*" << request.get_body() << "*"<< std::endl;
         //      std::cout << "*" << request.get_body().length() << "*"<< std::endl;
         // }
-        // std::cout << respond.getfinalString();
         if(request.get_error().empty() || respond.getstatusCode() == "301")
         {
             if(request.get_start_line().method == "GET")
             {
-                std::cout << "MUST WORK HERE\n";
                 Get(request.get_start_line().location_index, request.get_start_line().full_path);
-                std::cout << respond.getfinalString() << " <<\n";
-                exit(0);
             }
             if(request.get_start_line().method == "POST")
             {
                 //
             }
-            if(request.get_start_line().method == "DELET")
+            if(request.get_start_line().method == "DELETE")
             {
                 //
             }
