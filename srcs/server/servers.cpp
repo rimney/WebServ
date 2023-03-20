@@ -30,8 +30,6 @@ int servers::setup(std::vector<server_parser> servers_config)
         {
             _servers.push_back(server(servers_config[i].getPortObject(),
                 servers_config[i].getHostObject(), servers_config[i]));
-            std::cout <<  servers_config[i].getServerIndexObject() << '\n';
-            std::cout << servers_config[i].getPortObject() << '\n';
             _servers[i].setup(servers_config[i]);
         }
         catch(const std::string& msg)
@@ -125,7 +123,7 @@ void    servers::run()
                 {
                     (*it).second.receive();
                     (*it).second.process();
-                    
+                    // (*it).second.respond();
                 }
                 catch(const std::string& msg)
                 {

@@ -2,7 +2,7 @@ NAME = webserv
  
 SERVER = srcs/server
 
-SRC = webserv.cpp ${SERVER}/server.cpp ${SERVER}/servers.cpp srcs/parsing/Parsing.cpp  srcs/request/request.cpp ${SERVER}/post_method.cpp
+SRC = webserv.cpp ${SERVER}/server.cpp ${SERVER}/servers.cpp srcs/parsing/Parsing.cpp  srcs/request/request.cpp srcs/respond/respond.cpp  
 
 CFLAGS = -Wall -Wextra -Werror -std=c++98 -stdlib=libc++ -fsanitize=address -g3
 
