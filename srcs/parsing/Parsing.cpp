@@ -116,6 +116,7 @@ server_location::server_location(server_location const  & s)
     this->has_cgi = s.has_cgi;
     this->has_redirection = s.has_redirection;
     this->redirection = s.redirection;
+    this->upload = s.upload;
 }
 server_location server_location::operator=(server_location const & s)
 {

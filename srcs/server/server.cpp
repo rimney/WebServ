@@ -219,11 +219,11 @@ void    server::process()
             }
             if(request.get_start_line().method == "POST")
             {
-                //
+                post_method(_server_config);
             }
             if(request.get_start_line().method == "DELETE")
             {
-                post_method(_server_config);
+                //
             }
         }
         //respond  

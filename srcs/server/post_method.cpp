@@ -15,7 +15,7 @@ int is_file_or_dir(std::string & path)
     return -1;
 }
 
-size_t remove_header(std::string &request, size_t i,std::string &buffer,std::string &filename,std::string &upload)
+size_t remove_header(std::string &request, size_t i,std::string &buffer,std::string &filename,std::string upload)
 {
     int count_qouet = 0;
     if(i >= request.length() || !filename.empty())
@@ -59,12 +59,15 @@ void    server::post_method(server_parser &serv)
     bool is_boundary = false;
     int is_dir_or_not = 0;
     int error;
-    std::string upload = "/home/von/Desktop/WebServ/upload/";
     // std::cout << request.get_body() << std::endl;
     if(!request.get_body().empty())
     {
-        //!serv.getServerLocationsObject()[request.get_start_line().location_index].getLocationNameObject().empty()
-        if(!upload.empty())
+        // if(!serv.getServerLocationsObject()[request.get_start_line().location_index].getHasRedirection())
+        // {
+
+        // }
+        std::cout << "**" << serv.getServerLocationsObject()[request.get_start_line().location_index].getUploadObject() <<std::endl;
+        if(!serv.getServerLocationsObject()[request.get_start_line().location_index].getUploadObject().empty())
         {
             if(!request.get_header().find("Content-Type")->first.empty())
             {
@@ -78,7 +81,7 @@ void    server::post_method(server_parser &serv)
                     for (size_t i = 0 ; i < (size_t)request.get_body().length();i++)
                     {
                         boundary_pos = request.get_body().find(boundary,request.get_body().find(boundary) + boundary_pos);
-                        i = remove_header(request.get_body(),i,buffer,filename,upload);
+                        i = remove_header(request.get_body(),i,buffer,filename,serv.getServerLocationsObject()[request.get_start_line().location_index].getUploadObject());
                         for(; i < (size_t)request.get_body().length();i++)
                         {
                             if((request.get_body()[i] == 13 && request.get_body()[i + 1] == 10 && request.get_body()[i + 2] == '-') 
@@ -104,7 +107,7 @@ void    server::post_method(server_parser &serv)
                         if(buffer[i] == '/')
                             for(int j = i + 1 ; j < (int)buffer.length();j++)
                                 extention += buffer[j];
-                    std::ofstream post(upload + request.get_header().find("Postman-Token")->second +'.'+ extention);
+                    std::ofstream post(serv.getServerLocationsObject()[request.get_start_line().location_index].getUploadObject() + request.get_header().find("Postman-Token")->second +'.'+ extention);
                     post << request.get_body();
                     post.close();
                 }
