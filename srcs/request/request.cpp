@@ -143,6 +143,7 @@ void Request::errors(server_parser &serv)
 void Request::location_well(server_parser &serv)
 {
     size_t found = 0;
+    int query_pos = 0;
     long index = start_line.location_index = -1;
     size_t index_of_charachter = 0;
     bool method_allowed = false;
@@ -173,9 +174,20 @@ void Request::location_well(server_parser &serv)
         if(!serv.getServerLocationsObject()[index].getLocationRootObject().empty())//404 Not Found
             start_line.full_path = serv.getServerLocationsObject()[index].getLocationRootObject() + start_line.path;
         else if(!serv.getRootObject().empty())
+        {
             start_line.full_path = serv.getRootObject() + start_line.path;
+        }
         else
             r_error = "404";
+        if(!start_line.full_path.empty())//query
+        {
+            query_pos = start_line.full_path.find("?");
+            if(query_pos != -1)
+            {
+                for(int i = query_pos +1 ; i < (int)start_line.full_path.length() && start_line.full_path[i] != '#'   ; i++)
+                    start_line.query += start_line.full_path[i];
+            }
+        }
     }
     else
         r_error = "404";

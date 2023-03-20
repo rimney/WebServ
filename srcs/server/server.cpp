@@ -138,12 +138,17 @@ void    server::process()
         request.body_handling(_request);
     if(!request.get_wait_body())
     {
+        request.errors(_server_config);
         
         std::cout << "\nThe first line is : \n";
+        std::cout <<  request.get_error() << std::endl;
         std::cout <<  request.get_start_line().method << std::endl;
         std::cout <<  request.get_start_line().path << std::endl;
         std::cout <<  request.get_start_line().vertion << std::endl;
+        std::cout <<  request.get_start_line().full_path << std::endl;
+        std::cout <<  request.get_start_line().query << std::endl;
 
+        
         // std::cout << "\n\n";
         // std::map<std::string, std::string>::iterator itr;
         // std::cout << "\nThe heder is : \n";
