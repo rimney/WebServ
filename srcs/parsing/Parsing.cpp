@@ -60,8 +60,8 @@ std::ostream & operator<<(std::ostream & os, server_location & s)
     os << "     | Location Redirection : " << s.getLocationRedirectionObject() << '\n';
     for(size_t i = 0; i < locationMethods.size(); i++)
         os << "     | Location Methods : "<< locationMethods[i] << '\n';
-        os << "     | Location AutoIndex : " << s.getLocationIsAutoIndexObject() << '\n'; 
-        os << "     |------------->>\n";
+    os << "     | Location AutoIndex : " << s.getLocationIsAutoIndexObject() << '\n'; 
+    os << "     |------------->>\n";
         return (os);
 }
 
@@ -84,7 +84,7 @@ std::ostream & operator<<(std::ostream & os, server_parser & s)
     os << "| Server Redirection : " << s.getRedirectionObject() << '\n';
     for(size_t i = 0; i < serverNames.size(); i++)
         os << "| Server Names : "<< serverNames[i] << '\n';
-        os << "| Server AutoIndex : " << s.getIsAutoIndexObject() << '\n';
+    os << "| Server AutoIndex : " << s.getIsAutoIndexObject() << '\n';
     for(size_t i = 0; i < serverLocations.size(); i++)
         os << serverLocations[i] << '\n';
     os << "|------------->>\n";
