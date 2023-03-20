@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   respond.cpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: rimney < rimney@student.1337.ma>           +#+  +:+       +#+        */
+/*   By: eel-ghan <eel-ghan@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/15 20:32:17 by rimney            #+#    #+#             */
-/*   Updated: 2023/03/19 17:12:42 by rimney           ###   ########.fr       */
+/*   Updated: 2023/03/20 22:21:42 by eel-ghan         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -236,7 +236,6 @@ void	respond::setRespond(std::string path, std::string httpVersion, std::string 
     }
     if(theFileExists(path) == false && isFileOrDirectory(path) == "file")
     {
-        std::cout << path << " < PASSED\n";
         this->sethttpVersion(httpVersion);
         this->setstatusCode("404");
         this->setstatusDescription("Not Found");
