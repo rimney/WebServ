@@ -6,7 +6,7 @@
 /*   By: eel-ghan <eel-ghan@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/10 00:38:09 by eel-ghan          #+#    #+#             */
-/*   Updated: 2023/03/15 19:44:20 by eel-ghan         ###   ########.fr       */
+/*   Updated: 2023/03/20 21:33:44 by eel-ghan         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,12 +14,11 @@
 
 #include "../../includes/server.hpp"
 
-
 server::server()
     : _port(DEFAULT_PORT), _host(INADDR_ANY), _error_flag(1){}
 
-server::server(int port, unsigned int host)
-    : _port(port), _host(host), _error_flag(1) {}
+server::server(int port, unsigned int host, server_parser s)
+    : _port(port), _host(host), _server_config(s) ,_error_flag(1), respond(s) {}
 
 server::server(server const & s)
     : _error_flag(1)
@@ -68,10 +67,12 @@ server  & server::operator=(server const & s)
     _addr = s._addr;
     _request = s._request;
     _server_config = s._server_config;
+
+    this->respond.setRespondServer(_server_config);
     return *this;
 }
 
-void server::setup(server_parser *server_config, int index)
+void server::setup(server_parser & server_config)
 {
     int optval = 1;
 
@@ -89,8 +90,52 @@ void server::setup(server_parser *server_config, int index)
         throw(std::string("ERROR: failed to bind the socket."));
     if (listen(_fd_socket, 100) == -1)
         throw(std::string("ERROR: failed to listen."));
-    set_server_config(server_config, index);
+    set_server_config(server_config);
     std::cout << "host: " << _host << " is listening on port " << _port << "...\n\n";
+}
+
+
+void server::Get(int location_index , std::string path) 
+{
+    server_location location = _server_config.getOneLocationObject(location_index);
+    std::string isFOrD = isFileOrDirectory(path);
+    if(location.getHasRedirection())
+    {
+        respond.setBody(respond.fileToSring(location.getLocationRedirectionObject()));
+        respond.mergeRespondStrings();
+        return ;
+    }
+    else if(respond.getstatusCode() == "200")
+    {
+        if(isFOrD == "file")
+        {
+            std::cout << "IS A FILE\n";
+            if(location.getHasCgi())
+            {
+                std::cout << "location has CGI !!\n";  // BARAE << 
+                return ;
+            }
+            else
+            {
+                respond.setBody(respond.fileToSring(path));
+                respond.mergeRespondStrings();
+                return ;
+            }
+        }
+        else if(isFOrD == "directory")
+        {
+            if(location.getLocationIsAutoIndexObject())
+            {
+                Get(location_index, path + "/" + location.getLocationIndexObject()); // must handle the file well
+                return;
+            }
+            else
+            {
+                respond.setRespond(path, respond.gethttpVersion(), "403");
+                return ;
+            }
+        }
+    }
 }
 
 void    server::set_addr()
@@ -137,10 +182,9 @@ void    server::receive()
     _request = std::string(buffer,r);
 }
 
-void    server::set_server_config(server_parser *server_config, int index)
+void    server::set_server_config(server_parser  & server_config)
 {
-
-    _server_config = server_config[index];
+    _server_config = server_config;
 }
 
 int is_path_exist(std::string & path)
@@ -249,43 +293,49 @@ void    server::process()
     }
     if(!request.get_wait_body())
     {
+        request.errors(_server_config);
         
 
         std::cout << "\nThe first line is : \n";
+        std::cout <<  request.get_start_line().vertion << std::endl;
         std::cout <<  request.get_start_line().method << std::endl;
         std::cout <<  request.get_start_line().path << std::endl;
         std::cout <<  request.get_start_line().vertion << std::endl;
+        std::cout <<  request.get_start_line().full_path << std::endl;
+        std::cout <<  request.get_start_line().query << std::endl;
+        respond.setRespond(request.get_start_line().full_path, request.get_start_line().vertion, request.get_start_line().vertion);
+        // std::cout << "\n\n";
+        // std::map<std::string, std::string>::iterator itr;
+        // std::cout << "\nThe heder is : \n";
+        // std::cout << "\tKEY\tELEMENT\n";
+        // for (itr = request.get_header().begin(); itr != request.get_header().end(); ++itr) {
+        //     std::cout << '\t' << "*"<< itr->first << "*" << '\t' <<  "*" << itr->second << "*"<< '\n';
+        // }
 
-        std::cout << "\n\n";
-        std::map<std::string, std::string>::iterator itr;
-        std::cout << "\nThe heder is : \n";
-        std::cout << "\tKEY\tELEMENT\n";
-        for (itr = request.get_header().begin(); itr != request.get_header().end(); ++itr) {
-            std::cout << '\t' << "*"<< itr->first << "*" << '\t' <<  "*" << itr->second << "*"<< '\n';
-        }
-
-        std::cout << std::endl;
-        if(!request.get_body().empty())
+        // std::cout << std::endl;
+        // if(!request.get_body().empty())
+        // {
+        //     std::cout << "\nThe body is : \n"; 
+        //     std::cout << "*" << request.get_body() << "*"<< std::endl;
+        //      std::cout << "*" << request.get_body().length() << "*"<< std::endl;
+        // }
+        if(request.get_error().empty() || respond.getstatusCode() == "301")
         {
-            std::cout << "\nThe body is : \n"; 
-            std::cout << "*" << request.get_body() << "*"<< std::endl;
-            std::cout << "*" << request.get_body().length() << "*"<< std::endl;
+            if(request.get_start_line().method == "GET")
+            {
+                Get(request.get_start_line().location_index, request.get_start_line().full_path);
+                std::cout << respond.getfinalString() << " <<\n";
+            }
+            if(request.get_start_line().method == "POST")
+            {
+                //
+            }
+            if(request.get_start_line().method == "DELETE")
+            {
+                delete_method(request.get_start_line().full_path);
+            }
         }
-        // request.errors(_server_config);
-        // std::cout <<  request.get_error() << std::endl;
-        if(request.get_start_line().method == "GET")
-        {
-            //
-        }
-        if(request.get_start_line().method == "POST")
-        {
-            //
-        }
-        if(request.get_start_line().method == "DELETE")
-        {
-            std::string path = "/Users/eel-ghan/Desktop/work_space/WebServ/srcs/server/dir";
-            delete_method(path);// delete_method(request.get_start_line().path);
-        }
+        //respond  
         request.clear();
     }
 }

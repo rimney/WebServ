@@ -1,5 +1,3 @@
-
-
 #ifndef SERVER_HPP
 # define SERVER_HPP
 
@@ -16,10 +14,11 @@
 # include <vector>
 # include <fcntl.h>
 # include "parsing.hpp"
-# include "request.hpp"
 # include <cstring>
 # include <sys/stat.h>
 # include <stdio.h>
+# include "request.hpp"
+# include "respond.hpp"
 
 // TO BE DELETED //
 #include <string.h>
@@ -38,10 +37,11 @@ class server
         std::string         _request;
         std::string         _response;
         Request             request;
+        respond             respond;
 
     public:
         server();
-        server(int port, unsigned int host);
+        server(int port, unsigned int host, server_parser s);
         server(server const & s);
         ~server();
 
@@ -55,10 +55,12 @@ class server
         void            accept();
         void            close();
         void            receive();
-        void            set_server_config(server_parser *server_config, int index);
-        void            setup(server_parser *server_config, int index);
+        void            set_server_config(server_parser & server_config);
+        void            setup(server_parser & server_config);
         void            delete_method(std::string & path);
+        server_parser   getServerData(void) {return this->_server_config;}
         void            process();
+        void            Get(int location_index , std::string path);
     
     private:
         void            set_addr();
