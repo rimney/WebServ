@@ -14,7 +14,7 @@ class servers
     private:
         fd_set                  _set_fds;
         fd_set                  _set_read_fds;
-        // fd_set                  _set_write_fds;
+        fd_set                  _set_write_fds;
         int                     _servers_count;
         int                     _max_fd;
         std::vector<server>     _servers;

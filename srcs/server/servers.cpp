@@ -6,7 +6,7 @@
 /*   By: eel-ghan <eel-ghan@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/10 00:38:14 by eel-ghan          #+#    #+#             */
-/*   Updated: 2023/03/15 19:13:38 by eel-ghan         ###   ########.fr       */
+/*   Updated: 2023/03/20 22:41:20 by eel-ghan         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -75,6 +75,7 @@ int servers::setup(std::vector<server_parser> servers_config)
     }
     return 0;
 }
+
 void    servers::run()
 {
     int r;
@@ -86,8 +87,13 @@ void    servers::run()
 
     while(1)
     {
-        memcpy(&_set_read_fds, &_set_fds, sizeof(_set_fds)); // use ft_memcpy()
-        r = select(_max_fd + 1, &_set_read_fds, NULL, NULL, &time);
+        // memcpy(&_set_read_fds, &_set_fds, sizeof(_set_fds)); // use ft_memcpy()
+        _set_read_fds = _set_fds;
+        FD_ZERO(&_set_write_fds);
+        for (std::map<int, server>::iterator it = _fds_cnx.begin(); it != _fds_cnx.end(); it++)
+            FD_SET((*it).first, &_set_write_fds);
+        r = select(_max_fd + 1, &_set_read_fds, &_set_write_fds, NULL, &time);
+
         if (r == -1)
         {
             std::cerr << "ERROR: failed to select sockets.\n";
@@ -138,9 +144,8 @@ void    servers::run()
             {
                 try
                 {
-                    (*it).second.receive();
+                    (*it).second.receive((*it).first);
                     (*it).second.process();
-                    // (*it).second.respond();
                 }
                 catch(const std::string& msg)
                 {
@@ -150,22 +155,31 @@ void    servers::run()
                     _fds_cnx.erase((*it).first);
                     break ;
                 }
-                //  std::cout <<"**";
-                // std::string tmp = (*it).second.get_request();
-                // for(int i = 0; i < (int)tmp.length(); i++)
-                // {
-                //     if(tmp[i] == 13)
-                //         std::cout <<"</r>";
-                //     else if (tmp[i] == 10)
-                //         std::cout <<"</n>";
-                //     std::cout <<tmp[i];
-                // }
-                // std::cout << tmp << std::endl;
-                // std::cout <<"**";
-                // std::cout <<" *end* " << "\n";
             }
         }
-    
+        
+        // send response
+        for (std::map<int, server>::iterator it = _fds_cnx.begin(); it != _fds_cnx.end(); it++)
+        {
+            if (FD_ISSET((*it).first, &_set_write_fds))
+            {
+                try
+                {
+                    (*it).second.send((*it).first);
+                    _fds_cnx.erase((*it).first);
+                    break;
+                }
+                catch(const std::string& msg)
+                {
+                    std::cerr << msg << "\n";
+                    // FD_CLR((*it).first, &_set_fds);
+                    // FD_CLR((*it).first, &_set_write_fds);
+                    // FD_CLR((*it).first, &_set_read_fds);
+                    // ::close((*it).first);
+                    break ;
+                }
+            }
+        }
         // for (std::vector<server>::iterator it = _servers.begin(); it != _servers.end(); it++)
         //     close((*it).get_fd_connection());
     }
