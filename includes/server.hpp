@@ -54,7 +54,8 @@ class server
         server  &       operator=(server const & s);
         void            accept();
         void            close();
-        void            receive();
+        void            receive(int fd);
+        void            send(int fd);
         void            set_server_config(server_parser & server_config);
         void            setup(server_parser & server_config);
         void            delete_method(std::string & path);
