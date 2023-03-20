@@ -14,7 +14,7 @@ void Request::parser(std::string value)
         _token = _lexer.get_next_token();
         if(_token.type == TYPE_END_OF_LINE || _token.type == TYPE_CR)
             i++;
-            if(_token.type == TYPE_END_OF_SSECTION)
+        if(_token.type == TYPE_END_OF_SSECTION)
             end_of_section = true;
         if(i == 0 && !end_of_section)
         {

@@ -59,7 +59,7 @@ void    server::post_method(server_parser &serv)
     bool is_boundary = false;
     int is_dir_or_not = 0;
     int error;
-    std::string upload = "/Users/brmohamm/Desktop/WebServ/upload/";
+    std::string upload = "/home/von/Desktop/WebServ/upload/";
     // std::cout << request.get_body() << std::endl;
     if(!request.get_body().empty())
     {
@@ -104,9 +104,9 @@ void    server::post_method(server_parser &serv)
                         if(buffer[i] == '/')
                             for(int j = i + 1 ; j < (int)buffer.length();j++)
                                 extention += buffer[j];
-                        std::ofstream post(upload + request.get_header().find("Postman-Token")->second +'.'+ extention);
-                        post << request.get_body();
-                        post.close();
+                    std::ofstream post(upload + request.get_header().find("Postman-Token")->second +'.'+ extention);
+                    post << request.get_body();
+                    post.close();
                 }
             } 
             error = 201;
