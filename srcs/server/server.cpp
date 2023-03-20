@@ -182,7 +182,7 @@ void    server::process()
     if(!request.get_wait_body())
     {
         request.errors(_server_config);
-        
+    
         std::cout << "\nThe first line is : \n";
         std::cout <<  request.get_start_line().vertion << std::endl;
         std::cout <<  request.get_start_line().method << std::endl;
@@ -206,12 +206,10 @@ void    server::process()
         //     std::cout << "*" << request.get_body() << "*"<< std::endl;
         //      std::cout << "*" << request.get_body().length() << "*"<< std::endl;
         // }
-        if(request.get_start_line().method == "POST")
-            post_method(_server_config);
-        request.errors(_server_config);
         // std::cerr <<  request.get_error() << std::endl;
         std::cerr <<  "* done *" << std::endl;
         /// respond !!!! <<<<<<
+        std::cout << respond.getBody();
         if(request.get_error().empty() || respond.getstatusCode() == "301")
         {
             if(request.get_start_line().method == "GET")
@@ -225,7 +223,7 @@ void    server::process()
             }
             if(request.get_start_line().method == "DELETE")
             {
-                //
+                post_method(_server_config);
             }
         }
         //respond  
