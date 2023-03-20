@@ -6,7 +6,7 @@
 /*   By: eel-ghan <eel-ghan@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/10 00:38:09 by eel-ghan          #+#    #+#             */
-/*   Updated: 2023/03/20 21:33:44 by eel-ghan         ###   ########.fr       */
+/*   Updated: 2023/03/20 22:43:24 by eel-ghan         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -94,50 +94,6 @@ void server::setup(server_parser & server_config)
     std::cout << "host: " << _host << " is listening on port " << _port << "...\n\n";
 }
 
-
-void server::Get(int location_index , std::string path) 
-{
-    server_location location = _server_config.getOneLocationObject(location_index);
-    std::string isFOrD = isFileOrDirectory(path);
-    if(location.getHasRedirection())
-    {
-        respond.setBody(respond.fileToSring(location.getLocationRedirectionObject()));
-        respond.mergeRespondStrings();
-        return ;
-    }
-    else if(respond.getstatusCode() == "200")
-    {
-        if(isFOrD == "file")
-        {
-            std::cout << "IS A FILE\n";
-            if(location.getHasCgi())
-            {
-                std::cout << "location has CGI !!\n";  // BARAE << 
-                return ;
-            }
-            else
-            {
-                respond.setBody(respond.fileToSring(path));
-                respond.mergeRespondStrings();
-                return ;
-            }
-        }
-        else if(isFOrD == "directory")
-        {
-            if(location.getLocationIsAutoIndexObject())
-            {
-                Get(location_index, path + "/" + location.getLocationIndexObject()); // must handle the file well
-                return;
-            }
-            else
-            {
-                respond.setRespond(path, respond.gethttpVersion(), "403");
-                return ;
-            }
-        }
-    }
-}
-
 void    server::set_addr()
 {
     memset((char *)&_addr, 0, sizeof(_addr)); // use ft_memset() of libft
@@ -163,23 +119,36 @@ void    server::close()
     ::close(_fd_socket);
 }
 
-void    server::receive()
+void    server::receive(int fd)
 {
     int     r;
     char    buffer[RECV_SIZE] = {0};
     
-    r = recv(_fd_connection, buffer, RECV_SIZE, 0);
+    r = recv(fd, buffer, RECV_SIZE, 0);
     if (r == -1)
     {
-        ::close(_fd_connection);
+        ::close(fd);
         throw(std::string("ERROR: failed to receive data, closing connection."));
     }
     else if (r == 0)
     {
-        ::close(_fd_connection);
+        ::close(fd);
         throw(std::string("NOTE: connection closed by client."));
     }
     _request = std::string(buffer,r);
+}
+
+void    server::send(int fd)
+{
+    // std::cout << "\nresponse: ";
+    // std::cout << respond.getfinalString().c_str() << "\nlength: " << std::atoi(respond.getContentLenght().c_str()) << '\n';
+    // const char *res = "HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\n\r\nHello, world!\r\n";
+    // if (::send(fd, res, strlen(res), 0) == -1)
+    if (::send(fd, respond.getfinalString().c_str(), std::atoi(respond.getContentLenght().c_str()), 0) == -1)
+    {
+        // handle error 
+        throw(std::string("ERROR: send() faild to send response"));
+    }
 }
 
 void    server::set_server_config(server_parser  & server_config)
@@ -283,6 +252,48 @@ void    server::delete_method(std::string  & path)
     std::cout << "Not Found\n";
 }
 
+void server::Get(int location_index , std::string path) 
+{
+    server_location location = _server_config.getOneLocationObject(location_index);
+    std::string isFOrD = isFileOrDirectory(path);
+    if(location.getHasRedirection())
+    {
+        respond.setBody(respond.fileToSring(location.getLocationRedirectionObject()));
+        respond.mergeRespondStrings();
+        return ;
+    }
+    else if(respond.getstatusCode() == "200")
+    {
+        if(isFOrD == "file")
+        {
+            if(location.getHasCgi())
+            {
+                std::cout << "location has CGI !!\n";  // BARAE << 
+                return ;
+            }
+            else
+            {
+                respond.setBody(respond.fileToSring(path));
+                respond.mergeRespondStrings();
+                return ;
+            }
+        }
+        else if(isFOrD == "directory")
+        {
+            if(location.getLocationIsAutoIndexObject())
+            {
+                Get(location_index, path + "/" + location.getLocationIndexObject()); // must handle the file well
+                return;
+            }
+            else
+            {
+                respond.setRespond(path, respond.gethttpVersion(), "403");
+                return ;
+            }
+        }
+    }
+}
+
 void    server::process()
 {
     if(!request.get_wait_body())
@@ -304,27 +315,12 @@ void    server::process()
         std::cout <<  request.get_start_line().full_path << std::endl;
         std::cout <<  request.get_start_line().query << std::endl;
         respond.setRespond(request.get_start_line().full_path, request.get_start_line().vertion, request.get_start_line().vertion);
-        // std::cout << "\n\n";
-        // std::map<std::string, std::string>::iterator itr;
-        // std::cout << "\nThe heder is : \n";
-        // std::cout << "\tKEY\tELEMENT\n";
-        // for (itr = request.get_header().begin(); itr != request.get_header().end(); ++itr) {
-        //     std::cout << '\t' << "*"<< itr->first << "*" << '\t' <<  "*" << itr->second << "*"<< '\n';
-        // }
 
-        // std::cout << std::endl;
-        // if(!request.get_body().empty())
-        // {
-        //     std::cout << "\nThe body is : \n"; 
-        //     std::cout << "*" << request.get_body() << "*"<< std::endl;
-        //      std::cout << "*" << request.get_body().length() << "*"<< std::endl;
-        // }
         if(request.get_error().empty() || respond.getstatusCode() == "301")
         {
             if(request.get_start_line().method == "GET")
             {
                 Get(request.get_start_line().location_index, request.get_start_line().full_path);
-                std::cout << respond.getfinalString() << " <<\n";
             }
             if(request.get_start_line().method == "POST")
             {
