@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   server.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: eel-ghan <eel-ghan@student.42.fr>          +#+  +:+       +#+        */
+/*   By: rimney < rimney@student.1337.ma>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/10 00:38:09 by eel-ghan          #+#    #+#             */
-/*   Updated: 2023/03/20 22:43:24 by eel-ghan         ###   ########.fr       */
+/*   Updated: 2023/03/20 23:26:24 by rimney           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -141,7 +141,7 @@ void    server::receive(int fd)
 void    server::send(int fd)
 {
     // std::cout << "\nresponse: ";
-    // std::cout << respond.getfinalString().c_str() << "\nlength: " << std::atoi(respond.getContentLenght().c_str()) << '\n';
+    std::cout << respond.getfinalString().c_str() << "\nlength: " << std::atoi(respond.getContentLenght().c_str()) << '\n';
     // const char *res = "HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\n\r\nHello, world!\r\n";
     // if (::send(fd, res, strlen(res), 0) == -1)
     if (::send(fd, respond.getfinalString().c_str(), std::atoi(respond.getContentLenght().c_str()), 0) == -1)
@@ -259,6 +259,7 @@ void server::Get(int location_index , std::string path)
     if(location.getHasRedirection())
     {
         respond.setBody(respond.fileToSring(location.getLocationRedirectionObject()));
+        respond.setContentLenght(std::to_string(respond.getBody().size()));
         respond.mergeRespondStrings();
         return ;
     }
@@ -274,6 +275,7 @@ void server::Get(int location_index , std::string path)
             else
             {
                 respond.setBody(respond.fileToSring(path));
+                respond.setContentLenght(std::to_string(respond.getBody().size()));
                 respond.mergeRespondStrings();
                 return ;
             }
