@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   server.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: rimney < rimney@student.1337.ma>           +#+  +:+       +#+        */
+/*   By: eel-ghan <eel-ghan@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/10 00:38:09 by eel-ghan          #+#    #+#             */
-/*   Updated: 2023/03/21 19:11:32 by rimney           ###   ########.fr       */
+/*   Updated: 2023/03/21 22:55:21 by eel-ghan         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -67,8 +67,10 @@ server  & server::operator=(server const & s)
     _addr = s._addr;
     _request = s._request;
     _server_config = s._server_config;
-
-    this->respond.setRespondServer(_server_config);
+    _request = s._request;
+    request = s.request;
+    respond = s.respond;
+    // this->respond.setRespondServer(_server_config);
     return *this;
 }
 
@@ -147,19 +149,16 @@ void    server::send(int fd)
     std::cout << "//////////////////////////////////////////////////////\n";
     std::cout << respond.getfinalString().c_str() << "\nlength: " << std::atoi(respond.getContentLenght().c_str()) << '\n';
     std::cout << "//////////////////////////////////////////////////////\n";
-    std::cout << respond.getfinalString();
-    // exit(0);
     // const char *res = "HTTP/1.1 404 Not Found\r\nContent-Type: text/plain\r\n\r\nfffffffffff\r\n";
+    // if (::send(fd, res, strlen(res), 0) == -1)
+    
+    // getContentLenght() should retrun size_t type, in case atoi failed.
     if (::send(fd, respond.getfinalString().c_str(), std::atoi(respond.getContentLenght().c_str()), 0) == -1)
     {
         // handle error 
         throw(std::string("ERROR: send() faild to send response"));
     }
-    // if (::send(fd, res, strlen(res), 0) == -1)
-    // {
-    //     // handle error 
-    //     throw(std::string("ERROR: send() faild to send response"));
-    // }
+    std::cout << "<< here >>\n";
 }
 
 void    server::set_server_config(server_parser  & server_config)
