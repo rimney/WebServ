@@ -6,7 +6,7 @@
 /*   By: rimney < rimney@student.1337.ma>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/10 00:38:09 by eel-ghan          #+#    #+#             */
-/*   Updated: 2023/03/20 23:26:24 by rimney           ###   ########.fr       */
+/*   Updated: 2023/03/21 19:11:32 by rimney           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -141,14 +141,25 @@ void    server::receive(int fd)
 void    server::send(int fd)
 {
     // std::cout << "\nresponse: ";
+    if(respond.getBody().empty())
+        respond.recoverBody(atoi(respond.getstatusCode().c_str()));
+
+    std::cout << "//////////////////////////////////////////////////////\n";
     std::cout << respond.getfinalString().c_str() << "\nlength: " << std::atoi(respond.getContentLenght().c_str()) << '\n';
-    // const char *res = "HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\n\r\nHello, world!\r\n";
-    // if (::send(fd, res, strlen(res), 0) == -1)
+    std::cout << "//////////////////////////////////////////////////////\n";
+    std::cout << respond.getfinalString();
+    // exit(0);
+    // const char *res = "HTTP/1.1 404 Not Found\r\nContent-Type: text/plain\r\n\r\nfffffffffff\r\n";
     if (::send(fd, respond.getfinalString().c_str(), std::atoi(respond.getContentLenght().c_str()), 0) == -1)
     {
         // handle error 
         throw(std::string("ERROR: send() faild to send response"));
     }
+    // if (::send(fd, res, strlen(res), 0) == -1)
+    // {
+    //     // handle error 
+    //     throw(std::string("ERROR: send() faild to send response"));
+    // }
 }
 
 void    server::set_server_config(server_parser  & server_config)
@@ -260,7 +271,7 @@ void server::Get(int location_index , std::string path)
     {
         respond.setBody(respond.fileToSring(location.getLocationRedirectionObject()));
         respond.setContentLenght(std::to_string(respond.getBody().size()));
-        respond.mergeRespondStrings();
+        respond.mergeRespondStrings();  
         return ;
     }
     else if(respond.getstatusCode() == "200")
@@ -276,6 +287,7 @@ void server::Get(int location_index , std::string path)
             {
                 respond.setBody(respond.fileToSring(path));
                 respond.setContentLenght(std::to_string(respond.getBody().size()));
+
                 respond.mergeRespondStrings();
                 return ;
             }

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   respond.cpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: eel-ghan <eel-ghan@student.42.fr>          +#+  +:+       +#+        */
+/*   By: rimney < rimney@student.1337.ma>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/15 20:32:17 by rimney            #+#    #+#             */
-/*   Updated: 2023/03/20 22:21:42 by eel-ghan         ###   ########.fr       */
+/*   Updated: 2023/03/21 19:10:09 by rimney           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -115,9 +115,9 @@ std::string     respond::errorStringToString(int error)
     else if(error == 400)
         return ("<h1>\n400 Bad Request\n</h1>\n");
     else if(error == 404)
-        return ("<h1>\n404 Page Not Found\n</h1>\n");
+        return ("");
     else if(error == 403)
-        return ("<h1>\n 403 Error Forbidden</h1>\n");
+        return ("<h1>\n 403 Error Forbidden</h1>");
     return ("OK");
 }
 
@@ -127,14 +127,49 @@ std::string		respond::setErrorBody(std::string status_code)
         return (fileToSring(this->server.getServerErrorPageObject()));
     else if(this->isAmongErrorCodes(atoi(status_code.c_str())))
         return (fileToSring(this->server.getServerErrorPageObject()));    
-    return (errorStringToString(atoi(status_code.c_str())));
+    return ("");   
 }
 
 std::string		respond::mergeRespondStrings(void)
 {
-	std::string response = this->gethttpVersion() + " " + this->getstatusCode() + " " + this->getstatusDescription() + "\r\nContent-Length: " + this->getContentLenght() + "\r\n\r\n" + this->getBody();
+	std::string response = this->gethttpVersion() + " " + this->getstatusCode() + " " + this->getstatusDescription() + "\r\nContent-Length: " + this->getContentLenght() + "\r\nContent-Type: text/plain\r\n\r\n" + this->getBody();
 	this->finalString = response;
 	return (response); 
+}
+
+void    respond::recoverBody(int status_code)
+{
+    if(status_code == 404)
+    {
+        this->setFinalString("HTTP/1.1 404 Not Found\r\nContent-Type: text/plain\r\n\r\nf<h1>404 Not Found</h1>\r\n");
+        this->setContentLenght(std::to_string(this->getfinalString().size()));
+    }
+    else if(status_code == 501)
+    {
+        this->setFinalString("HTTP/1.1 501 Not Implementedr\nContent-Type: text/plain\r\n\r\n<h1>501 Not Implemented</h1>\r\n");
+        this->setContentLenght(std::to_string(this->getfinalString().size()));
+    }
+    else if(status_code == 400)
+    {
+        this->setFinalString("HTTP/1.1 400 Bad Request\r\nContent-Type: text/plain\r\n\r\n<h1>\n400 Bad Request\n</h1>");
+        this->setContentLenght(std::to_string(this->getfinalString().size()));
+    }
+    else if(status_code == 413)
+    {
+        this->setFinalString("HTTP/1.1 413 Request Entity Too Large\r\nContent-Type: text/plain\r\n\r<h1>\n413 Request Entity Too Large\n</h1>\r\n");
+        this->setContentLenght(std::to_string(this->getfinalString().size()));
+    }
+    else if(status_code == 414)
+    {
+        this->setFinalString("HTTP/1.1 414 Request-URI Too Longr\nContent-Type: text/plain\r\n\r\n<h1>\n414 Request-URI Too Long\n</h1>\n\r\n");
+        this->setContentLenght(std::to_string(this->getfinalString().size()));
+    }
+    else if (status_code == 403)
+    {
+        this->setFinalString("HTTP/1.1 403 Error Forbidden\r\nContent-Type: text/plain\r\n\r\n<h1>\n 403 Error Forbidden</h1>\r\n");
+        this->setContentLenght(std::to_string(this->getfinalString().size()));
+        
+    }
 }
 
 void	respond::setRespond(std::string path, std::string httpVersion, std::string error)
@@ -221,7 +256,6 @@ void	respond::setRespond(std::string path, std::string httpVersion, std::string 
             this->setContentLenght(std::to_string(this->getBody().size()));
 			this->mergeRespondStrings();
             return ;
-        
         }
         else if(error == "301") // << HERE
         {
@@ -245,7 +279,7 @@ void	respond::setRespond(std::string path, std::string httpVersion, std::string 
         return ;
     }
     else
-    {
+    {        
         this->sethttpVersion(httpVersion);
         this->setstatusCode("200");
         this->setstatusDescription("OK");

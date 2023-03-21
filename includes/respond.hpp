@@ -6,7 +6,7 @@
 /*   By: rimney < rimney@student.1337.ma>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/14 17:42:24 by rimney            #+#    #+#             */
-/*   Updated: 2023/03/19 23:42:57 by rimney           ###   ########.fr       */
+/*   Updated: 2023/03/21 18:08:52 by rimney           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -54,6 +54,7 @@ class respond
         std::string fileToSring(std::string path);
         std::string errorStringToString(int error);
         std::string mergeRespondStrings(void);
+        void        recoverBody(int status_code);
         
 };
 
