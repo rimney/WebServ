@@ -32,7 +32,7 @@ class Request
         Request(): wait_body(false),body_size(0){}
         Request(Request const & r)
         {*this = r;}
-        Request operator=(Request const & r)
+        Request & operator=(Request const & r)
         {
             this->start_line.method = r.start_line.method;
             this->start_line.path = r.start_line.path;
