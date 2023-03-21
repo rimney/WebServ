@@ -97,7 +97,13 @@ void Request::body_handling(std::string buffer)
             }
             else
             {
-                
+                buffer_body.clear();
+                for(int i = body.length() - 20 ;i < (int)(body.length()); i++)
+                {
+                    buffer_body += body[i];
+                }
+                body.erase(body.length() - 20);
+                buffer.insert(0,buffer_body);
                 for (int  i = 0; i < (int)buffer.length() ; i++)
                 {
                     if(buffer[i] == 13 && buffer[i + 1] == 10)

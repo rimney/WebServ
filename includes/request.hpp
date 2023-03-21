@@ -28,6 +28,7 @@ class Request
         std::string r_error;
         bool         wait_body;
         unsigned long          body_size;
+        std::string buffer_body;
     public:
         Request(): wait_body(false),body_size(0){}
         Request(Request const & r)
