@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   servers.cpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: eel-ghan <eel-ghan@student.42.fr>          +#+  +:+       +#+        */
+/*   By: rimney < rimney@student.1337.ma>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/10 00:38:14 by eel-ghan          #+#    #+#             */
-/*   Updated: 2023/03/21 22:32:24 by eel-ghan         ###   ########.fr       */
+/*   Updated: 2023/03/22 01:38:34 by rimney           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -105,7 +105,7 @@ void    servers::run()
             FD_ZERO(&_set_read_fds);
             FD_ZERO(&_set_write_fds);
             _max_fd = 0;
-            for (int i = 0; i < _servers_count; i++)
+            for (int i = 0; (size_t)i < _servers.size(); i++)
             {
                 fd = _servers[i].get_fd_socket();
                 FD_SET(fd, &_set_fds);
