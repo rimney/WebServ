@@ -1,3 +1,17 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   server.cpp                                         :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: rimney < rimney@student.1337.ma>           +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2023/03/10 00:38:09 by eel-ghan          #+#    #+#             */
+/*   Updated: 2023/03/22 01:22:16 by rimney           ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
+
+
 #include "../../includes/server.hpp"
 
 server::server()
@@ -44,7 +58,6 @@ int server::get_error_flag() const
     return _error_flag;
 }
 
-// TO BE EDITED TO ADD THE OTHER CLASS ARGS
 server  & server::operator=(server const & s)
 {
     _port = s._port;
@@ -54,8 +67,10 @@ server  & server::operator=(server const & s)
     _addr = s._addr;
     _request = s._request;
     _server_config = s._server_config;
-
-    this->respond.setRespondServer(_server_config);
+    _request = s._request;
+    request = s.request;
+    respond = s.respond;
+    // this->respond.setRespondServer(_server_config);
     return *this;
 }
 
@@ -79,50 +94,6 @@ void server::setup(server_parser & server_config)
         throw(std::string("ERROR: failed to listen."));
     set_server_config(server_config);
     std::cout << "host: " << _host << " is listening on port " << _port << "...\n\n";
-}
-
-
-void server::Get(int location_index , std::string path) 
-{
-    server_location location = _server_config.getOneLocationObject(location_index);
-    std::string isFOrD = isFileOrDirectory(path);
-    if(location.getHasRedirection())
-    {
-        respond.setBody(respond.fileToSring(location.getLocationRedirectionObject()));
-        respond.mergeRespondStrings();
-        return ;
-    }
-    else if(respond.getstatusCode() == "200")
-    {
-        if(isFOrD == "file")
-        {
-            std::cout << "IS A FILE\n";
-            if(location.getHasCgi())
-            {
-                std::cout << "location has CGI !!\n";  // BARAE << 
-                return ;
-            }
-            else
-            {
-                respond.setBody(respond.fileToSring(path));
-                respond.mergeRespondStrings();
-                return ;
-            }
-        }
-        else if(isFOrD == "directory")
-        {
-            if(location.getLocationIsAutoIndexObject())
-            {
-                Get(location_index, path + "/" + location.getLocationIndexObject()); // must handle the file well
-                return;
-            }
-            else
-            {
-                respond.setRespond(path, respond.gethttpVersion(), "403");
-                return ;
-            }
-        }
-    }
 }
 
 void    server::set_addr()
@@ -150,29 +121,193 @@ void    server::close()
     ::close(_fd_socket);
 }
 
-void    server::receive()
+void    server::receive(int fd)
 {
     int     r;
     char    buffer[RECV_SIZE] = {0};
     
-    r = recv(_fd_connection, buffer, RECV_SIZE, 0);
+    r = recv(fd, buffer, RECV_SIZE, 0);
     if (r == -1)
     {
-        ::close(_fd_connection);
+        ::close(fd);
         throw(std::string("ERROR: failed to receive data, closing connection."));
     }
     else if (r == 0)
     {
-        ::close(_fd_connection);
-        throw(std::string("ERROR: connection closed by client."));
+        ::close(fd);
+        throw(std::string("NOTE: connection closed by client."));
     }
     _request = std::string(buffer,r);
+}
+
+void    server::send(int fd)
+{
+    // std::cout << "\nresponse: ";
+    if(respond.getBody().empty())
+        respond.recoverBody(atoi(respond.getstatusCode().c_str()));
+
+    std::cout << respond.getfinalString();
+    // exit(0);
+    // const char *res = "HTTP/1.1 404 Not Found\r\nContent-Type: text/plain\r\n\r\nfffffffffff\r\n";
+    if (::send(fd, respond.getfinalString().c_str(), respond.getfinalString().size(), 0) == -1)
+    {
+        // handle error 
+        throw(std::string("ERROR: send() faild to send response"));
+    }
+    respond.cleanAll();
+    // if (::send(fd, res, strlen(res), 0) == -1)
+    // {
+    //     // handle error 
+    //     throw(std::string("ERROR: send() faild to send response"));
+    // }
 }
 
 void    server::set_server_config(server_parser  & server_config)
 {
     _server_config = server_config;
 }
+
+int is_path_exist(std::string & path)
+{
+    if (access(path.c_str(), F_OK) == 0)
+        return 1;
+    return 0;
+}
+
+int is_file_or_dir(std::string & path)
+{
+    struct stat file_info;
+
+    if (stat(path.c_str(), &file_info) == -1)
+        return -1;
+    if (file_info.st_mode & S_IFDIR)
+        return 2;
+    if (file_info.st_mode & S_IFREG)
+        return 1;
+    return -1;
+}
+
+void    server::delete_method(std::string  & path)
+{
+    
+    if (is_path_exist(path))
+    {
+        int r = is_file_or_dir(path);
+        if (r == 1) // handle file cases
+        {
+            // if location has cgi
+            // call cgi to handle this case
+            // else if :
+            if (remove(path.c_str()) == 0)
+            {
+                std::cout << "HTTP/1.1 204 No Content\r\n";
+                std::cout << "Content-Type: text/plain\r\n";
+                std::cout << "\r\n";
+                return ;
+            }
+            std::cout << "HTTP/1.1 500 Internal Server Error\r\n";
+            std::cout << "Content-Type: text/plain\r\n";
+            std::cout << "\r\n";
+            std::cout << "Internal Server Error\n";
+            return ;
+        }
+        else if (r == 2) // handle dir cases
+        {
+            if (path.back() == '/')
+            {
+                // if location has cgi
+                // call cgi to handle this case
+                // else if :
+                if (access(path.c_str(), W_OK) == 0)
+                {
+                    if (remove(path.c_str()) == 0)
+                    {
+                        std::cout << "HTTP/1.1 204 No Content\r\n";
+                        std::cout << "Content-Type: text/plain\r\n";
+                        std::cout << "\r\n";
+                        return ;
+                    }
+                    std::cout << "500 Internal Server Error\r\n";
+                    std::cout << "Content-Type: text/plain\r\n";
+                    std::cout << "\r\n";
+                    std::cout << "Internal Server Error\n";
+                    return ;
+                }
+                std::cout << "HTTP/1.1 403 Forbidden\r\n";
+                std::cout << "Content-Type: text/plain\r\n";
+                std::cout << "\r\n";
+                std::cout << "Forbidden\n";
+                return ;
+            }
+            else
+            {
+                std::cout << "HTTP/1.1 409 Conflict\r\n";
+                std::cout << "Content-Type: text/plain\r\n";
+                std::cout << "\r\n";
+                std::cout << "Conflict\n";
+                return ;
+            }
+        }
+        else // error
+        {
+            std::cout << "500 Internal Server Error\r\n";
+            std::cout << "Content-Type: text/plain\r\n";
+            std::cout << "\r\n";
+            std::cout << "Internal Server Error\n";
+            return ;
+        }
+    }
+    std::cout << "HTTP/1.1 404 Not Found\r\n";
+    std::cout << "Content-Type: text/plain\r\n";
+    std::cout << "\r\n";
+    std::cout << "Not Found\n";
+}
+
+void server::Get(int location_index , std::string path) 
+{
+    server_location location = _server_config.getOneLocationObject(location_index);
+    std::string isFOrD = isFileOrDirectory(path);
+    if(location.getHasRedirection())
+    {
+        respond.setBody(respond.fileToSring(location.getLocationRedirectionObject()));
+        respond.setContentLenght(std::to_string(respond.getBody().size()));
+        respond.mergeRespondStrings();  
+        return ;
+    }
+    else if(respond.getstatusCode() == "200")
+    {
+        if(isFOrD == "file")
+        {
+            if(location.getHasCgi())
+            {
+                std::cout << "location has CGI !!\n";  // BARAE << 
+                return ;
+            }
+            else
+            {
+                respond.setBody(respond.fileToSring(path));
+                respond.setContentLenght(std::to_string(respond.getBody().size()));
+                respond.setContentType(respond.getFileType(path));
+                respond.mergeRespondStrings();
+                return ;
+            }
+        }
+        else if(isFOrD == "directory")
+        {
+            if(location.getLocationIsAutoIndexObject())
+            {
+                Get(location_index, path + "/" + location.getLocationIndexObject()); // must handle the file well
+                return;
+            }
+            else
+            {
+                respond.setRespond(path, respond.gethttpVersion(), "403");
+                return ;
+            }
+        }
+    }
+}
+
 void    server::process()
 {
     if(!request.get_wait_body())
@@ -185,35 +320,22 @@ void    server::process()
     {
         request.errors(_server_config);
         
-        std::cout << "\nThe first line is : \n";
+
+        // std::cout << "\nThe first line is : \n";
+        std::cout << "//////////////// REQUEST ///////////////////\n";
         std::cout <<  request.get_start_line().vertion << std::endl;
         std::cout <<  request.get_start_line().method << std::endl;
         std::cout <<  request.get_start_line().path << std::endl;
         std::cout <<  request.get_start_line().vertion << std::endl;
         std::cout <<  request.get_start_line().full_path << std::endl;
         std::cout <<  request.get_start_line().query << std::endl;
+        std::cout << "//////////////// REQUEST ///////////////////\n\n";
         respond.setRespond(request.get_start_line().full_path, request.get_start_line().vertion, request.get_start_line().vertion);
-        // std::cout << "\n\n";
-        // std::map<std::string, std::string>::iterator itr;
-        // std::cout << "\nThe heder is : \n";
-        // std::cout << "\tKEY\tELEMENT\n";
-        // for (itr = request.get_header().begin(); itr != request.get_header().end(); ++itr) {
-        //     std::cout << '\t' << "*"<< itr->first << "*" << '\t' <<  "*" << itr->second << "*"<< '\n';
-        // }
-
-        // std::cout << std::endl;
-        // if(!request.get_body().empty())
-        // {
-        //     std::cout << "\nThe body is : \n"; 
-        //     std::cout << "*" << request.get_body() << "*"<< std::endl;
-        //      std::cout << "*" << request.get_body().length() << "*"<< std::endl;
-        // }
         if(request.get_error().empty() || respond.getstatusCode() == "301")
         {
             if(request.get_start_line().method == "GET")
             {
                 Get(request.get_start_line().location_index, request.get_start_line().full_path);
-                std::cout << respond.getfinalString() << " <<\n";
             }
             if(request.get_start_line().method == "POST")
             {
@@ -221,7 +343,7 @@ void    server::process()
             }
             if(request.get_start_line().method == "DELETE")
             {
-                //
+                delete_method(request.get_start_line().full_path);
             }
         }
         //respond  

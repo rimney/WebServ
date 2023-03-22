@@ -6,7 +6,7 @@
 /*   By: rimney < rimney@student.1337.ma>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/14 17:42:24 by rimney            #+#    #+#             */
-/*   Updated: 2023/03/19 23:42:57 by rimney           ###   ########.fr       */
+/*   Updated: 2023/03/22 00:37:35 by rimney           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,6 +25,7 @@ class respond
 	    std::string ContentLenght; // len of body
         std::string Body; // content
         std::string finalString; //
+        std::string content_type;
         server_parser server;
     public:
         respond() {};
@@ -54,6 +55,12 @@ class respond
         std::string fileToSring(std::string path);
         std::string errorStringToString(int error);
         std::string mergeRespondStrings(void);
+        void        recoverBody(int status_code);
+        size_t      getContentLenght_sizet(void);
+        void        cleanAll(void);
+        std::string getFileType(const std::string& fileName);
+        void    setContentType(std::string const & content_type);
+
         
 };
 

@@ -14,9 +14,11 @@
 # include <vector>
 # include <fcntl.h>
 # include "parsing.hpp"
-#include "request.hpp"
-#include "respond.hpp"
-
+# include <cstring>
+# include <sys/stat.h>
+# include <stdio.h>
+# include "request.hpp"
+# include "respond.hpp"
 
 // TO BE DELETED //
 #include <string.h>
@@ -32,11 +34,10 @@ class server
         struct sockaddr_in  _addr;
         server_parser       _server_config;
         int                 _error_flag;
-        //
         std::string         _request;
+        std::string         _response;
         Request             request;
         respond             respond;
-        //
 
     public:
         server();
@@ -53,9 +54,11 @@ class server
         server  &       operator=(server const & s);
         void            accept();
         void            close();
-        void            receive();
+        void            receive(int fd);
+        void            send(int fd);
         void            set_server_config(server_parser & server_config);
         void            setup(server_parser & server_config);
+        void            delete_method(std::string & path);
         server_parser   getServerData(void) {return this->_server_config;}
         void            process();
         void            Get(int location_index , std::string path);

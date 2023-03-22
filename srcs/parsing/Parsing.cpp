@@ -6,12 +6,13 @@
 /*   By: rimney < rimney@student.1337.ma>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/07 03:50:36 by rimney            #+#    #+#             */
-/*   Updated: 2023/03/19 17:03:59 by rimney           ###   ########.fr       */
+/*   Updated: 2023/03/22 17:41:22 by rimney           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../../includes/parsing.hpp"
+#include "../../includes/webserv.hpp"
 #include <arpa/inet.h>
+
 
 char *toIp(int ip)
 {
@@ -283,14 +284,29 @@ void server_location::construct_location(std::vector<std::string>::iterator firs
             getErrorPage(stringSplit(locationVec[i], ' ', &temp_size), temp_size);
             if(error_codes.size() == 0)
                 error_codes.push_back(404);
+            if(isFileOrDirectory(this->getLocationErrorPageObject()) == "error")
+            {
+                std::cerr << "Error : Check The Location Error Path\n";
+                exit(0);
+            }
         }
         else if(!strncmp(locationVec[i].c_str(), "index", 5))
         {
             getIndexPage(stringSplit(locationVec[i], ' ', &temp_size), temp_size);
+            if(isFileOrDirectory(this->getLocationIndexObject()) == "error")
+            {
+                std::cerr << "Error : Check The Location Index Path\n";
+                exit(0);
+            }
         }
         else if(!strncmp(locationVec[i].c_str(), "root", 4))
         {
             getRoot(stringSplit(locationVec[i], ' ', &temp_size), temp_size);
+            if(isFileOrDirectory(this->getLocationRootObject()) == "error")
+            {
+                std::cerr << "Error : Check The Location Root Path\n";
+                exit(0);
+            }
         }
         else if (!strncmp(locationVec[i].c_str(), "autoindex", 9))
         {
@@ -638,14 +654,29 @@ void    server_parser::construct_server(std::vector<std::string>::iterator first
         else if(!strncmp(serverVec[i].c_str(), "error", 5))
         {
             getErrorPage(stringSplit(serverVec[i], ' ', &temp_size), temp_size);
+            if(isFileOrDirectory(this->getServerErrorPageObject()) == "error")
+            {
+                std::cerr << "Error : Check The Server Error Path\n";
+                exit(0);
+            }
         }
         else if(!strncmp(serverVec[i].c_str(), "index", 5))
         {
             getIndexPage(stringSplit(serverVec[i], ' ', &temp_size), temp_size);
+            if(isFileOrDirectory(this->getIndexObject()) == "error")
+            {
+                std::cerr << "Error : Check The Server Index Path\n";
+                exit(0);
+            }
         }
         else if(!strncmp(serverVec[i].c_str(), "root", 4))
         {
             getRoot(stringSplit(serverVec[i], ' ', &temp_size), temp_size);
+            if(isFileOrDirectory(this->getRootObject()) == "error")
+            {
+                std::cerr << "Error : Check The Server Root Path\n";
+                exit(0);
+            }
         }
         else if (!strncmp(serverVec[i].c_str(), "autoindex", 9))
         {
