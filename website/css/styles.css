@@ -1,0 +1,170 @@
+/*-------------------------------------------------
+GLOBALS CLASSES 
+-------------------------------------------------*/
+*{padding:0; margin:0;}
+body{font-family:"Trebuchet MS"; font-size:14px; color:#ffed71; background:url(../images/bg1.jpg);}
+img{border:none;}
+h1{ font-family:"Trebuchet MS"; font-size:22px; font-weight:normal;}
+h2{ font-family:"Trebuchet MS"; font-size:18px; font-weight:normal;}
+P{ line-height:20px;}
+a{text-decoration:none; color:#ffed71;}
+a:hover{color:#ffffff;}
+/*-------------------------------------------------
+GENERAL CLASSES
+-------------------------------------------------*/
+.clearing { clear:both;}
+.marTop20{margin-top:20px;}
+.marTop30{margin-top:30px;}
+.marTop40{margin-top:40px;}
+.marRight30{margin-right:30px;}
+.bg-bottom{ background:none bottom !important;}
+.panel{}
+.title{}
+.content{}
+.button a{ text-decoration:none; background:url(../images/btn-bg.png) no-repeat; width:90px; height:30px; text-align:center; line-height:30px; display:block;}
+.button a:hover{background:url(../images/btn-bghover.png) no-repeat; color:#04192f;}
+.page-wrap{ width:960px; margin:0 auto; overflow:hidden;}
+.wrap{ width:960px; margin:0 auto; overflow:hidden;}
+.input-newsletter{ background:url(../images/newsletter-bg.png) no-repeat center; width:210px; height:46px; border:none; text-indent:10px; color:#fff;font-family:"Trebuchet MS"; font-size:14px;}
+
+
+/*-------------------------------------------------
+HEADER CLASSES
+-------------------------------------------------*/
+.header-wrap{ background:#000 url(../images/bg2.jpg) repeat-x; height:150px; width:100%; }
+.logo{ width:360px; margin:0 auto;}
+.logo h1{ color:#ffffff; font-size:45px; font-weight: normal; padding-top:70px; padding-bottom:40px;}
+
+/*-------------------------------------------------
+MENU CLASSES
+-------------------------------------------------*/
+.menu-wrap{ overflow:hidden; margin:25px auto 30px auto; width:960px;}
+.menu{ float:left; width:660px;}
+.menu ul li{ list-style:none; float:left; width:88px; text-align:center; line-height:40px; margin-right:10px;}
+.menu ul li a{ text-decoration:none; font-size:15px; font-weight:bold; text-transform:uppercase; text-align:center; display:block; color:#ffed71;}
+.menu ul li a:hover{ color:#ffffff;  background:url(../images/menu-btn.png) no-repeat;}
+.menu ul li a.active{ background:url(../images/menu-btn.png) no-repeat; color:#ffed71; width:88px; height:40px; color:#ffffff;}
+
+/*-------------------------------------------------
+SOCIAL MEDIA CLASSES
+-------------------------------------------------*/
+.socia-wrap{ float:right; width:200px;}
+.socail{ overflow:hidden;}
+.socail ul li{ float:left; margin-right:15px; list-style:none;}
+
+/*-------------------------------------------------
+BANNER CLASSES
+-------------------------------------------------*/
+.banner-wrap{width:960px; overflow:hidden; margin:0 auto;}
+.banner{ height:430px; background:url(../images/banner-bg.png) no-repeat;}
+.banner .banner-img{ margin:0 auto; padding-top:54px; width:420px;}
+.shadow{ width:950px; height:38px; background:url(../images/shadow.png) no-repeat center; margin-bottom:45px;}
+
+/*-------------------------------------------------
+BOX CLASSES
+-------------------------------------------------*/
+.box{ width:300px; overflow:hidden; float:left;}
+.box .panel .title{ background:url(../images/line-bg.jpg) repeat-x bottom; padding-bottom:25px; margin-bottom:25px;}
+.box .panel .title span{ float:left; margin-right:12px;}
+.box .panel .title h1{ color:#ffffff; font-weight:normal;}
+/*-------------------------------------------------
+WRAP2 CLASSES
+-------------------------------------------------*/
+.wrap2{ width:880px; height:75px; margin:0 auto; overflow:hidden; background:url(../images/box-bg.png) no-repeat; margin-top:60px; margin-bottom:60px; padding:40px 40px;}
+.wrap2 .content{ width:500px; float:left;}
+.icon{ float:left; width:35px; height:60px; margin-right:25px;}
+.wrap2 h1{ color:#001325;}
+.wrap2 .button{ float:right; display:block;}
+.wrap2 .button a{background:url(../images/box-bg2.png) no-repeat;  width:220px; height:60px; font-size:26px; line-height:60px; text-transform:uppercase; padding-left:40px;}
+.wrap2 .button a:hover{ width:220px; height:60px; padding-left:40px; background:url(../images/box-bg2hover.png) no-repeat; color:#ec3600;}
+
+/*-------------------------------------------------
+WRAP3 CLASSES
+-------------------------------------------------*/
+.wrap3{ width:960px; margin:0 auto;}
+.wrap3 .panel{ width:300px; float:left;}
+.wrap3 .panel .title{ padding-bottom:30px;}
+.wrap3 .panel .title h1{ color:#ffffff;}
+.wrap3 .panel .content img{ margin-bottom:20px;}
+.wrap3 .panel .content p a{ color:#ffed71; text-decoration:underline; font-style:italic; padding-top:30px; display:block;}
+.wrap3 .panel .content p a:hover{ color:#fff; text-decoration:none;}
+.wrap3 .panel .content .icon{ float:left; padding-right:20px;}
+.wrap3 .panel .content spna{ text-decoration:underline; color:#ffffff;}
+.wrap3 .panel .content ul{padding-top:30px;}
+.wrap3 .panel .content ul li{ list-style:none; background:url(../images/line-bg.jpg) repeat-x bottom; line-height:38px;}
+.wrap3 .panel .content ul li a{ text-decoration:none; color:#ffffff;}
+.wrap3 .panel .content ul li a:hover{color:#ffed71;}
+
+/*-------------------------------------------------
+COLS CLASSES
+-------------------------------------------------*/
+.leftcol{ float:left; width:630px; overflow:hidden; margin-top:30px;}
+.leftcol .panel{ width:100%;}
+.leftcol .panel .title{ background:url(../images/line-bg.jpg) repeat-x bottom; padding-bottom:25px; margin-bottom:25px;}
+.leftcol .panel .title h1{ text-transform:uppercase;}
+.leftcol .panel .content h2{ color:#1e3246; padding-bottom:15px; padding-top:10px;}
+.leftcol .panel .title span{ font-size:18px; color:#1e3246;}
+.leftcol .panel .content p{ padding-bottom:20px;}
+.leftcol .panel .content img{ float:left; margin-right:20px; background:#dd2900; padding:3px; border:#f32d00 solid 2px;}
+
+
+.rightcol{ float:right; width:300px; overflow:hidden; margin-top:30px;}
+
+/*-------------------------------------------------
+PORTFOLIO CLASSES
+-------------------------------------------------*/
+.portfolio-content{ width:960px; margin:0 auto;overflow:hidden; }
+.portfolio-categ{margin-bottom:30px; margin:0 auto; text-align:left; margin:30px auto 30px auto; font-size:16px; background:url(../images/line-bg.jpg) repeat-x bottom; padding-bottom:25px; margin-bottom:25px;}
+.portfolio-categ li{display:inline;margin-right:10px;}
+.image-block{ display:block;position: relative;}
+.image-block img{border: 1px solid #d5d5d5; border-radius: 4px 4px 4px 4px; background:#dd2900; border:#f32d00 solid 1px;  padding:5px;}
+.image-block img:hover{}
+.portfolio-area li{float: left;overflow: hidden;width:200px; padding:5px; margin-right:30px;}
+.home-portfolio-text{margin-top:10px;}
+li.active a{ text-decoration:underline;}
+
+
+/*-------------------------------------------------
+CONTACT FORM CLASSS
+-------------------------------------------------*/
+
+.contact-form {padding:30px; width:100%; float:left;}
+.contact-form label {display: block; padding:10px 0 10px 0;}
+.contact-form label span {display: block; color:#ffed71;font-size:16px; float:left; width:80px; text-align:left; padding:5px 20px 0 0;}
+.contact-form .input_text {padding:10px 10px; width:440px; background:#1e3246;border: none; color:#fff; background:url(../images/bg2.jpg) repeat-x; outline:none; font-family:"Trebuchet MS"; font-size:14px;}
+.contact-form .message{padding:10px 10px; width:440px; color:#fff;border: none;overflow:hidden;height:150px;background:url(../images/bg2.jpg); outline:none; font-family:"Trebuchet MS"; font-size:14px;}
+.contact-form .button{padding:8px;background:#ff9c00; color:#1e3246; text-transform:uppercase; font-family:"Trebuchet MS"; border:0px solid;margin-left:100px;margin-top:20px;}
+
+.address { float:left; width:370px; margin-left:30px;}
+.address .panel { border:none; color:#9b9e9a}
+.address .panel .title h1 {  color:#d13f31; padding-bottom:10px;}
+.address .panel .content p span { color:#9b9e9a;}
+
+
+/*-------------------------------------------------
+FOOTER CLASSES
+-------------------------------------------------*/
+.footer-wrap{ background:url(../images/bg2.jpg); margin-top:80px; overflow:hidden;}
+.footer-wrap .wrap{ width:960px; margin:0 auto;background:url(../images/footerbg-light.png) no-repeat center; height:208px; padding-top:60px; padding-bottom:60px; overflow:hidden;}
+.footer-wrap .wrap .panel{width:300px; float:left;}
+.footer-wrap .wrap .panel .title{ color:#ffffff; padding-bottom:30px;}
+.testimonials{background:url(../images/testimonials-bg.png) no-repeat; width:220px; height:106px; padding:30px 50px 30px 30px;}
+.footer-wrap .wrap .panel .content span{ color:#da2600;}
+.footer-wrap .wrap .panel .content span a{ color:#da2600; text-decoration:underline; display:block; padding-top:20px;}
+.footer-wrap .wrap .panel .content span a:hover{ color:#ffed71; text-decoration:none;}
+
+
+.footer-wrap .wrap .panel .content ul{ padding-bottom:30px; overflow:hidden;}
+.footer-wrap .wrap .panel .content ul li{list-style:none; float:left;}
+.footer-wrap .wrap .panel .content ul li .button{ background:url(../images/signup-btn.png); width:80px; height:46px; border:none; font-size:18px; color:#3d1a1b;  font-family:"Trebuchet MS"; margin-left:10px;}
+
+.cotact{width:300px;}
+.cotact ul li{ border-bottom:#0d304f solid 1px; list-style:none; line-height:50px;}
+.cotact ul li img{ padding-right:10px;}
+
+
+.copyright-wrap{ background:url(../images/bg3.jpg) repeat-x center; height:63px; padding-top:45px;}
+.copyright-wrap .content{text-align:center; color:#feaf32;}
+.copyright-wrap .content p a{ color:#feaf32; text-decoration:none;}
+.copyright-wrap .content p a:hover{ color:#ffffff;}
+.copyright-wrap .content p a.active{ color:#ffffff;}

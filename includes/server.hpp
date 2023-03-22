@@ -27,17 +27,20 @@
 class server
 {
     private:
-        int                 _port;
-        unsigned int        _host;
-        int                 _fd_socket;
-        int                 _fd_connection;
-        struct sockaddr_in  _addr;
-        server_parser       _server_config;
-        int                 _error_flag;
-        std::string         _request;
-        std::string         _response;
-        Request             request;
-        respond             respond;
+        int                         _port;
+        unsigned int                _host;
+        int                         _fd_socket;
+        int                         _fd_connection;
+        struct sockaddr_in          _addr;
+        server_parser               _server_config;
+        int                         _error_flag;
+        // std::string             _request;
+        std::string                 _response;
+        // Request                     request;
+        // respond                     respond;
+        std::map<int, respond>          _respond;
+        std::map<int, std::string>  _request_map;
+        std::map<int, Request>      _request;
 
     public:
         server();
@@ -60,8 +63,8 @@ class server
         void            setup(server_parser & server_config);
         void            delete_method(std::string & path);
         server_parser   getServerData(void) {return this->_server_config;}
-        void            process();
-        void            Get(int location_index , std::string path);
+        void            process(int fd);
+        void            Get(int location_index , std::string path, int fd);
     
     private:
         void            set_addr();

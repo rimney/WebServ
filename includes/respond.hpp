@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   respond.hpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: rimney < rimney@student.1337.ma>           +#+  +:+       +#+        */
+/*   By: eel-ghan <eel-ghan@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/14 17:42:24 by rimney            #+#    #+#             */
-/*   Updated: 2023/03/22 00:37:35 by rimney           ###   ########.fr       */
+/*   Updated: 2023/03/22 19:55:42 by eel-ghan         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,7 +26,7 @@ class respond
         std::string Body; // content
         std::string finalString; //
         std::string content_type;
-        server_parser server;
+        server_parser server; // set a header flag << // set a path to the file
     public:
         respond() {};
         respond(server_parser const & s): server(s) {};
@@ -60,6 +60,7 @@ class respond
         void        cleanAll(void);
         std::string getFileType(const std::string& fileName);
         void    setContentType(std::string const & content_type);
+        // get_rest_body(path of file)
 
         
 };
