@@ -6,7 +6,7 @@
 /*   By: rimney < rimney@student.1337.ma>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/15 20:32:17 by rimney            #+#    #+#             */
-/*   Updated: 2023/03/22 01:24:13 by rimney           ###   ########.fr       */
+/*   Updated: 2023/03/22 02:03:20 by rimney           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -186,27 +186,27 @@ void    respond::recoverBody(int status_code)
     }
     else if(status_code == 501)
     {
-        this->setFinalString("HTTP/1.1 501 Not Implementedr\nContent-Type: text/plain\r\n\r\n<h1>501 Not Implemented</h1>\r\n");
+        this->setFinalString("HTTP/1.1 501 Not Implementedr\nContent-Type: text/html\r\nContent-Length: 29\r\n\r\n<h1>501 Not Implemented</h1>\r\n");
         this->setContentLenght(std::to_string(this->getfinalString().size()));
     }
     else if(status_code == 400)
     {
-        this->setFinalString("HTTP/1.1 400 Bad Request\r\nContent-Type: text/plain\r\n\r\n<h1>\n400 Bad Request\n</h1>");
+        this->setFinalString("HTTP/1.1 400 Bad Request\r\nContent-Type: text/html\r\nContent-Length: 22\r\n\r\n<h1>\n400 Bad Request\n</h1>");
         this->setContentLenght(std::to_string(this->getfinalString().size()));
     }
     else if(status_code == 413)
     {
-        this->setFinalString("HTTP/1.1 413 Request Entity Too Large\r\nContent-Type: text/plain\r\n\r<h1>\n413 Request Entity Too Large\n</h1>\r\n");
+        this->setFinalString("HTTP/1.1 413 Request Entity Too Large\r\nContent-Type: text/html\r\n\r\nContent-Length: 41\\r\n<h1>\n413 Request Entity Too Large\n</h1>\r\n");
         this->setContentLenght(std::to_string(this->getfinalString().size()));
     }
     else if(status_code == 414)
     {
-        this->setFinalString("HTTP/1.1 414 Request-URI Too Longr\nContent-Type: text/plain\r\n\r\n<h1>\n414 Request-URI Too Long\n</h1>\r\n");
+        this->setFinalString("HTTP/1.1 414 Request-URI Too Longer\nContent-Type: text/html\r\n\r\nContent-Length: 37\\r\n<h1>\n414 Request-URI Too Long\n</h1>\r\n");
         this->setContentLenght(std::to_string(this->getfinalString().size()));
     }
     else if (status_code == 403)
     {
-        this->setFinalString("HTTP/1.1 403 Error Forbidden\r\nContent-Type: text/plain\r\n\r\n<h1>\n 403 Error Forbidden</h1>\r\n");
+        this->setFinalString("HTTP/1.1 403 Error Forbidden\r\nContent-Type: text/html\r\n\r\nContent-Length: 31\\r\n<h1>\n 403 Error Forbidden</h1>\r\n");
         this->setContentLenght(std::to_string(this->getfinalString().size()));
         
     }
