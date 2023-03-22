@@ -112,7 +112,6 @@ void    servers::run()
                 if (_max_fd < _servers[i].get_fd_socket())
                     _max_fd = _servers[i].get_fd_socket();
             }
-            std::cout << "<< here >>\n";
             continue ;
         }
         else if (r == 0)

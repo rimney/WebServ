@@ -186,27 +186,27 @@ void    respond::recoverBody(int status_code)
     }
     else if(status_code == 501)
     {
-        this->setFinalString("HTTP/1.1 501 Not Implementedr\nContent-Type: text/html\r\nContent-Length: 28\r\n\r\n<h1>501 Not Implemented</h1>");
+        this->setFinalString("HTTP/1.1 501 Not Implementedr\nContent-Type: text/html\r\nContent-Length: 29\r\n\r\n<h1>501 Not Implemented</h1>\r\n");
         this->setContentLenght(std::to_string(this->getfinalString().size()));
     }
     else if(status_code == 400)
     {
-        this->setFinalString("HTTP/1.1 400 Bad Request\r\nContent-Type: text/html\r\nContent-Length: 24\r\n\r\n<h1>400 Bad Request</h1>");
+        this->setFinalString("HTTP/1.1 400 Bad Request\r\nContent-Type: text/html\r\nContent-Length: 22\r\n\r\n<h1>\n400 Bad Request\n</h1>");
         this->setContentLenght(std::to_string(this->getfinalString().size()));
     }
     else if(status_code == 413)
     {
-        this->setFinalString("HTTP/1.1 413 Request Entity Too Large\r\nContent-Type: text/html\r\nContent-Length: 37\r\n\r<h1>413 Request Entity Too Large</h1>");
+        this->setFinalString("HTTP/1.1 413 Request Entity Too Large\r\nContent-Type: text/html\r\n\r\nContent-Length: 41\\r\n<h1>\n413 Request Entity Too Large\n</h1>\r\n");
         this->setContentLenght(std::to_string(this->getfinalString().size()));
     }
     else if(status_code == 414)
     {
-        this->setFinalString("HTTP/1.1 414 Request-URI Too Longr\nContent-Type: text/html\r\nContent-Length: 33\r\n\r\n<h1>414 Request-URI Too Long</h1>");
+        this->setFinalString("HTTP/1.1 414 Request-URI Too Longer\nContent-Type: text/html\r\n\r\nContent-Length: 37\\r\n<h1>\n414 Request-URI Too Long\n</h1>\r\n");
         this->setContentLenght(std::to_string(this->getfinalString().size()));
     }
     else if (status_code == 403)
     {
-        this->setFinalString("HTTP/1.1 403 Error Forbidden\r\nContent-Type: text/html\r\nContent-Length: 28\r\n\r\n<h1>403 Error Forbidden</h1>");
+        this->setFinalString("HTTP/1.1 403 Error Forbidden\r\nContent-Type: text/html\r\n\r\nContent-Length: 31\\r\n<h1>\n 403 Error Forbidden</h1>\r\n");
         this->setContentLenght(std::to_string(this->getfinalString().size()));
         
     }
@@ -344,14 +344,14 @@ bool isDirectory(const char* path) {
     return S_ISDIR(file_stat.st_mode);
 }
 
-std::string	isFileOrDirectory(std::string path)
+std::string	isFileOrDirectory(std::string path) // need to fix this one !!
 {
+    std::ifstream init(path);
     if (isDirectory(path.c_str()))
 	{
         return ("directory");
     }
-	else {
+	else if(init.good())
         return ("file");
-    }
 	return ("error");
 }
