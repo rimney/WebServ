@@ -6,7 +6,7 @@
 /*   By: rimney < rimney@student.1337.ma>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/15 20:32:17 by rimney            #+#    #+#             */
-/*   Updated: 2023/03/22 02:03:20 by rimney           ###   ########.fr       */
+/*   Updated: 2023/03/22 17:39:30 by rimney           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -344,14 +344,14 @@ bool isDirectory(const char* path) {
     return S_ISDIR(file_stat.st_mode);
 }
 
-std::string	isFileOrDirectory(std::string path)
+std::string	isFileOrDirectory(std::string path) // need to fix this one !!
 {
+    std::ifstream init(path);
     if (isDirectory(path.c_str()))
 	{
         return ("directory");
     }
-	else {
+	else if(init.good())
         return ("file");
-    }
 	return ("error");
 }

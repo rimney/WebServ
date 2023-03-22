@@ -6,7 +6,7 @@
 /*   By: rimney < rimney@student.1337.ma>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/10 00:38:14 by eel-ghan          #+#    #+#             */
-/*   Updated: 2023/03/22 01:38:34 by rimney           ###   ########.fr       */
+/*   Updated: 2023/03/22 17:40:06 by rimney           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -112,7 +112,6 @@ void    servers::run()
                 if (_max_fd < _servers[i].get_fd_socket())
                     _max_fd = _servers[i].get_fd_socket();
             }
-            std::cout << "<< here >>\n";
             continue ;
         }
         else if (r == 0)
