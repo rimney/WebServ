@@ -6,7 +6,7 @@
 /*   By: eel-ghan <eel-ghan@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/10 00:38:09 by eel-ghan          #+#    #+#             */
-/*   Updated: 2023/03/22 19:54:38 by eel-ghan         ###   ########.fr       */
+/*   Updated: 2023/03/22 23:41:30 by eel-ghan         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,8 +17,8 @@
 server::server()
     : _port(DEFAULT_PORT), _host(INADDR_ANY), _error_flag(1){}
 
-server::server(int port, unsigned int host, server_parser s)
-    : _port(port), _host(host), _server_config(s) ,_error_flag(1), respond(s) {}
+server::server(int port, unsigned int host)
+    : _port(port), _host(host) ,_error_flag(1) {}
 
 server::server(server const & s)
     : _error_flag(1)
@@ -68,8 +68,7 @@ server  & server::operator=(server const & s)
     _server_config = s._server_config;
     _request_map = s._request_map;
     _request = s._request;
-    respond = s.respond;
-    _request_map = s._request_map;
+    _respond = s._respond;
     // this->respond.setRespondServer(_server_config);
     return *this;
 }
@@ -146,7 +145,7 @@ void    server::receive(int fd)
     {
         _request_map.insert(std::make_pair(fd, std::string(buffer, r)));
         _request.insert(std::make_pair(fd, Request()));
-        _respond.insert(std::make_pair(fd, respond()));
+        _respond.insert(std::make_pair(fd, respond(_server_config)));
     }
 }
 
@@ -155,7 +154,7 @@ void    server::send(int fd)
     // if flage_body = 1 // send get_rest_body() 
     if(_respond[fd].getBody().empty())
         _respond[fd].recoverBody(atoi(_respond[fd].getstatusCode().c_str()));
-
+    // std::cout << _respond[fd].getfinalString() << '\n';
     if (::send(fd, _respond[fd].getfinalString().c_str(), _respond[fd].getfinalString().size(), 0) == -1)
     {
         // handle error 
@@ -322,7 +321,6 @@ void    server::process(int fd)
     {
         _request[fd].errors(_server_config);
         
-
         // std::cout << "\nThe first line is : \n";
         std::cout << "//////////////// REQUEST ///////////////////\n";
         std::cout <<  _request[fd].get_start_line().vertion << std::endl;
@@ -331,8 +329,11 @@ void    server::process(int fd)
         std::cout <<  _request[fd].get_start_line().vertion << std::endl;
         std::cout <<  _request[fd].get_start_line().full_path << std::endl;
         std::cout <<  _request[fd].get_start_line().query << std::endl;
+        std::cout << _request[fd].get_error() << "\n";
         std::cout << "//////////////// REQUEST ///////////////////\n\n";
+        
         _respond[fd].setRespond(_request[fd].get_start_line().full_path, _request[fd].get_start_line().vertion, _request[fd].get_error());
+        
         if(_request[fd].get_error().empty() || _respond[fd].getstatusCode() == "301")
         {
             if(_request[fd].get_start_line().method == "GET")
