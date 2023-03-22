@@ -6,7 +6,7 @@
 /*   By: rimney < rimney@student.1337.ma>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/10 00:38:09 by eel-ghan          #+#    #+#             */
-/*   Updated: 2023/03/21 19:11:32 by rimney           ###   ########.fr       */
+/*   Updated: 2023/03/22 00:45:19 by rimney           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -144,17 +144,15 @@ void    server::send(int fd)
     if(respond.getBody().empty())
         respond.recoverBody(atoi(respond.getstatusCode().c_str()));
 
-    std::cout << "//////////////////////////////////////////////////////\n";
-    std::cout << respond.getfinalString().c_str() << "\nlength: " << std::atoi(respond.getContentLenght().c_str()) << '\n';
-    std::cout << "//////////////////////////////////////////////////////\n";
     std::cout << respond.getfinalString();
     // exit(0);
     // const char *res = "HTTP/1.1 404 Not Found\r\nContent-Type: text/plain\r\n\r\nfffffffffff\r\n";
-    if (::send(fd, respond.getfinalString().c_str(), std::atoi(respond.getContentLenght().c_str()), 0) == -1)
+    if (::send(fd, respond.getfinalString().c_str(), respond.getfinalString().size(), 0) == -1)
     {
         // handle error 
         throw(std::string("ERROR: send() faild to send response"));
     }
+    respond.cleanAll();
     // if (::send(fd, res, strlen(res), 0) == -1)
     // {
     //     // handle error 
@@ -287,7 +285,7 @@ void server::Get(int location_index , std::string path)
             {
                 respond.setBody(respond.fileToSring(path));
                 respond.setContentLenght(std::to_string(respond.getBody().size()));
-
+                respond.setContentType(respond.getFileType(path));
                 respond.mergeRespondStrings();
                 return ;
             }
@@ -321,15 +319,16 @@ void    server::process()
         request.errors(_server_config);
         
 
-        std::cout << "\nThe first line is : \n";
+        // std::cout << "\nThe first line is : \n";
+        std::cout << "//////////////// REQUEST ///////////////////\n";
         std::cout <<  request.get_start_line().vertion << std::endl;
         std::cout <<  request.get_start_line().method << std::endl;
         std::cout <<  request.get_start_line().path << std::endl;
         std::cout <<  request.get_start_line().vertion << std::endl;
         std::cout <<  request.get_start_line().full_path << std::endl;
         std::cout <<  request.get_start_line().query << std::endl;
+        std::cout << "//////////////// REQUEST ///////////////////\n\n";
         respond.setRespond(request.get_start_line().full_path, request.get_start_line().vertion, request.get_start_line().vertion);
-
         if(request.get_error().empty() || respond.getstatusCode() == "301")
         {
             if(request.get_start_line().method == "GET")
