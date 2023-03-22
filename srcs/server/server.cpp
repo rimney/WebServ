@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   server.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: rimney < rimney@student.1337.ma>           +#+  +:+       +#+        */
+/*   By: eel-ghan <eel-ghan@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/10 00:38:09 by eel-ghan          #+#    #+#             */
-/*   Updated: 2023/03/22 01:22:16 by rimney           ###   ########.fr       */
+/*   Updated: 2023/03/22 19:54:38 by eel-ghan         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,10 +38,10 @@ unsigned int    server::get_host() const
     return _host;
 }
 
-std::string   server::get_request() const
-{
-    return _request;
-}
+// std::string   server::get_request() const
+// {
+//     return _request;
+// }
 
 int server::get_fd_socket() const
 {
@@ -65,11 +65,11 @@ server  & server::operator=(server const & s)
     _fd_socket = s._fd_socket;
     _fd_connection = s._fd_connection;
     _addr = s._addr;
-    _request = s._request;
     _server_config = s._server_config;
+    _request_map = s._request_map;
     _request = s._request;
-    request = s.request;
     respond = s.respond;
+    _request_map = s._request_map;
     // this->respond.setRespondServer(_server_config);
     return *this;
 }
@@ -137,29 +137,31 @@ void    server::receive(int fd)
         ::close(fd);
         throw(std::string("NOTE: connection closed by client."));
     }
-    _request = std::string(buffer,r);
+    if (_request_map.find(fd) != _request_map.end())
+    {
+        _request_map[fd].clear();
+        _request_map[fd] = std::string(buffer, r);
+    }
+    else
+    {
+        _request_map.insert(std::make_pair(fd, std::string(buffer, r)));
+        _request.insert(std::make_pair(fd, Request()));
+        _respond.insert(std::make_pair(fd, respond()));
+    }
 }
 
 void    server::send(int fd)
 {
-    // std::cout << "\nresponse: ";
-    if(respond.getBody().empty())
-        respond.recoverBody(atoi(respond.getstatusCode().c_str()));
+    // if flage_body = 1 // send get_rest_body() 
+    if(_respond[fd].getBody().empty())
+        _respond[fd].recoverBody(atoi(_respond[fd].getstatusCode().c_str()));
 
-    std::cout << respond.getfinalString();
-    // exit(0);
-    // const char *res = "HTTP/1.1 404 Not Found\r\nContent-Type: text/plain\r\n\r\nfffffffffff\r\n";
-    if (::send(fd, respond.getfinalString().c_str(), respond.getfinalString().size(), 0) == -1)
+    if (::send(fd, _respond[fd].getfinalString().c_str(), _respond[fd].getfinalString().size(), 0) == -1)
     {
         // handle error 
         throw(std::string("ERROR: send() faild to send response"));
     }
-    respond.cleanAll();
-    // if (::send(fd, res, strlen(res), 0) == -1)
-    // {
-    //     // handle error 
-    //     throw(std::string("ERROR: send() faild to send response"));
-    // }
+    _respond[fd].cleanAll();
 }
 
 void    server::set_server_config(server_parser  & server_config)
@@ -263,18 +265,18 @@ void    server::delete_method(std::string  & path)
     std::cout << "Not Found\n";
 }
 
-void server::Get(int location_index , std::string path) 
+void server::Get(int location_index , std::string path, int fd) 
 {
     server_location location = _server_config.getOneLocationObject(location_index);
     std::string isFOrD = isFileOrDirectory(path);
     if(location.getHasRedirection())
     {
-        respond.setBody(respond.fileToSring(location.getLocationRedirectionObject()));
-        respond.setContentLenght(std::to_string(respond.getBody().size()));
-        respond.mergeRespondStrings();  
+        _respond[fd].setBody(_respond[fd].fileToSring(location.getLocationRedirectionObject()));
+        _respond[fd].setContentLenght(std::to_string(_respond[fd].getBody().size()));
+        _respond[fd].mergeRespondStrings();  
         return ;
     }
-    else if(respond.getstatusCode() == "200")
+    else if(_respond[fd].getstatusCode() == "200")
     {
         if(isFOrD == "file")
         {
@@ -285,10 +287,10 @@ void server::Get(int location_index , std::string path)
             }
             else
             {
-                respond.setBody(respond.fileToSring(path));
-                respond.setContentLenght(std::to_string(respond.getBody().size()));
-                respond.setContentType(respond.getFileType(path));
-                respond.mergeRespondStrings();
+                _respond[fd].setBody(_respond[fd].fileToSring(path));
+                _respond[fd].setContentLenght(std::to_string(_respond[fd].getBody().size()));
+                _respond[fd].setContentType(_respond[fd].getFileType(path));
+                _respond[fd].mergeRespondStrings();
                 return ;
             }
         }
@@ -296,57 +298,58 @@ void server::Get(int location_index , std::string path)
         {
             if(location.getLocationIsAutoIndexObject())
             {
-                Get(location_index, path + "/" + location.getLocationIndexObject()); // must handle the file well
+                Get(location_index, path + "/" + location.getLocationIndexObject(), fd); // must handle the file well
                 return;
             }
             else
             {
-                respond.setRespond(path, respond.gethttpVersion(), "403");
+                _respond[fd].setRespond(path, _respond[fd].gethttpVersion(), "403");
                 return ;
             }
         }
     }
 }
 
-void    server::process()
+void    server::process(int fd)
 {
-    if(!request.get_wait_body())
-        request.parser(_request);
+    if(!_request[fd].get_wait_body())
+        _request[fd].parser(_request_map[fd]);
     else
     {
-        request.body_handling(_request);
+        _request[fd].body_handling(_request_map[fd]);
     }
-    if(!request.get_wait_body())
+    if(!_request[fd].get_wait_body())
     {
-        request.errors(_server_config);
+        _request[fd].errors(_server_config);
         
 
         // std::cout << "\nThe first line is : \n";
         std::cout << "//////////////// REQUEST ///////////////////\n";
-        std::cout <<  request.get_start_line().vertion << std::endl;
-        std::cout <<  request.get_start_line().method << std::endl;
-        std::cout <<  request.get_start_line().path << std::endl;
-        std::cout <<  request.get_start_line().vertion << std::endl;
-        std::cout <<  request.get_start_line().full_path << std::endl;
-        std::cout <<  request.get_start_line().query << std::endl;
+        std::cout <<  _request[fd].get_start_line().vertion << std::endl;
+        std::cout <<  _request[fd].get_start_line().method << std::endl;
+        std::cout <<  _request[fd].get_start_line().path << std::endl;
+        std::cout <<  _request[fd].get_start_line().vertion << std::endl;
+        std::cout <<  _request[fd].get_start_line().full_path << std::endl;
+        std::cout <<  _request[fd].get_start_line().query << std::endl;
         std::cout << "//////////////// REQUEST ///////////////////\n\n";
-        respond.setRespond(request.get_start_line().full_path, request.get_start_line().vertion, request.get_start_line().vertion);
-        if(request.get_error().empty() || respond.getstatusCode() == "301")
+        _respond[fd].setRespond(_request[fd].get_start_line().full_path, _request[fd].get_start_line().vertion, _request[fd].get_error());
+        if(_request[fd].get_error().empty() || _respond[fd].getstatusCode() == "301")
         {
-            if(request.get_start_line().method == "GET")
+            if(_request[fd].get_start_line().method == "GET")
             {
-                Get(request.get_start_line().location_index, request.get_start_line().full_path);
+                Get(_request[fd].get_start_line().location_index, _request[fd].get_start_line().full_path, fd);
             }
-            if(request.get_start_line().method == "POST")
+            if(_request[fd].get_start_line().method == "POST")
             {
                 //
             }
-            if(request.get_start_line().method == "DELETE")
+            if(_request[fd].get_start_line().method == "DELETE")
             {
-                delete_method(request.get_start_line().full_path);
+                delete_method(_request[fd].get_start_line().full_path);
             }
         }
         //respond  
-        request.clear();
+        // _request[fd].clear();
+        _request_map.erase(fd);
     }
 }

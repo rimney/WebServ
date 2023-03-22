@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   servers.cpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: rimney < rimney@student.1337.ma>           +#+  +:+       +#+        */
+/*   By: eel-ghan <eel-ghan@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/10 00:38:14 by eel-ghan          #+#    #+#             */
-/*   Updated: 2023/03/22 01:38:34 by rimney           ###   ########.fr       */
+/*   Updated: 2023/03/22 03:40:36 by eel-ghan         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -148,7 +148,7 @@ void    servers::run()
                 try
                 {
                     (*it).second.receive((*it).first);
-                    (*it).second.process();
+                    (*it).second.process((*it).first);
                     _fds_ready.insert(std::make_pair((*it).first, (*it).second));
                     // break;
                 }
@@ -171,7 +171,6 @@ void    servers::run()
                 try
                 {
                     (*it).second.send((*it).first);
-                    // ::close((*it).first);
                     _fds_cnx.erase((*it).first);
                     _fds_ready.erase((*it).first);
                     break;
@@ -179,10 +178,8 @@ void    servers::run()
                 catch(const std::string& msg)
                 {
                     std::cerr << msg << "\n";
-                    // FD_CLR((*it).first, &_set_fds);
-                    // FD_CLR((*it).first, &_set_write_fds);
-                    // FD_CLR((*it).first, &_set_read_fds);
-                    // ::close((*it).first);
+                    FD_CLR((*it).first, &_set_write_fds);
+                    FD_CLR((*it).first, &_set_read_fds);
                     break ;
                 }
             }
