@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Parsing.cpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: rimney < rimney@student.1337.ma>           +#+  +:+       +#+        */
+/*   By: eel-ghan <eel-ghan@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/07 03:50:36 by rimney            #+#    #+#             */
-/*   Updated: 2023/03/22 17:41:22 by rimney           ###   ########.fr       */
+/*   Updated: 2023/03/22 20:32:23 by eel-ghan         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -293,11 +293,6 @@ void server_location::construct_location(std::vector<std::string>::iterator firs
         else if(!strncmp(locationVec[i].c_str(), "index", 5))
         {
             getIndexPage(stringSplit(locationVec[i], ' ', &temp_size), temp_size);
-            if(isFileOrDirectory(this->getLocationIndexObject()) == "error")
-            {
-                std::cerr << "Error : Check The Location Index Path\n";
-                exit(0);
-            }
         }
         else if(!strncmp(locationVec[i].c_str(), "root", 4))
         {
@@ -657,6 +652,7 @@ void    server_parser::construct_server(std::vector<std::string>::iterator first
             if(isFileOrDirectory(this->getServerErrorPageObject()) == "error")
             {
                 std::cerr << "Error : Check The Server Error Path\n";
+                // system("leaks webserv");
                 exit(0);
             }
         }

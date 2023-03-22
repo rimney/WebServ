@@ -6,7 +6,7 @@
 /*   By: eel-ghan <eel-ghan@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/15 20:32:17 by rimney            #+#    #+#             */
-/*   Updated: 2023/03/22 03:09:31 by eel-ghan         ###   ########.fr       */
+/*   Updated: 2023/03/22 20:48:23 by eel-ghan         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -196,17 +196,17 @@ void    respond::recoverBody(int status_code)
     }
     else if(status_code == 413)
     {
-        this->setFinalString("HTTP/1.1 413 Request Entity Too Large\r\nContent-Type: text/html\r\n\r\nContent-Length: 41\\r\n<h1>\n413 Request Entity Too Large\n</h1>\r\n");
+        this->setFinalString("HTTP/1.1 413 Request Entity Too Large\r\nContent-Type: text/html\r\nContent-Length: 41\r\n\r\n<h1>\n413 Request Entity Too Large\n</h1>\r\n");
         this->setContentLenght(std::to_string(this->getfinalString().size()));
     }
     else if(status_code == 414)
     {
-        this->setFinalString("HTTP/1.1 414 Request-URI Too Longer\nContent-Type: text/html\r\n\r\nContent-Length: 37\\r\n<h1>\n414 Request-URI Too Long\n</h1>\r\n");
+        this->setFinalString("HTTP/1.1 414 Request-URI Too Longer\nContent-Type: text/html\r\nContent-Length: 37\r\n\r\n<h1>\n414 Request-URI Too Long\n</h1>\r\n");
         this->setContentLenght(std::to_string(this->getfinalString().size()));
     }
     else if (status_code == 403)
     {
-        this->setFinalString("HTTP/1.1 403 Error Forbidden\r\nContent-Type: text/html\r\n\r\nContent-Length: 31\\r\n<h1>\n 403 Error Forbidden</h1>\r\n");
+        this->setFinalString("HTTP/1.1 403 Error Forbidden\r\nContent-Type: text/html\r\nContent-Length: 31\r\n\r\n<h1>\n 403 Error Forbidden</h1>\r\n");
         this->setContentLenght(std::to_string(this->getfinalString().size()));
         
     }
@@ -312,7 +312,7 @@ void	respond::setRespond(std::string path, std::string httpVersion, std::string 
             return ;
         }   
     }
-    if(theFileExists(path) == false && isFileOrDirectory(path) == "file")
+    if(theFileExists(path) == false || isFileOrDirectory(path) == "error")
     {
         this->sethttpVersion(httpVersion);
         this->setstatusCode("404");
@@ -324,7 +324,6 @@ void	respond::setRespond(std::string path, std::string httpVersion, std::string 
     }
     else
     {        
-        std::cout << path << "PATH" << std::endl;
         this->setContentType(getFileType(path));
         this->sethttpVersion(httpVersion);
         this->setstatusCode("200");
