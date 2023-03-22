@@ -34,17 +34,13 @@ class server
         struct sockaddr_in          _addr;
         server_parser               _server_config;
         int                         _error_flag;
-        // std::string             _request;
-        std::string                 _response;
-        // Request                     request;
-        // respond                     respond;
-        std::map<int, respond>          _respond;
         std::map<int, std::string>  _request_map;
+        std::map<int, respond>      _respond;
         std::map<int, Request>      _request;
 
     public:
         server();
-        server(int port, unsigned int host, server_parser s);
+        server(int port, unsigned int host);
         server(server const & s);
         ~server();
 
