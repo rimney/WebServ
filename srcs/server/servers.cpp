@@ -6,7 +6,7 @@
 /*   By: eel-ghan <eel-ghan@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/10 00:38:14 by eel-ghan          #+#    #+#             */
-/*   Updated: 2023/03/20 22:41:20 by eel-ghan         ###   ########.fr       */
+/*   Updated: 2023/03/21 22:32:24 by eel-ghan         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -90,7 +90,7 @@ void    servers::run()
         // memcpy(&_set_read_fds, &_set_fds, sizeof(_set_fds)); // use ft_memcpy()
         _set_read_fds = _set_fds;
         FD_ZERO(&_set_write_fds);
-        for (std::map<int, server>::iterator it = _fds_cnx.begin(); it != _fds_cnx.end(); it++)
+        for (std::map<int, server>::iterator it = _fds_ready.begin(); it != _fds_ready.end(); it++)
             FD_SET((*it).first, &_set_write_fds);
         r = select(_max_fd + 1, &_set_read_fds, &_set_write_fds, NULL, &time);
 
@@ -99,8 +99,11 @@ void    servers::run()
             std::cerr << "ERROR: failed to select sockets.\n";
             for (std::map<int, server>::iterator it = _fds_cnx.begin(); it != _fds_cnx.end(); it++)
                 ::close((*it).first);
+            _fds_ready.clear();
             _fds_cnx.clear();
             FD_ZERO(&_set_fds);
+            FD_ZERO(&_set_read_fds);
+            FD_ZERO(&_set_write_fds);
             _max_fd = 0;
             for (int i = 0; i < _servers_count; i++)
             {
@@ -109,6 +112,7 @@ void    servers::run()
                 if (_max_fd < _servers[i].get_fd_socket())
                     _max_fd = _servers[i].get_fd_socket();
             }
+            std::cout << "<< here >>\n";
             continue ;
         }
         else if (r == 0)
@@ -122,18 +126,17 @@ void    servers::run()
                 try
                 {
                     (*it).accept();
+                    FD_SET((*it).get_fd_connection(), &_set_fds);
+                    _fds_cnx.insert(std::make_pair((*it).get_fd_connection(), *it));
+                    if (_max_fd < (*it).get_fd_connection())
+                        _max_fd = (*it).get_fd_connection();
+                    std::cout << "host: " << (*it).get_host() << ", port: " << (*it).get_port() << " accept a new connections\n\n";
                 }
                 catch(const std::string& msg)
                 {
                     std::cerr << msg << '\n';
                     break ;
                 }
-                
-                FD_SET((*it).get_fd_connection(), &_set_fds);
-                _fds_cnx.insert(std::make_pair((*it).get_fd_connection(), *it));
-                if (_max_fd < (*it).get_fd_connection())
-                    _max_fd = (*it).get_fd_connection();
-                std::cout << "host: " << (*it).get_host() << ", port: " << (*it).get_port() << " accept a new connections\n\n";
             }
         }
 
@@ -146,6 +149,8 @@ void    servers::run()
                 {
                     (*it).second.receive((*it).first);
                     (*it).second.process();
+                    _fds_ready.insert(std::make_pair((*it).first, (*it).second));
+                    // break;
                 }
                 catch(const std::string& msg)
                 {
@@ -159,14 +164,16 @@ void    servers::run()
         }
         
         // send response
-        for (std::map<int, server>::iterator it = _fds_cnx.begin(); it != _fds_cnx.end(); it++)
+        for (std::map<int, server>::iterator it = _fds_ready.begin(); it != _fds_ready.end(); it++)
         {
             if (FD_ISSET((*it).first, &_set_write_fds))
             {
                 try
                 {
                     (*it).second.send((*it).first);
+                    // ::close((*it).first);
                     _fds_cnx.erase((*it).first);
+                    _fds_ready.erase((*it).first);
                     break;
                 }
                 catch(const std::string& msg)
@@ -180,6 +187,7 @@ void    servers::run()
                 }
             }
         }
+        
         // for (std::vector<server>::iterator it = _servers.begin(); it != _servers.end(); it++)
         //     close((*it).get_fd_connection());
     }

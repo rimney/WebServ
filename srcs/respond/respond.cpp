@@ -6,7 +6,7 @@
 /*   By: rimney < rimney@student.1337.ma>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/15 20:32:17 by rimney            #+#    #+#             */
-/*   Updated: 2023/03/22 00:46:51 by rimney           ###   ########.fr       */
+/*   Updated: 2023/03/22 01:24:13 by rimney           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -201,12 +201,12 @@ void    respond::recoverBody(int status_code)
     }
     else if(status_code == 414)
     {
-        this->setFinalString("HTTP/1.1 414 Request-URI Too Longr\nContent-Type: text/plain\r\n\r\n<h1>\n414 Request-URI Too Long\n</h1>\n\r\n");
+        this->setFinalString("HTTP/1.1 414 Request-URI Too Longr\nContent-Type: text/plain\r\n\r\n<h1>\n414 Request-URI Too Long\n</h1>\r\n");
         this->setContentLenght(std::to_string(this->getfinalString().size()));
     }
     else if (status_code == 403)
     {
-        this->setFinalString("HTTP/1.1 403 Error Forbidden\r\nContent-Type: text/html\r\nContent-Length: 29\r\n\r\n<h1>\n403 Error Forbidden</h1>");
+        this->setFinalString("HTTP/1.1 403 Error Forbidden\r\nContent-Type: text/plain\r\n\r\n<h1>\n 403 Error Forbidden</h1>\r\n");
         this->setContentLenght(std::to_string(this->getfinalString().size()));
         
     }

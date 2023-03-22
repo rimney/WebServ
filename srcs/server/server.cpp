@@ -6,7 +6,7 @@
 /*   By: rimney < rimney@student.1337.ma>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/10 00:38:09 by eel-ghan          #+#    #+#             */
-/*   Updated: 2023/03/22 00:45:19 by rimney           ###   ########.fr       */
+/*   Updated: 2023/03/22 01:22:16 by rimney           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -67,8 +67,10 @@ server  & server::operator=(server const & s)
     _addr = s._addr;
     _request = s._request;
     _server_config = s._server_config;
-
-    this->respond.setRespondServer(_server_config);
+    _request = s._request;
+    request = s.request;
+    respond = s.respond;
+    // this->respond.setRespondServer(_server_config);
     return *this;
 }
 
