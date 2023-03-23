@@ -6,7 +6,7 @@
 /*   By: rimney < rimney@student.1337.ma>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/15 20:32:17 by rimney            #+#    #+#             */
-/*   Updated: 2023/03/23 03:29:54 by rimney           ###   ########.fr       */
+/*   Updated: 2023/03/23 16:09:12 by rimney           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -137,14 +137,19 @@ std::string	respond::getAutoIndexPage(std::string path)
     struct dirent *ent;
     
     temp = "<html>\n<head>\n<title>Directory listing</title>\n</head>\n<body>\n<ul>\n";
-    if ((dir = opendir(path.c_str())) != NULL) { // replace "." with the path to the directory you want to list
-        while ((ent = readdir (dir)) != NULL) {
-            if (ent->d_type == DT_REG) { // only list regular files
-                temp = temp +  "<li><a href=\"" + ent->d_name + "\">" + ent->d_name + "</a></li>\n";
-            }
+    if ((dir = opendir(path.c_str())) != NULL)
+    { // replace "." with the path to the directory you want to list
+        while ((ent = readdir (dir)) != NULL)
+        {
+            if (ent->d_type == DT_REG || ent->d_type == DT_DIR) { // list regular files and directories
+            std::string type = (ent->d_type == DT_REG) ? "file" : "directory";
+            temp = temp + "<li><a href=\"" + ent->d_name + "\">" + ent->d_name + "</a> (" + type + ")</li>\n";
         }
-        closedir (dir);
-    } else {
+    }
+    closedir (dir);
+    }
+    else
+    {
         std::cout << "Unable to open directory";
         return "";
     }
