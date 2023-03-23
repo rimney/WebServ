@@ -14,7 +14,7 @@ void Request::parser(std::string value)
         _token = _lexer.get_next_token();
         if(_token.type == TYPE_END_OF_LINE || _token.type == TYPE_CR)
             i++;
-            if(_token.type == TYPE_END_OF_SSECTION)
+        if(_token.type == TYPE_END_OF_SSECTION)
             end_of_section = true;
         if(i == 0 && !end_of_section)
         {
@@ -146,6 +146,7 @@ void Request::errors(server_parser &serv)
 void Request::location_well(server_parser &serv)
 {
     size_t found = 0;
+    int query_pos = 0;
     long index = start_line.location_index = -1;
     size_t index_of_charachter = 0;
     bool method_allowed = false;
@@ -174,11 +175,36 @@ void Request::location_well(server_parser &serv)
                 r_error = "405";
         }
         if(!serv.getServerLocationsObject()[index].getLocationRootObject().empty())//404 Not Found
+        {
+            if(serv.getServerLocationsObject()[index].getLocationRootObject() [serv.getServerLocationsObject()[index].getLocationRootObject() .length() - 1] == '/' && start_line.path[0] == '/')
+                 start_line.path.erase(0,1);
             start_line.full_path = serv.getServerLocationsObject()[index].getLocationRootObject() + start_line.path;
+            // for(int i = 0; i < (int)start_line.full_path.length();i++)
+            // {
+            //     if(start_line.full_path[i] == '/' && start_line.full_path[i + 1] == '/')
+            //     {
+            //         start_line.full_path.erase(i,1);
+            //         break;
+            //     }
+            // }
+        }
         else if(!serv.getRootObject().empty())
+        {
+            if(serv.getRootObject()[serv.getRootObject().length() - 1] == '/' && start_line.path[0] == '/')
+                 start_line.path.erase(0);
             start_line.full_path = serv.getRootObject() + start_line.path;
+        }
         else
             r_error = "404";
+        if(!start_line.full_path.empty())//query
+        {
+            query_pos = start_line.full_path.find("?");
+            if(query_pos != -1)
+            {
+                for(int i = query_pos +1 ; i < (int)start_line.full_path.length() && start_line.full_path[i] != '#'   ; i++)
+                    start_line.query += start_line.full_path[i];
+            }
+        }
     }
     else
         r_error = "404";

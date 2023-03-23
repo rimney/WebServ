@@ -14,8 +14,11 @@
 # include <vector>
 # include <fcntl.h>
 # include "parsing.hpp"
-#include "request.hpp"
-
+# include <cstring>
+# include <sys/stat.h>
+# include <stdio.h>
+# include "request.hpp"
+# include "respond.hpp"
 
 // TO BE DELETED //
 #include <string.h>
@@ -24,21 +27,20 @@
 class server
 {
     private:
-        int                 _port;
-        unsigned int        _host;
-        int                 _fd_socket;
-        int                 _fd_connection;
-        struct sockaddr_in  _addr;
-        server_parser       _server_config;
-        int                 _error_flag;
-        //
-        std::string         _request;
-        Request             request;
-        //
+        int                         _port;
+        unsigned int                _host;
+        int                         _fd_socket;
+        int                         _fd_connection;
+        struct sockaddr_in          _addr;
+        server_parser               _server_config;
+        int                         _error_flag;
+        std::map<int, std::string>  _request_map;
+        std::map<int, respond>      _respond;
+        std::map<int, Request>      _request;
 
     public:
         server();
-        server(int port, unsigned int host, server_parser s);
+        server(int port, unsigned int host);
         server(server const & s);
         ~server();
 
@@ -51,11 +53,14 @@ class server
         server  &       operator=(server const & s);
         void            accept();
         void            close();
-        void            receive();
+        void            receive(int fd);
+        void            send(int fd);
         void            set_server_config(server_parser & server_config);
         void            setup(server_parser & server_config);
+        void            delete_method(std::string & path);
         server_parser   getServerData(void) {return this->_server_config;}
-        void            process();
+        void            process(int fd);
+        void            Get(int location_index , std::string path, int fd);
     
     private:
         void            set_addr();
