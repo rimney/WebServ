@@ -14,7 +14,7 @@ void Request::parser(std::string value)
         _token = _lexer.get_next_token();
         if(_token.type == TYPE_END_OF_LINE || _token.type == TYPE_CR)
             i++;
-            if(_token.type == TYPE_END_OF_SSECTION)
+        if(_token.type == TYPE_END_OF_SSECTION)
             end_of_section = true;
         if(i == 0 && !end_of_section)
         {
@@ -46,7 +46,6 @@ void Request::parser(std::string value)
         wait_body = false;
     else
     {
-            
         if(!header.find("Transfer-Encoding")->first.empty())
         {
             if(header.find("Transfer-Encoding")->second == "chunked" )
@@ -68,71 +67,64 @@ void Request::parser(std::string value)
 void Request::body_handling(std::string buffer)
 {
     std::string hexa;
-
     if(!header.find("Transfer-Encoding")->first.empty())
     {
-        if(buffer[buffer.length() - 1] == 10 && buffer[buffer.length() - 2] == 13 && buffer[buffer.length() - 3] == 10
-                                && buffer[buffer.length() - 4] == 13 && buffer[buffer.length() - 5] == '0' && buffer[buffer.length() - 6] == 10 && buffer[buffer.length() - 7] == 13)
+
+        if(header.find("Transfer-Encoding")->second == "chunked")
         {
-        
-            buffer.erase(buffer.length() - 7 , buffer.length() - 1);
-            wait_body = false;
-        }
-        if(header.find("Transfer-Encoding")->second == "chunked" )
-        {
+            if(buffer[0] == '0' && buffer[buffer.length() - 1] == 10 && buffer[buffer.length() - 2] == 13 && buffer[buffer.length() - 3] == 10
+                            && buffer[buffer.length() - 4] == 13 && buffer[buffer.length() - 5] == '0')
+            {
+                body.clear();
+                wait_body = false;
+            }
+            else if(buffer[buffer.length() - 1] == 10 && buffer[buffer.length() - 2] == 13 && buffer[buffer.length() - 3] == 10
+                            && buffer[buffer.length() - 4] == 13 && buffer[buffer.length() - 5] == '0' && buffer[buffer.length() - 6] == 10 && buffer[buffer.length() - 7] == 13)
+            {
+                buffer.erase(buffer.length() - 7);
+                wait_body = false;
+            }
             if(body_size == 0)
             {
-                for(long i = 0 ; i < (long)buffer.length(); i++)
-                {
-                    if(buffer[i] == 13 && buffer[i + 1] == 10)
-                    {
-                        buffer.erase(0,i + 2);
-                        break;
-                    }
-                    else
-                        hexa += buffer[i];
-                }
-                std::cerr << "*"<< hexa << "*"<< std::endl;
-                body_size = std::stoul(hexa, nullptr, 16);
-                body = buffer;
+                body.erase(0,body.find("\r\n") + 2);
+                body_size = 1;
             }
             else
+               body += buffer;
+            if(wait_body == false)
             {
-                
-                for (int  i = 0; i < (int)buffer.length() ; i++)
+                bool is_hexa = true;
+                for(long long pos = 0; pos != -1;)
                 {
-                    if(buffer[i] == 13 && buffer[i + 1] == 10)
+                    pos = body.find("\r\n",pos + 1);
+                    for(size_t j = pos + 2 ; j < body.length() ; j++)
                     {
-                        for(int j = i + 2 ; j < (int)buffer.length() ; j++)
+                        if(body[j] == 13 && body[j + 1] == 10)
                         {
-                            if(buffer[j] == 13 && buffer[j + 1] == 10)
+                            if(is_hexa == true)
                             {
-
-                                if(!hexa.empty())
-                                {
-                                    std::cerr << hexa << std::endl;
-                                    body_size = std::stoul(hexa, nullptr, 16);
-                                    i = j + 2;
-                                    break;
-                                }
-                            }
-                            hexa += buffer[j];
-                            if((buffer[j] < 48 || buffer[j] > 57) &&  (buffer[j] < 65 || buffer[j] > 70) )
-                            {
-                                hexa.clear();
+                                body.erase(body.begin() + pos, body.begin() + (j + 2));
+                                is_hexa = false;
                                 break;
                             }
                         }
+                        if((body[j] >= '0' && body[j] <= '9') ||  (body[j] >= 'a' && body[j] <= 'f') )
+                            is_hexa = true;
+                        else
+                        {
+                            is_hexa = false;
+                            break;
+                        }
                     }
-                    body += buffer[i];
                 }
+                
             }
         }
     }
     else if(!header.find("Content-Length")->first.empty())
     {
         body += buffer;
-        if((unsigned long)body.length() >= body_size)
+        if(body.length() >= (size_t)body_size)
             wait_body = false;
     }
 }
@@ -150,7 +142,7 @@ void Request::location_well(server_parser &serv)
     long index = start_line.location_index = -1;
     size_t index_of_charachter = 0;
     bool method_allowed = false;
-    for(size_t i = 0 ; i < (size_t)serv.getServerLocationsObject().size(); i++)
+    for(size_t i = 0 ; i < (size_t)serv.getServerLocationsObject().size(); i++)//serche path
     {
         found = start_line.path.find(serv.getServerLocationsObject()[i].getLocationNameObject());
         if (found != (size_t) -1  && index_of_charachter <= serv.getServerLocationsObject()[i].getLocationNameObject().length())
@@ -185,7 +177,6 @@ void Request::location_well(server_parser &serv)
         if(!start_line.full_path.empty())//query
         {
             query_pos = start_line.full_path.find("?");
-            std::cerr << "*-"<< query_pos << std::endl;
             if(query_pos != -1)
             {
                 for(int i = query_pos +1 ; i < (int)start_line.full_path.length() && start_line.full_path[i] != '#'   ; i++)
@@ -195,7 +186,6 @@ void Request::location_well(server_parser &serv)
     }
     else
         r_error = "404";
-   
 }
 
 void Request::request_well_formed(server_parser &serv)
@@ -220,7 +210,10 @@ void Request::request_well_formed(server_parser &serv)
     {
         if(((tmp_path[i] < 95 || tmp_path[i] > 'z') && (tmp_path[i] < 33 || tmp_path[i] > 90))
             || tmp_path[i] == 34 || tmp_path[i] == 60 || tmp_path[i] == 62 || tmp_path[i] == 96)
-                r_error = "400 Bad Request";
+        {
+            r_error = "400 Bad Request";
+            break;
+        }
     }
 }
 
