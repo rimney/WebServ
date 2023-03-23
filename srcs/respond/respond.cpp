@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   respond.cpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: eel-ghan <eel-ghan@student.42.fr>          +#+  +:+       +#+        */
+/*   By: rimney <rimney@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/15 20:32:17 by rimney            #+#    #+#             */
-/*   Updated: 2023/03/22 20:48:23 by eel-ghan         ###   ########.fr       */
+/*   Updated: 2023/03/23 01:43:55 by rimney           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -100,7 +100,6 @@ std::string respond::getFileType(const std::string& fileName)
 {
     // Get the file extension
     std::string ext = fileName.substr(fileName.find_last_of(".") + 1);
-
     // Check the file extension and return the content-type
     if (ext == "txt")
         return "text/plain";
@@ -115,7 +114,7 @@ std::string respond::getFileType(const std::string& fileName)
     else if (ext == "css")
         return "text/css";
     else
-        return "application/octet-stream";
+        return "text/html";
 }
 
 
@@ -129,6 +128,33 @@ void    respond::cleanAll(void)
     this->ContentLenght.clear();
     this->finalString.clear();
     this->content_type.clear();
+}
+
+std::string	respond::getAutoIndexPage(std::string path)
+{
+    std::string temp;
+    DIR *dir;
+    struct dirent *ent;
+    
+    temp = "<html>\n<head>\n<title>Directory listing</title>\n</head>\n<body>\n<ul>\n";
+    if ((dir = opendir(path.c_str())) != NULL) { // replace "." with the path to the directory you want to list
+        while ((ent = readdir (dir)) != NULL) {
+            if (ent->d_type == DT_REG) { // only list regular files
+                temp = temp +  "<li><a href=\"" + ent->d_name + "\">" + ent->d_name + "</a></li>\n";
+            }
+        }
+        closedir (dir);
+    } else {
+        std::cout << "Unable to open directory";
+        return "";
+    }
+    temp = temp + "</ul>\n";
+    temp = temp + "</body>\n";
+    temp = temp + "</html>\n";
+    
+    std::cout << temp << "\n";
+    exit(0);
+    return (path);
 }
 
 std::string     respond::fileToSring(std::string path)

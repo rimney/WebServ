@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   server.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: eel-ghan <eel-ghan@student.42.fr>          +#+  +:+       +#+        */
+/*   By: rimney <rimney@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/10 00:38:09 by eel-ghan          #+#    #+#             */
-/*   Updated: 2023/03/22 23:41:30 by eel-ghan         ###   ########.fr       */
+/*   Updated: 2023/03/23 01:46:27 by rimney           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -154,7 +154,7 @@ void    server::send(int fd)
     // if flage_body = 1 // send get_rest_body() 
     if(_respond[fd].getBody().empty())
         _respond[fd].recoverBody(atoi(_respond[fd].getstatusCode().c_str()));
-    // std::cout << _respond[fd].getfinalString() << '\n';
+    std::cout << _respond[fd].getfinalString() << '\n';
     if (::send(fd, _respond[fd].getfinalString().c_str(), _respond[fd].getfinalString().size(), 0) == -1)
     {
         // handle error 
@@ -295,10 +295,23 @@ void server::Get(int location_index , std::string path, int fd)
         }
         else if(isFOrD == "directory")
         {
-            if(location.getLocationIsAutoIndexObject())
+            if(isFileOrDirectory(location.getLocationRootObject() + "/" + location.getLocationIndexObject()) == "file")
             {
-                Get(location_index, path + "/" + location.getLocationIndexObject(), fd); // must handle the file well
-                return;
+                std::cout << location.getLocationIndexObject() << " <<\n";
+                Get(location_index, location.getLocationRootObject() + "/" + location.getLocationIndexObject(), fd);
+            }
+            else if (location.getLocationIndexObject().size() > 0 &&
+                isFileOrDirectory(location.getLocationRootObject() + "/" + location.getLocationIndexObject()) == "error")
+            {
+                _respond[fd].setRespond(path, _respond[fd].gethttpVersion(), "404");
+                return ;
+            }
+            else if(location.getLocationIsAutoIndexObject()) // HERE
+            {
+                _respond[fd].setBody(_respond[fd].getAutoIndexPage(path));
+                // _respond[fd].setContentLenght(_respond[fd].)
+                // _respond[fd].mergeRespondStrings();
+                return ;
             }
             else
             {

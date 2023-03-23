@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Parsing.cpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: eel-ghan <eel-ghan@student.42.fr>          +#+  +:+       +#+        */
+/*   By: rimney <rimney@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/07 03:50:36 by rimney            #+#    #+#             */
-/*   Updated: 2023/03/22 20:32:23 by eel-ghan         ###   ########.fr       */
+/*   Updated: 2023/03/23 00:39:40 by rimney           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -754,11 +754,6 @@ void    server_parser::restoreIndexObject(int i)
     {
         std::cerr << "Error : Duplicate Index Path\n";
         exit(0);
-    }
-    else if(this->index.size() == 0 && this->location[i].getLocationIndexObject().size() == 0)
-    {
-        std::cerr << "Error : There's No Index In Server\n";
-        exit(0);   
     }
 }
 
