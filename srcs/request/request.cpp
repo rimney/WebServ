@@ -46,7 +46,6 @@ void Request::parser(std::string value)
         wait_body = false;
     else
     {
-            
         if(!header.find("Transfer-Encoding")->first.empty())
         {
             if(header.find("Transfer-Encoding")->second == "chunked" )
@@ -73,7 +72,13 @@ void Request::body_handling(std::string buffer)
 
         if(header.find("Transfer-Encoding")->second == "chunked")
         {
-            if(buffer[buffer.length() - 1] == 10 && buffer[buffer.length() - 2] == 13 && buffer[buffer.length() - 3] == 10
+            if(buffer[0] == '0' && buffer[buffer.length() - 1] == 10 && buffer[buffer.length() - 2] == 13 && buffer[buffer.length() - 3] == 10
+                            && buffer[buffer.length() - 4] == 13 && buffer[buffer.length() - 5] == '0')
+            {
+                body.clear();
+                wait_body = false;
+            }
+            else if(buffer[buffer.length() - 1] == 10 && buffer[buffer.length() - 2] == 13 && buffer[buffer.length() - 3] == 10
                             && buffer[buffer.length() - 4] == 13 && buffer[buffer.length() - 5] == '0' && buffer[buffer.length() - 6] == 10 && buffer[buffer.length() - 7] == 13)
             {
                 buffer.erase(buffer.length() - 7);
@@ -81,47 +86,34 @@ void Request::body_handling(std::string buffer)
             }
             if(body_size == 0)
             {
-                for(size_t i = 0 ; i < (size_t)buffer.length(); i++)
-                {
-                    if(buffer[i] == 13 && buffer[i + 1] == 10)
-                    {
-                        buffer.erase(0,i + 2);
-                        break;
-                    }
-                    else
-                        hexa += buffer[i];
-                }
-                body_size = std::strtoul(hexa.c_str(), 0, 16);//hexa
-                body = buffer;
+                body.erase(0,body.find("\r\n") + 2);
+                body_size = 1;
             }
             else
-                body += buffer;
+               body += buffer;
             if(wait_body == false)
             {
-                
-                bool is_hexa = false;
-                for (size_t i = 0; i < body.length() ; i++)
+                bool is_hexa = true;
+                for(long long pos = 0; pos != -1;)
                 {
-                    if( i + 1 < body.length() && body[i] == 13 && body[i + 1] == 10)
+                    pos = body.find("\r\n",pos + 1);
+                    for(size_t j = pos + 2 ; j < body.length() ; j++)
                     {
-                        for(size_t j = i + 2 ; j < body.length() ; j++)
+                        if(body[j] == 13 && body[j + 1] == 10)
                         {
-                            if(body[j] == 13 && body[j + 1] == 10)
+                            if(is_hexa == true)
                             {
-                                if(is_hexa == true)
-                                {
-                                    body.erase(body.begin() + i, body.begin() + (j + 2));
-                                   is_hexa = false;
-                                    break;
-                                }
-                            }
-                            if((body[j] >= '0' && body[j] <= '9') ||  (body[j] >= 'a' && body[j] <= 'f') )
-                                is_hexa = true;
-                            else
-                            {
+                                body.erase(body.begin() + pos, body.begin() + (j + 2));
                                 is_hexa = false;
                                 break;
                             }
+                        }
+                        if((body[j] >= '0' && body[j] <= '9') ||  (body[j] >= 'a' && body[j] <= 'f') )
+                            is_hexa = true;
+                        else
+                        {
+                            is_hexa = false;
+                            break;
                         }
                     }
                 }
@@ -194,7 +186,6 @@ void Request::location_well(server_parser &serv)
     }
     else
         r_error = "404";
-   
 }
 
 void Request::request_well_formed(server_parser &serv)
