@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   server.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: rimney <rimney@student.42.fr>              +#+  +:+       +#+        */
+/*   By: rimney < rimney@student.1337.ma>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/10 00:38:09 by eel-ghan          #+#    #+#             */
-/*   Updated: 2023/03/23 01:46:27 by rimney           ###   ########.fr       */
+/*   Updated: 2023/03/23 03:37:31 by rimney           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -272,7 +272,7 @@ void server::Get(int location_index , std::string path, int fd)
     {
         _respond[fd].setBody(_respond[fd].fileToSring(location.getLocationRedirectionObject()));
         _respond[fd].setContentLenght(std::to_string(_respond[fd].getBody().size()));
-        _respond[fd].mergeRespondStrings();  
+        _respond[fd].mergeRespondStrings();
         return ;
     }
     else if(_respond[fd].getstatusCode() == "200")
@@ -309,7 +309,10 @@ void server::Get(int location_index , std::string path, int fd)
             else if(location.getLocationIsAutoIndexObject()) // HERE
             {
                 _respond[fd].setBody(_respond[fd].getAutoIndexPage(path));
-                // _respond[fd].setContentLenght(_respond[fd].)
+                _respond[fd].setContentLenght(std::to_string(_respond[fd].getBody().size()));
+                _respond[fd].mergeRespondStrings();
+                std::cout << _respond[fd].getBody() << std::endl;
+                std::cout << _respond[fd].getContentLenght() << std::endl;
                 // _respond[fd].mergeRespondStrings();
                 return ;
             }

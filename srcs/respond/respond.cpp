@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   respond.cpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: rimney <rimney@student.42.fr>              +#+  +:+       +#+        */
+/*   By: rimney < rimney@student.1337.ma>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/15 20:32:17 by rimney            #+#    #+#             */
-/*   Updated: 2023/03/23 01:43:55 by rimney           ###   ########.fr       */
+/*   Updated: 2023/03/23 03:29:54 by rimney           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -153,8 +153,7 @@ std::string	respond::getAutoIndexPage(std::string path)
     temp = temp + "</html>\n";
     
     std::cout << temp << "\n";
-    exit(0);
-    return (path);
+    return (temp);
 }
 
 std::string     respond::fileToSring(std::string path)
