@@ -68,21 +68,20 @@ void Request::parser(std::string value)
 void Request::body_handling(std::string buffer)
 {
     std::string hexa;
-
     if(!header.find("Transfer-Encoding")->first.empty())
     {
-        if(buffer[buffer.length() - 1] == 10 && buffer[buffer.length() - 2] == 13 && buffer[buffer.length() - 3] == 10
-                                && buffer[buffer.length() - 4] == 13 && buffer[buffer.length() - 5] == '0' && buffer[buffer.length() - 6] == 10 && buffer[buffer.length() - 7] == 13)
+
+        if(header.find("Transfer-Encoding")->second == "chunked")
         {
-        
-            buffer.erase(buffer.length() - 7 , buffer.length() - 1);
-            wait_body = false;
-        }
-        if(header.find("Transfer-Encoding")->second == "chunked" )
-        {
+            if(buffer[buffer.length() - 1] == 10 && buffer[buffer.length() - 2] == 13 && buffer[buffer.length() - 3] == 10
+                            && buffer[buffer.length() - 4] == 13 && buffer[buffer.length() - 5] == '0' && buffer[buffer.length() - 6] == 10 && buffer[buffer.length() - 7] == 13)
+            {
+                buffer.erase(buffer.length() - 7);
+                wait_body = false;
+            }
             if(body_size == 0)
             {
-                for(long i = 0 ; i < (long)buffer.length(); i++)
+                for(size_t i = 0 ; i < (size_t)buffer.length(); i++)
                 {
                     if(buffer[i] == 13 && buffer[i + 1] == 10)
                     {
@@ -96,46 +95,44 @@ void Request::body_handling(std::string buffer)
                 body = buffer;
             }
             else
+                body += buffer;
+            if(wait_body == false)
             {
-                buffer_body.clear();
-                for(int i = body.length() - 20 ;i < (int)(body.length()); i++)
+                
+                bool is_hexa = false;
+                for (size_t i = 0; i < body.length() ; i++)
                 {
-                    buffer_body += body[i];
-                }
-                body.erase(body.length() - 20);
-                buffer.insert(0,buffer_body);
-                for (int  i = 0; i < (int)buffer.length() ; i++)
-                {
-                    if(buffer[i] == 13 && buffer[i + 1] == 10)
+                    if( i + 1 < body.length() && body[i] == 13 && body[i + 1] == 10)
                     {
-                        for(int j = i + 2 ; j < (int)buffer.length() ; j++)
+                        for(size_t j = i + 2 ; j < body.length() ; j++)
                         {
-                            if(buffer[j] == 13 && buffer[j + 1] == 10)
+                            if(body[j] == 13 && body[j + 1] == 10)
                             {
-                                if(!hexa.empty())
+                                if(is_hexa == true)
                                 {
-                                    body_size = std::strtoul(hexa.c_str(), 0, 16);
-                                    i = j + 2;
+                                    body.erase(body.begin() + i, body.begin() + (j + 2));
+                                   is_hexa = false;
                                     break;
                                 }
                             }
-                            hexa += buffer[j];
-                            if((buffer[j] < 48 || buffer[j] > 57) &&  (buffer[j] < 65 || buffer[j] > 70) )
+                            if((body[j] >= '0' && body[j] <= '9') ||  (body[j] >= 'a' && body[j] <= 'f') )
+                                is_hexa = true;
+                            else
                             {
-                                hexa.clear();
+                                is_hexa = false;
                                 break;
                             }
                         }
                     }
-                    body += buffer[i];
                 }
+                
             }
         }
     }
     else if(!header.find("Content-Length")->first.empty())
     {
         body += buffer;
-        if((unsigned long)body.length() >= body_size)
+        if(body.length() >= (size_t)body_size)
             wait_body = false;
     }
 }

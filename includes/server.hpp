@@ -3,7 +3,7 @@
 
 # define DEFAULT_PORT 8080
 # define DEFAULT_PROTOCOL 0
-# define RECV_SIZE 1024
+# define RECV_SIZE 2048
 
 
 # include <netinet/in.h>
