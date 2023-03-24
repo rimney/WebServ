@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   respond.hpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: rimney <rimney@student.42.fr>              +#+  +:+       +#+        */
+/*   By: rimney < rimney@student.1337.ma>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/14 17:42:24 by rimney            #+#    #+#             */
-/*   Updated: 2023/03/23 01:30:50 by rimney           ###   ########.fr       */
+/*   Updated: 2023/03/24 17:00:04 by rimney           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,7 +22,7 @@
 class respond
 {
     private:
-        // bool			c_flag;
+        bool			bodyFlag;
         std::string		Body; // content
         std::string		statusCode; // 200 404 501
         std::string		httpVersion; // http/1.1
@@ -63,6 +63,11 @@ class respond
         std::string	getFileType(const std::string& fileName);
         void		setContentType(std::string const & content_type);
         std::string	getAutoIndexPage(std::string path);
+        bool        getBodyFlag();
+        void        setBodyFlag(bool v);
+        std::string chunkedFileToString(std::string path);
+
+        
 
         
 };

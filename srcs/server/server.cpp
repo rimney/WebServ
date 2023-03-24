@@ -6,7 +6,7 @@
 /*   By: rimney < rimney@student.1337.ma>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/10 00:38:09 by eel-ghan          #+#    #+#             */
-/*   Updated: 2023/03/23 03:37:31 by rimney           ###   ########.fr       */
+/*   Updated: 2023/03/24 17:01:50 by rimney           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -151,16 +151,32 @@ void    server::receive(int fd)
 
 void    server::send(int fd)
 {
-    // if flage_body = 1 // send get_rest_body() 
+    ssize_t sent;
+
+    std::cout << _respond[fd].getBody();
     if(_respond[fd].getBody().empty())
         _respond[fd].recoverBody(atoi(_respond[fd].getstatusCode().c_str()));
+    
     std::cout << _respond[fd].getfinalString() << '\n';
-    if (::send(fd, _respond[fd].getfinalString().c_str(), _respond[fd].getfinalString().size(), 0) == -1)
+    std::cout << _respond[fd].getBodyFlag() << " <<here\n";
+    if(_respond[fd].getBodyFlag() == false)
     {
-        // handle error 
-        throw(std::string("ERROR: send() faild to send response"));
-    }
+        if ((sent = ::send(fd, _respond[fd].getfinalString().c_str(), _respond[fd].getfinalString().size(), 0)) == -1)
+        {
+            // handle error 
+            throw(std::string("ERROR: send() faild to send response"));
+        }
     _respond[fd].cleanAll();
+    }
+    else
+    {
+        if ((sent = ::send(fd, _respond[fd].getfinalString().c_str(), _respond[fd].getfinalString().size(), 0)) == -1)
+        {
+            // handle error 
+            throw(std::string("ERROR: send() faild to send response"));
+        }
+        exit(0);
+    }
 }
 
 void    server::set_server_config(server_parser  & server_config)
@@ -286,10 +302,21 @@ void server::Get(int location_index , std::string path, int fd)
             }
             else
             {
-                _respond[fd].setBody(_respond[fd].fileToSring(path));
-                _respond[fd].setContentLenght(std::to_string(_respond[fd].getBody().size()));
-                _respond[fd].setContentType(_respond[fd].getFileType(path));
-                _respond[fd].mergeRespondStrings();
+                
+                if(_respond[fd].fileToSring(path).size() > 1024)
+                    _respond[fd].setBodyFlag(true);
+                if(_respond[fd].getBodyFlag() == false)
+                {
+                    _respond[fd].setBody(_respond[fd].fileToSring(path));
+                    _respond[fd].mergeRespondStrings();
+                }
+                else
+                {
+                    _respond[fd].setBody(_respond[fd].chunkedFileToString(path));
+                    std::cout << _respond[fd].getBody() << std::endl;
+                    exit(0);
+                }
+                
                 return ;
             }
         }

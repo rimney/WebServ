@@ -6,7 +6,7 @@
 /*   By: rimney < rimney@student.1337.ma>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/15 20:32:17 by rimney            #+#    #+#             */
-/*   Updated: 2023/03/23 16:09:12 by rimney           ###   ########.fr       */
+/*   Updated: 2023/03/24 16:59:17 by rimney           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,6 +36,16 @@ size_t respond::getContentLenght_sizet(void)
 {
     return (this->Body.size());
 }
+
+bool respond::getBodyFlag(void)
+{
+    return (this->bodyFlag);
+}
+
+void respond::setBodyFlag(bool v)
+{
+    this->bodyFlag = v;
+}   
 
 std::string respond::getBody(void)
 {
@@ -94,6 +104,13 @@ bool respond::isAmongErrorCodes(int error_code)
             return (true);
     }
     return (false);
+}
+
+std::string respond::chunkedFileToString(std::string path)
+{ 
+    std::cout << path << " < should do chuking here !!\n";
+    exit(0);
+    return "";
 }
 
 std::string respond::getFileType(const std::string& fileName)
@@ -249,10 +266,12 @@ void    respond::setContentType(std::string const & content_type)
 
 void	respond::setRespond(std::string path, std::string httpVersion, std::string error)
 {
+    this->bodyFlag = false;
     if(!error.empty())
     {
         if(error == "501 Not Implemented")
         {
+            this->bodyFlag = false;
             this->sethttpVersion(httpVersion);
             this->setstatusCode("501");
             this->setstatusDescription("Not Implemented");
@@ -263,6 +282,7 @@ void	respond::setRespond(std::string path, std::string httpVersion, std::string 
         }
         else if(error == "403")
         {
+            this->bodyFlag = false;
             this->sethttpVersion(httpVersion);
             this->setstatusCode("403");
             this->setstatusDescription("Forbidden");
@@ -273,6 +293,7 @@ void	respond::setRespond(std::string path, std::string httpVersion, std::string 
         }
         else if(error == "400 Bad Request")
         {
+            this->bodyFlag = false;
             this->sethttpVersion(httpVersion);
             this->setstatusCode("400");
             this->setstatusDescription("Bad Request");
@@ -283,6 +304,7 @@ void	respond::setRespond(std::string path, std::string httpVersion, std::string 
         }
         else if(error == "413 Request Entity Too Large")
         {
+            this->bodyFlag = false;
             this->sethttpVersion(httpVersion);
             this->setstatusCode("413");
             this->setstatusDescription("Request Entity Too Large");
@@ -293,6 +315,7 @@ void	respond::setRespond(std::string path, std::string httpVersion, std::string 
         }
         else if(error == "414 Request-URI Too Long")
         {
+            this->bodyFlag = false;
             this->sethttpVersion(httpVersion);
             this->setstatusCode("414");
             this->setstatusDescription("Request-URI Too Long");
@@ -303,6 +326,7 @@ void	respond::setRespond(std::string path, std::string httpVersion, std::string 
         }
         else if(error == "400 Bad Request")
         {
+            this->bodyFlag = false;
             this->sethttpVersion(httpVersion);
             this->setstatusCode("400");
             this->setstatusDescription("400 Bad Request");
@@ -313,6 +337,7 @@ void	respond::setRespond(std::string path, std::string httpVersion, std::string 
         }
         else if(error == "404")
         {
+            this->bodyFlag = false;
             this->sethttpVersion(httpVersion);
             this->setstatusCode("404");
             this->setstatusDescription("Not Found");
@@ -323,6 +348,7 @@ void	respond::setRespond(std::string path, std::string httpVersion, std::string 
         }
         else if(error == "405")
         {
+            this->bodyFlag = false;
             this->sethttpVersion(httpVersion);
             this->setstatusCode("405");
             this->setstatusDescription("Method Not Allowed");
@@ -333,6 +359,7 @@ void	respond::setRespond(std::string path, std::string httpVersion, std::string 
         }
         else if(error == "301") // << HERE
         {
+            this->bodyFlag = false;
             this->sethttpVersion(httpVersion);
             this->setstatusCode("301");
             this->setstatusDescription("Moved Permanently");
@@ -344,6 +371,7 @@ void	respond::setRespond(std::string path, std::string httpVersion, std::string 
     }
     if(theFileExists(path) == false || isFileOrDirectory(path) == "error")
     {
+        this->bodyFlag = false;
         this->sethttpVersion(httpVersion);
         this->setstatusCode("404");
         this->setstatusDescription("Not Found");
@@ -353,14 +381,22 @@ void	respond::setRespond(std::string path, std::string httpVersion, std::string 
         return ;
     }
     else
-    {        
-        this->setContentType(getFileType(path));
-        this->sethttpVersion(httpVersion);
-        this->setstatusCode("200");
-        this->setstatusDescription("OK");
-        this->setBody(this->setErrorBody(this->getstatusCode()));   
-        this->setContentLenght(std::to_string(this->getBody().size()));
-		this->mergeRespondStrings();
+    { 
+        this->pathSave = path;
+        std::cout << getfinalString().size() << " << size <<\n";
+        this->finalString.clear();
+        if(this->getBodyFlag() == false)
+        {
+            std::cout << "Header Set !\n"; 
+            this->setContentType(getFileType(path));
+            this->sethttpVersion(httpVersion);
+            this->setstatusCode("200");
+            this->setstatusDescription("OK");
+            this->setContentLenght(std::to_string(fileToSring(path).size()));
+            this->Body.clear();
+            if(getfinalString().size() == 0)
+		        this->mergeRespondStrings();
+        }
         return ;
     }
 }
