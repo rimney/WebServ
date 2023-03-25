@@ -6,7 +6,7 @@
 /*   By: rimney < rimney@student.1337.ma>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/10 00:38:09 by eel-ghan          #+#    #+#             */
-/*   Updated: 2023/03/24 17:01:50 by rimney           ###   ########.fr       */
+/*   Updated: 2023/03/24 17:01:50 by rimney            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -166,7 +166,7 @@ void    server::send(int fd)
             // handle error 
             throw(std::string("ERROR: send() faild to send response"));
         }
-    _respond[fd].cleanAll();
+        _respond[fd].cleanAll();
     }
     else
     {
@@ -175,7 +175,6 @@ void    server::send(int fd)
             // handle error 
             throw(std::string("ERROR: send() faild to send response"));
         }
-        exit(0);
     }
 }
 
