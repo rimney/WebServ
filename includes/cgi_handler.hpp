@@ -5,8 +5,11 @@
 # define CGI_HANDLER
 
 # include <vector>
+# include <unistd.h>
 # include "request.hpp"
 # include "parsing.hpp"
+
+# define CGI_BUFFER 1024
 
 class cgi_handler
 {
@@ -14,6 +17,7 @@ class cgi_handler
         std::vector<std::string>    _env;
         server_parser               _server_config;
         Request                     _request;
+        server_location             _location;
         
 
     public:
@@ -23,11 +27,11 @@ class cgi_handler
 
         cgi_handler &   operator=(cgi_handler const & c);
         void            init_env();
-        void            exec();
+        std::string     exec(std::string const & script);
     
     private:
         cgi_handler();
-        char**  cgi_handler::vector_to_ptr();
+        char**          vector_to_ptr();
 
 };
 
