@@ -6,18 +6,21 @@
 /*   By: rimney < rimney@student.1337.ma>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/14 17:42:24 by rimney            #+#    #+#             */
-/*   Updated: 2023/03/24 17:00:04 by rimney           ###   ########.fr       */
+/*   Updated: 2023/03/26 19:28:41 by rimney           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#ifndef RESPOND_HPP
+# ifndef RESPOND_HPP
 # define RESPOND_HPP
-
 # include "../includes/parsing.hpp"
 # include "sys/stat.h"
-#include <cstdio>
-#include <dirent.h>
-#include <fcntl.h>
+# include <cstdio>
+# include <dirent.h>
+# include <fcntl.h>
+# include <sys/types.h>
+# include <sys/uio.h>
+# include <unistd.h>
+# include <string>
 
 class respond
 {
@@ -32,6 +35,7 @@ class respond
         std::string		statusDescription;
 		std::string		pathSave;
         server_parser	server;
+        std::vector<std::string>    bodyChunked;
 		std::string		tempAutoIndexFile;// set a header flag << // set a path to the file
     
     public:
@@ -65,7 +69,10 @@ class respond
         std::string	getAutoIndexPage(std::string path);
         bool        getBodyFlag();
         void        setBodyFlag(bool v);
-        std::string chunkedFileToString(std::string path);
+        std::string getPathSave(void);
+        std::vector<std::string> getBodyChunked(void);
+        void    setBodyChunked(std::vector<std::string> s);
+        std::vector<std::string> chunkedFileToString(std::string path);
 
         
 

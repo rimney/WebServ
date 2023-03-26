@@ -6,7 +6,7 @@
 /*   By: rimney < rimney@student.1337.ma>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/15 20:32:17 by rimney            #+#    #+#             */
-/*   Updated: 2023/03/25 00:46:59 by rimney           ###   ########.fr       */
+/*   Updated: 2023/03/26 19:29:11 by rimney           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -95,6 +95,11 @@ bool theFileExists(const std::string& fileName)
     return (false);
 }
 
+std::string respond::getPathSave(void)
+{
+    return (this->pathSave);
+}
+
 bool respond::isAmongErrorCodes(int error_code)
 {
     std::vector<int> errors = server.getErrorCodesObject();
@@ -106,11 +111,30 @@ bool respond::isAmongErrorCodes(int error_code)
     return (false);
 }
 
-std::string respond::chunkedFileToString(std::string path)
-{ 
-    std::cout << path << " < should do chuking here !!\n";
-    exit(0);
-    return "";
+std::vector<std::string> respond::chunkedFileToString(std::string path)
+{
+    int fd;
+    std::vector<std::string> chunks;
+    
+    fd = open(path.c_str(), O_RDONLY);
+    char buffer[5000];
+    int bytes_read;
+    chunks.push_back(this->getfinalString());
+    while((bytes_read = read(fd, buffer, 5000)) > 0)
+    {
+        if (bytes_read == 0) {
+            break;
+        } else if (bytes_read == -1) {
+            std::cerr << "Error while chunking";
+            break;
+        }
+        std::string content(buffer, bytes_read);
+        chunks.push_back(content);
+        lseek(fd, bytes_read, SEEK_CUR);
+    }
+    
+    close(fd);
+    return (chunks);
 }
 
 std::string respond::getFileType(const std::string& fileName)
@@ -145,6 +169,8 @@ void    respond::cleanAll(void)
     this->ContentLenght.clear();
     this->finalString.clear();
     this->content_type.clear();
+    this->pathSave.clear();
+    this->bodyChunked.clear();
 }
 
 std::string	respond::getAutoIndexPage(std::string path)
@@ -257,6 +283,16 @@ void    respond::recoverBody(int status_code)
         this->setContentLenght(std::to_string(this->getfinalString().size()));
         
     }
+}
+
+void    respond::setBodyChunked(std::vector<std::string> s)
+{
+    this->bodyChunked = s;
+}
+
+std::vector<std::string>    respond::getBodyChunked(void)
+{
+    return(this->bodyChunked);
 }
 
 void    respond::setContentType(std::string const & content_type)

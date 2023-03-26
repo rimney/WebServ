@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   servers.cpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: eel-ghan <eel-ghan@student.42.fr>          +#+  +:+       +#+        */
+/*   By: rimney < rimney@student.1337.ma>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/10 00:38:14 by eel-ghan          #+#    #+#             */
-/*   Updated: 2023/03/22 23:40:55 by eel-ghan         ###   ########.fr       */
+/*   Updated: 2023/03/26 19:50:22 by rimney           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -165,7 +165,7 @@ void    servers::run()
                 try
                 {
                     (*it).second.send((*it).first);
-                    _fds_ready.erase(it);
+                     _fds_ready.erase(it);
                     break;
                 }
                 catch(const std::string& msg)
