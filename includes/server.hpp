@@ -19,6 +19,7 @@
 # include <stdio.h>
 # include "request.hpp"
 # include "respond.hpp"
+# include "cgi_handler.hpp"
 
 // TO BE DELETED //
 #include <string.h>

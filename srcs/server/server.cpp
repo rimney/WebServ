@@ -6,7 +6,7 @@
 /*   By: eel-ghan <eel-ghan@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/10 00:38:09 by eel-ghan          #+#    #+#             */
-/*   Updated: 2023/03/22 23:41:30 by eel-ghan         ###   ########.fr       */
+/*   Updated: 2023/03/26 02:25:42 by eel-ghan         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -281,7 +281,9 @@ void server::Get(int location_index , std::string path, int fd)
         {
             if(location.getHasCgi())
             {
-                std::cout << "location has CGI !!\n";  // BARAE << 
+                std::cout << "location has CGI !!\n";
+                cgi_handler cgi(_server_config, _request[fd]);
+                std::cout << cgi.exec(path) << '\n';
                 return ;
             }
             else
