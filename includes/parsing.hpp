@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   parsing.hpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: rimney < rimney@student.1337.ma>           +#+  +:+       +#+        */
+/*   By: eel-ghan <eel-ghan@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/24 21:53:42 by rimney            #+#    #+#             */
-/*   Updated: 2023/03/19 16:47:34 by rimney           ###   ########.fr       */
+/*   Updated: 2023/03/26 01:42:17 by eel-ghan         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,7 +44,7 @@ class server_location
         server_location(){};
         ~server_location(){};
         server_location(server_location const & s);
-        server_location operator=(server_location const & s);
+        server_location & operator=(server_location const & s);
 		////////////// Constructors and Overloads //////////////
 		
 		////////////// Getters and Setters //////////////
