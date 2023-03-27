@@ -165,7 +165,7 @@ void    server::send(int fd)
     
     if(_respond[fd].getBodyFlag() == true)
         _respond[fd].setFinalString(_respond[fd].chunkedFileToString(_respond[fd].getPathSave()));
-
+    std::cout << _respond[fd].getfinalString() << " << HERE\n";
     if(_respond[fd].getfinalString().size() > 0)
     {
         if ((::send(fd, _respond[fd].getfinalString().c_str(), _respond[fd].getfinalString().size(), 0)) == -1)
@@ -305,7 +305,6 @@ void server::Get(int location_index , std::string path, int fd)
                 {
                     if(_respond[fd].getBodyFlag() == true)
                     {
-                        std::cout << "PASS\n";
                         return ;
                     }
                     _respond[fd].setBodyFlag(true);
@@ -313,7 +312,9 @@ void server::Get(int location_index , std::string path, int fd)
                 }
                 else
                 {
+                    std::cout << path << " < path\n";
                     _respond[fd].setBody(_respond[fd].fileToSring(path));
+                    _respond[fd].setContentLenght(std::to_string(_respond[fd].fileToSring(path).size()));
                     _respond[fd].mergeRespondStrings();
                 }
                 
@@ -322,6 +323,7 @@ void server::Get(int location_index , std::string path, int fd)
         }
         else if(isFOrD == "directory")
         {
+            std::cout << "HERE\n";
             if(isFileOrDirectory(location.getLocationRootObject() + "/" + location.getLocationIndexObject()) == "file")
             {
                 Get(location_index, location.getLocationRootObject() + "/" + location.getLocationIndexObject(), fd);
