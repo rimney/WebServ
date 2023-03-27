@@ -6,7 +6,7 @@
 /*   By: eel-ghan <eel-ghan@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/10 00:38:09 by eel-ghan          #+#    #+#             */
-/*   Updated: 2023/03/27 21:38:08 by eel-ghan         ###   ########.fr       */
+/*   Updated: 2023/03/27 21:46:03 by eel-ghan         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -279,13 +279,14 @@ void server::Get(int location_index , std::string path, int fd)
     {
         if(isFOrD == "file")
         {
-            if(location.getHasCgi())
-            {
+            if(location.getHasCgi()) // check if the extention of file compatible with extentions 
+            {                        // that's setting the in config (if ext == ".php" || == ".py")
+                std::cout << "CGI <<<\n";
                 cgi_handler cgi(_server_config, _request[fd]);
                 cgi.exec(_respond[fd]);
                 return ;
             }
-            else
+            else // html and css
             {
                 _respond[fd].setBody(_respond[fd].fileToSring(path));
                 _respond[fd].setContentLenght(std::to_string(_respond[fd].getBody().size()));
