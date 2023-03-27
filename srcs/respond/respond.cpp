@@ -6,7 +6,7 @@
 /*   By: rimney <rimney@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/15 20:32:17 by rimney            #+#    #+#             */
-/*   Updated: 2023/03/27 16:51:07 by rimney           ###   ########.fr       */
+/*   Updated: 2023/03/27 18:10:30 by rimney           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -173,6 +173,10 @@ std::string respond::getFileType(const std::string& fileName)
         return "text/html";
     else if (ext == "css")
         return "text/css";
+    else if(ext == "mp4")
+        return "video/mp4";
+    else if (ext == "mp3")
+        return ("audio/mp3");
     else
         return "text/html";
 }

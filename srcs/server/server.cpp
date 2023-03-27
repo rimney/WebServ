@@ -301,7 +301,7 @@ void server::Get(int location_index , std::string path, int fd)
             else
             {
                 
-                if(_respond[fd].fileToSring(path).size() > 1500 || _respond[fd].getBodyFlag() == true)
+                if(_respond[fd].fileToSring(path).size() > 50000 || _respond[fd].getBodyFlag() == true)
                 {
                     if(_respond[fd].getBodyFlag() == true)
                     {
