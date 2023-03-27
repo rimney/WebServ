@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Parsing.cpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: rimney <rimney@student.42.fr>              +#+  +:+       +#+        */
+/*   By: rimney < rimney@student.1337.ma>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/07 03:50:36 by rimney            #+#    #+#             */
-/*   Updated: 2023/03/23 00:39:40 by rimney           ###   ########.fr       */
+/*   Updated: 2023/03/27 02:29:25 by rimney           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -140,7 +140,7 @@ void    server_location::getErrorPage(std::string *keys, size_t size)
 {
     if (size <= 1)
     {
-        std::cout << "Error Error Page Not Found\n";
+        std::cerr << "Error Error Page Not Found\n";
         exit(0);
     }
     this->error_page = keys[size - 1];
@@ -152,7 +152,7 @@ void    server_location::getIndexPage(std::string *keys, size_t size)
 {
     if(size <= 1 || size > 2)
     {
-        std::cout << "Error Missing index page !";
+        std::cerr << "Error Missing index page !";
         exit(0);
     }
     this->index = keys[size - 1];
@@ -162,7 +162,7 @@ void    server_location::getAutoIndex(std::string *keys, size_t size)
 {
     if(size <= 1 || size > 2)
     {
-        std::cout << "Error Autoindex Bad Argument\n";
+        std::cerr << "Error Autoindex Bad Argument\n";
         exit(0);
     }
     if(keys[size - 1] == "on")
@@ -171,7 +171,7 @@ void    server_location::getAutoIndex(std::string *keys, size_t size)
         this->is_auto_index = false;
     else
     {
-        std::cout << "Error Wrong autoindex Argument";
+        std::cerr << "Error Wrong autoindex Argument";
         exit(0);
     }
 }
@@ -179,7 +179,7 @@ void    server_location::getRoot(std::string *keys, size_t size)
 {
     if(size <= 1 || size > 2)
     {
-        std::cout << "Error Missing Root Page\n";
+        std::cerr << "Error Missing Root Page\n";
         exit(0);
     }
     this->root = keys[size - 1];
@@ -189,7 +189,7 @@ void    server_location::getRedirection(std::string *keys, size_t size)
 {
     if(size <= 1 || size > 2)
     {
-        std::cout << "Error Redirection Arguments !\n";
+        std::cerr << "Error Redirection Arguments !\n";
         exit(0);
     }
     this->redirection = keys[size - 1];
@@ -199,7 +199,7 @@ void    server_location::getCmds(std::string *keys, size_t size)
 {
     if(size <= 1 || size > 2)
     {
-        std::cout << "Error Cmbs Arguments";
+        std::cerr << "Error Cmbs Arguments";
         exit(0);
     }
     this->client_max_body_size = stoi(keys[size - 1]);
@@ -209,7 +209,7 @@ void    server_location::getMethods(std::string *Keys, size_t size)
 {
     if(size <= 1 || size > 4)
     {
-        std::cout << "Error Methods Assignemt\n";
+        std::cerr << "Error Methods Assignemt\n";
         exit(0);
     }
     for(size_t i = 1;i < size; i++)
@@ -224,7 +224,7 @@ void    server_location::getCgiPath(std::string *Keys, size_t size)
 {
     if(size <= 1 || size > 2)
     {
-        std::cout << "Error Cgi Path Assignemt\n";
+        std::cerr << "Error Cgi Path Assignemt\n";
         exit(0);
     }
     this->cgiPath = Keys[size - 1];
@@ -235,7 +235,7 @@ void    server_location::getCgiExec(std::string *Keys, size_t size)
 {
     if(size <= 1)
     {
-        std::cout << "Error Cgi Exec Assinment\n";
+        std::cerr << "Error Cgi Exec Assinment\n";
         exit(0);
     }
     for(size_t i = 1; i < size; i++)
@@ -247,7 +247,7 @@ void    server_location::getLocationName(std::string *Keys, size_t size)
 {
     if(size <= 1 || size > 3)
     {
-        std::cout << "Error Location Name Arguments\n";
+        std::cerr << "Error Location Name Arguments\n";
         exit(0);
     }
     this->location_name = Keys[size - 2];
@@ -258,7 +258,7 @@ void    server_location::getUpload(std::string *Keys, size_t size)
 {
     if(size <= 1 || size > 2)
     {
-        std::cout << "Error Upload Arguments\n";
+        std::cerr << "Error Upload Arguments\n";
         exit(0);
     }
     this->upload = Keys[size - 1];
@@ -311,7 +311,6 @@ void server_location::construct_location(std::vector<std::string>::iterator firs
         {
             getRedirection(stringSplit(locationVec[i], ' ', &temp_size), temp_size);
             this->has_redirection = true;
-            std::cout << this->redirection << " redirection\n";
         }
         else if (!strncmp(locationVec[i].c_str(), "client_max_body_size", 19))
         {
@@ -484,13 +483,13 @@ int server_parser::ipToInt(std::string host)
         Array.push_back(stoi(keys[i]));
         if(!is_digits(keys[i]) || Array[i] > 256 || Array[i] < 0)
         {
-            std::cout << "Error Wrong IP Value\n";
+            std::cerr << "Error Wrong IP Value\n";
             exit(0);
         }
     }
     if(size != 4)
     {
-        std::cout << "Wrong ip Address";
+        std::cerr << "Wrong ip Address";
         exit(0);
     }
     for (int i = 0; i < 4; i++) {
@@ -507,7 +506,7 @@ void    server_parser::getPort(std::string *Port, size_t temp_size)
 
     if(temp_size > 2)
     {
-        std::cout << "Error listen has more than one argument !\n";
+        std::cerr << "Error listen has more than one argument !\n";
         exit(0);
     }
     pos = Port[1].find('.');
@@ -516,7 +515,7 @@ void    server_parser::getPort(std::string *Port, size_t temp_size)
         temparray = stringSplit(Port[1], ':', &temp_sizee);
         if (temp_sizee > 2)
         {
-            std::cout << "Error port has more than one location\n";
+            std::cerr << "Error port has more than one location\n";
             exit(0);
         }
         this->port = stoi(temparray[1]);
@@ -534,12 +533,12 @@ void    server_parser::getServerName(std::string *keys, size_t size)
 {
     if (size <= 1)
     {
-        std::cout << "Error Missing Server Name !";
+        std::cerr << "Error Missing Server Name !";
         exit(0);
     }
     if(this->server_names.size() > 0)
     {
-        std::cout << "Error Duplicate Server_name !";
+        std::cerr << "Error Duplicate Server_name !";
         exit(0);
     }
     for(size_t i = 1; i < size; i++)
@@ -551,7 +550,7 @@ void    server_parser::getErrorPage(std::string *keys, size_t size)
 {
     if (size <= 1)
     {
-        std::cout << "Error Error Page Not Found\n";
+        std::cerr << "Error Error Page Not Found\n";
         exit(0);
     }
     this->error_page = keys[size - 1];
@@ -563,7 +562,7 @@ void    server_parser::getIndexPage(std::string *keys, size_t size)
 {
     if(size <= 1 || size > 2)
     {
-        std::cout << "Error Missing index page !";
+        std::cerr << "Error Missing index page !";
         exit(0);
     }
     this->index = keys[size - 1];
@@ -573,7 +572,7 @@ void    server_parser::getAutoIndex(std::string *keys, size_t size)
 {
     if(size <= 1 || size > 2)
     {
-        std::cout << "Error Autoindex Bad Argument\n";
+        std::cerr << "Error Autoindex Bad Argument\n";
         exit(0);
     }
     if(keys[size - 1] == "on")
@@ -582,7 +581,7 @@ void    server_parser::getAutoIndex(std::string *keys, size_t size)
         this->is_auto_index = false;
     else
     {
-        std::cout << "Error Wrong autoindex Argument";
+        std::cerr << "Error Wrong autoindex Argument";
         exit(0);
     }
     delete [] keys;
@@ -591,7 +590,7 @@ void    server_parser::getRoot(std::string *keys, size_t size)
 {
     if(size <= 1 || size > 2)
     {
-        std::cout << "Error Missing Root Page\n";
+        std::cerr << "Error Missing Root Page\n";
         exit(0);
     }
     this->root = keys[size - 1];
@@ -601,7 +600,7 @@ void    server_parser::getRedirection(std::string *keys, size_t size)
 {
     if(size <= 1 || size > 2)
     {
-        std::cout << "Error Redirection Arguments !\n";
+        std::cerr << "Error Redirection Arguments !\n";
         exit(0);
     }
     this->redirection = keys[size - 1];
@@ -611,7 +610,7 @@ void    server_parser::getCmds(std::string *keys, size_t size)
 {
     if(size <= 1 || size > 2)
     {
-        std::cout << "Error Cmbs Arguments";
+        std::cerr << "Error Cmbs Arguments";
         exit(0);
     }
     this->client_max_body_size = stoi(keys[size - 1]);
@@ -712,7 +711,7 @@ void    server_parser::setLocationsIndex(std::vector<server_location> location)
 }
 void    server_parser::setServerIndex(int index)
 {
-    // std::cout << "CALLED\n";
+    // std::cerr << "CALLED\n";
     this->server_index = index;
 }
 size_t server_parser::getLocationCount(std::vector<std::string> vec)

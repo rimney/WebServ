@@ -6,7 +6,7 @@
 /*   By: rimney < rimney@student.1337.ma>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/10 00:38:14 by eel-ghan          #+#    #+#             */
-/*   Updated: 2023/03/26 19:50:22 by rimney           ###   ########.fr       */
+/*   Updated: 2023/03/27 04:17:10 by rimney           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -165,7 +165,9 @@ void    servers::run()
                 try
                 {
                     (*it).second.send((*it).first);
-                     _fds_ready.erase(it);
+                    // std::cout << (*it).second.getRespond((*it).second.get_fd_connection()).getBodyFlag() << " <<\n";
+                    if ((*it).second.getRespond((*it).second.get_fd_connection()).getBodyFlag() == false)
+                        _fds_ready.erase(it);
                     break;
                 }
                 catch(const std::string& msg)

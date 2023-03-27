@@ -6,11 +6,11 @@
 /*   By: rimney < rimney@student.1337.ma>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/15 20:32:17 by rimney            #+#    #+#             */
-/*   Updated: 2023/03/26 19:29:11 by rimney           ###   ########.fr       */
+/*   Updated: 2023/03/27 05:48:38 by rimney           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../../includes/respond.hpp"
+#include "../../includes/webserv.hpp"
 
 std::string respond::gethttpVersion(void)
 {
@@ -111,30 +111,49 @@ bool respond::isAmongErrorCodes(int error_code)
     return (false);
 }
 
-std::vector<std::string> respond::chunkedFileToString(std::string path)
+
+std::string respond::chunkedFileToString(std::string path)
 {
-    int fd;
-    std::vector<std::string> chunks;
-    
-    fd = open(path.c_str(), O_RDONLY);
-    char buffer[5000];
-    int bytes_read;
-    chunks.push_back(this->getfinalString());
-    while((bytes_read = read(fd, buffer, 5000)) > 0)
+    int fd = open(path.c_str(), O_RDONLY);
+    if (fd == -1) 
     {
-        if (bytes_read == 0) {
-            break;
-        } else if (bytes_read == -1) {
-            std::cerr << "Error while chunking";
-            break;
-        }
-        std::string content(buffer, bytes_read);
-        chunks.push_back(content);
-        lseek(fd, bytes_read, SEEK_CUR);
+        std::cerr << "Error opening file " << path << std::endl;
+        return "";
     }
     
+    // Move file pointer to current chunk position
+    lseek(fd, this->chunkPosition, SEEK_SET);
+    
+    char buffer[CHUNK_SIZE];
+    int bytes_read = read(fd, buffer, CHUNK_SIZE);
+    if (bytes_read == 0)
+    {
+        std::cout << "THE END !\n";
+        bodyFlag = false;
+        pathSave.clear();
+        this->cleanAll();
+        this->chunkPosition = 0;
+        return ("0\r\n\r\n");
+    }
+    else if (bytes_read == -1)
+    {
+        std::cerr << "Error while chunking";
+        return "";
+    }
+    
+    std::string content(buffer, bytes_read);
+    
+    // Update current chunk position
+    this->chunkPosition += bytes_read;
+    
     close(fd);
-    return (chunks);
+    
+    if (getfinalString().size() > 0) {
+        return getfinalString() + content;
+    }
+    else
+        finalString.clear();
+    return content;
 }
 
 std::string respond::getFileType(const std::string& fileName)
@@ -161,7 +180,6 @@ std::string respond::getFileType(const std::string& fileName)
 
 void    respond::cleanAll(void)
 {
-    std::cout << "CLEARED <<\n"; 
     this->Body.clear();
     this->httpVersion.clear();
     this->statusCode.clear();
@@ -169,8 +187,6 @@ void    respond::cleanAll(void)
     this->ContentLenght.clear();
     this->finalString.clear();
     this->content_type.clear();
-    this->pathSave.clear();
-    this->bodyChunked.clear();
 }
 
 std::string	respond::getAutoIndexPage(std::string path)
@@ -285,15 +301,8 @@ void    respond::recoverBody(int status_code)
     }
 }
 
-void    respond::setBodyChunked(std::vector<std::string> s)
-{
-    this->bodyChunked = s;
-}
 
-std::vector<std::string>    respond::getBodyChunked(void)
-{
-    return(this->bodyChunked);
-}
+
 
 void    respond::setContentType(std::string const & content_type)
 {
@@ -302,7 +311,6 @@ void    respond::setContentType(std::string const & content_type)
 
 void	respond::setRespond(std::string path, std::string httpVersion, std::string error)
 {
-    this->bodyFlag = false;
     if(!error.empty())
     {
         if(error == "501 Not Implemented")
@@ -407,7 +415,6 @@ void	respond::setRespond(std::string path, std::string httpVersion, std::string 
     }
     if(theFileExists(path) == false || isFileOrDirectory(path) == "error")
     {
-        this->bodyFlag = false;
         this->sethttpVersion(httpVersion);
         this->setstatusCode("404");
         this->setstatusDescription("Not Found");
@@ -419,11 +426,11 @@ void	respond::setRespond(std::string path, std::string httpVersion, std::string 
     else
     { 
         this->pathSave = path;
-        std::cout << getfinalString().size() << " << size <<\n";
-        this->finalString.clear();
+        cleanAll();
         if(this->getBodyFlag() == false)
         {
             std::cout << "Header Set !\n"; 
+            this->setChunkPosition(0);
             this->setContentType(getFileType(path));
             this->sethttpVersion(httpVersion);
             this->setstatusCode("200");
@@ -435,6 +442,16 @@ void	respond::setRespond(std::string path, std::string httpVersion, std::string 
         }
         return ;
     }
+}
+
+int respond::getChunkPosition(void)
+{
+    return (this->chunkPosition);
+}
+
+void respond::setChunkPosition(int chunk)
+{
+    this->chunkPosition = chunk;
 }
 
 bool isDirectory(const char* path) {
@@ -455,4 +472,9 @@ std::string	isFileOrDirectory(std::string path) // need to fix this one !!
 	else if(init.good())
         return ("file");
 	return ("error");
+}
+
+respond respond::getRespond(void)
+{
+    return (*this);    
 }

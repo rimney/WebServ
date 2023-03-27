@@ -6,7 +6,7 @@
 /*   By: rimney < rimney@student.1337.ma>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/14 17:42:24 by rimney            #+#    #+#             */
-/*   Updated: 2023/03/26 19:28:41 by rimney           ###   ########.fr       */
+/*   Updated: 2023/03/27 05:02:20 by rimney           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,6 +26,7 @@ class respond
 {
     private:
         bool			bodyFlag;
+        int             chunkPosition;
         std::string		Body; // content
         std::string		statusCode; // 200 404 501
         std::string		httpVersion; // http/1.1
@@ -35,7 +36,6 @@ class respond
         std::string		statusDescription;
 		std::string		pathSave;
         server_parser	server;
-        std::vector<std::string>    bodyChunked;
 		std::string		tempAutoIndexFile;// set a header flag << // set a path to the file
     
     public:
@@ -70,9 +70,11 @@ class respond
         bool        getBodyFlag();
         void        setBodyFlag(bool v);
         std::string getPathSave(void);
-        std::vector<std::string> getBodyChunked(void);
-        void    setBodyChunked(std::vector<std::string> s);
-        std::vector<std::string> chunkedFileToString(std::string path);
+        void    setBodyChunked(std::string s);
+        std::string chunkedFileToString(std::string path);
+        respond     getRespond(void);
+        int         getChunkPosition(void);
+        void        setChunkPosition(int chunk);
 
         
 

@@ -61,6 +61,7 @@ class server
         server_parser   getServerData(void) {return this->_server_config;}
         void            process(int fd);
         void            Get(int location_index , std::string path, int fd);
+        respond         getRespond(int fd);
     
     private:
         void            set_addr();

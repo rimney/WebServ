@@ -26,6 +26,11 @@ server::server(server const & s)
     *this = s;
 }
 
+respond server::getRespond(int fd)
+{
+    return _respond[fd];
+}
+
 server::~server() {}
 
 int server::get_port() const
@@ -149,85 +154,27 @@ void    server::receive(int fd)
     }
 }
 
-void send_chunked_respond(int client_socket, std::string filename, std::string content_type, std::string size) {
-    // Open the file
-    std::ifstream file(filename, std::ios::binary);
-    if (!file.is_open()) {
-        std::cout << "Failed to open file: " << filename << std::endl;
-        return;
-    }
-
-    // Send HTTP response header
-    std::ostringstream response_header;
-    response_header << "HTTP/1.1 200 OK\r\n"
-                    << "Content-Length: " + size + "\r\n"
-                    << "Transfer-Encoding: chunked\r\n"
-                    << "Content-Type: " + content_type + "\r\n\r\n";
-    const std::string& response_header_str = response_header.str();
-    send(client_socket, response_header_str.c_str(), response_header_str.size(), 0);
-    std::cout << response_header_str << " << HEADER\n";
-    // Send file in chunks
-    std::vector<char> buffer(8192);
-    std::streamsize read_size;
-    while ((read_size = file.readsome(buffer.data(), buffer.size())) > 0) {
-        std::ostringstream chunk_header;
-        chunk_header << std::hex << read_size << "\r\n";
-        const std::string& chunk_header_str = chunk_header.str();
-        send(client_socket, chunk_header_str.c_str(), chunk_header_str.size(), 0);
-
-        int bytes_sent = 0;
-        while (bytes_sent < read_size) {
-            int chunk_size = std::min<int>(8192, read_size - bytes_sent);
-            int n = send(client_socket, buffer.data() + bytes_sent, chunk_size, 0);
-            if (n <= 0) {
-                std::cout << "Failed to send file data" << std::endl;
-                return;
-            }
-            bytes_sent += n;
-        }
-
-        const char* CRLF = "\r\n";
-        send(client_socket, CRLF, strlen(CRLF), 0);
-    }
-
-    // Send final zero-sized chunk
-    const char* FINAL_CHUNK = "0\r\n\r\n";
-    send(client_socket, FINAL_CHUNK, strlen(FINAL_CHUNK), 0);
-}
-
 void    server::send(int fd)
 {
-    ssize_t sent;
+    // ssize_t sent;
 
-    std::cout << _respond[fd].getBody();
+    // std::cout << _respond[fd].getBody();
+    // std::cout << _respond[fd].getBodyFlag() << " <<\n";
     if(_respond[fd].getBody().empty())
         _respond[fd].recoverBody(atoi(_respond[fd].getstatusCode().c_str()));
     
-    if(_respond[fd].getBodyFlag() == false)
+    if(_respond[fd].getBodyFlag() == true)
+        _respond[fd].setFinalString(_respond[fd].chunkedFileToString(_respond[fd].getPathSave()));
+
+    if(_respond[fd].getfinalString().size() > 0)
     {
-        if ((sent = ::send(fd, _respond[fd].getfinalString().c_str(), _respond[fd].getfinalString().size(), 0)) == -1)
+        if ((::send(fd, _respond[fd].getfinalString().c_str(), _respond[fd].getfinalString().size(), 0)) == -1)
         {
             throw(std::string("ERROR: send() faild to send response"));
         }
-        _respond[fd].cleanAll();
     }
-    else
-    {
-        std::cout << _respond[fd].getPathSave();
-        send_chunked_respond(fd,  _respond[fd].getPathSave(), _respond[fd].getFileType(_respond[fd].getPathSave()), std::to_string(_respond[fd].fileToSring(_respond[fd].getPathSave()).size()));
-        // exit(0);
-        // for(size_t i = 0; i < _respond[fd].getBodyChunked().size(); i++) // getBodyChunked vector
-        // {
-        //     // std::cout <<  _respond[fd].getBodyChunked()[i] << " << \n";
-        //     if ((sent = ::send(fd, _respond[fd].getBodyChunked()[i].c_str(), _respond[fd].getBodyChunked()[i].size(), 0)) == -1)
-        //     {
-        //         // handle error 
-        //         throw(std::string("ERROR: send() faild to send response"));
-        //     }
-        // }
-        _respond[fd].setBodyFlag(false);
+        
         _respond[fd].cleanAll();
-    }
 }
 
 void    server::set_server_config(server_parser  & server_config)
@@ -342,7 +289,7 @@ void server::Get(int location_index , std::string path, int fd)
         _respond[fd].mergeRespondStrings();
         return ;
     }
-    else if(_respond[fd].getstatusCode() == "200")
+    else if(_respond[fd].getstatusCode() == "200" && _respond[fd].getBodyFlag() == false)
     {
         if(isFOrD == "file")
         {
@@ -354,16 +301,15 @@ void server::Get(int location_index , std::string path, int fd)
             else
             {
                 
-                if(_respond[fd].fileToSring(path).size() > 1500)
+                if(_respond[fd].fileToSring(path).size() > 1500 || _respond[fd].getBodyFlag() == true)
+                {
                     _respond[fd].setBodyFlag(true);
-                if(_respond[fd].getBodyFlag() == false)
+                    return;
+                }
+                else
                 {
                     _respond[fd].setBody(_respond[fd].fileToSring(path));
                     _respond[fd].mergeRespondStrings();
-                }
-                else // chunked
-                {
-                    _respond[fd].setBodyChunked(_respond[fd].chunkedFileToString(path));
                 }
                 
                 return ;
@@ -373,7 +319,6 @@ void server::Get(int location_index , std::string path, int fd)
         {
             if(isFileOrDirectory(location.getLocationRootObject() + "/" + location.getLocationIndexObject()) == "file")
             {
-                std::cout << location.getLocationIndexObject() << " <<\n";
                 Get(location_index, location.getLocationRootObject() + "/" + location.getLocationIndexObject(), fd);
             }
             else if (location.getLocationIndexObject().size() > 0 &&
@@ -387,9 +332,6 @@ void server::Get(int location_index , std::string path, int fd)
                 _respond[fd].setBody(_respond[fd].getAutoIndexPage(path));
                 _respond[fd].setContentLenght(std::to_string(_respond[fd].getBody().size()));
                 _respond[fd].mergeRespondStrings();
-                std::cout << _respond[fd].getBody() << std::endl;
-                std::cout << _respond[fd].getContentLenght() << std::endl;
-                // _respond[fd].mergeRespondStrings();
                 return ;
             }
             else
