@@ -303,6 +303,11 @@ void server::Get(int location_index , std::string path, int fd)
                 
                 if(_respond[fd].fileToSring(path).size() > 1500 || _respond[fd].getBodyFlag() == true)
                 {
+                    if(_respond[fd].getBodyFlag() == true)
+                    {
+                        std::cout << "PASS\n";
+                        return ;
+                    }
                     _respond[fd].setBodyFlag(true);
                     return;
                 }

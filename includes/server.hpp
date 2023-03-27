@@ -4,7 +4,7 @@
 # define DEFAULT_PORT 8080
 # define DEFAULT_PROTOCOL 0
 # define RECV_SIZE 1024
-# define CHUNK_SIZE 5000
+# define CHUNK_SIZE 1024
 
 # include <netinet/in.h>
 # include <string>
