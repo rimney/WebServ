@@ -6,7 +6,7 @@ cgi_handler::cgi_handler() {}
 
 cgi_handler::cgi_handler(server_parser server_config, Request request)
     : _server_config(server_config), _request(request),
-    _location(_server_config.getServerLocationsObject()[start_line.location_index])
+    _location(_server_config.getServerLocationsObject()[_request.get_start_line().location_index])
 {
     init_env();
 }
@@ -66,9 +66,11 @@ void            cgi_handler::init_env()
     _env.push_back(std::string("SERVER_PORT=") + std::to_string(_server_config.getPortObject()));
     _env.push_back("SERVER_PROTOCOL=HTTP/1.1");
     _env.push_back("SERVER_SOFTWARE=WebServ/0.0");
+    _env.push_back("REDIRECT_STATUS=200");
 
-    for  (std::vector<std::string>::iterator it = _env.begin(); it != _env.end(); it++)
-        std::cout << *it << '\n';
+    // print all env variables
+    // for  (std::vector<std::string>::iterator it = _env.begin(); it != _env.end(); it++)
+    //     std::cout << *it << '\n';
 }
 
 char**  cgi_handler::vector_to_ptr()
@@ -86,18 +88,14 @@ char**  cgi_handler::vector_to_ptr()
     return env;
 }
 
-std::string cgi_handler::exec()
+void cgi_handler::exec(respond & response)
 {
     pid_t       cgi_pid;
     int         fds[2];
     char**      env;
-    std::string body;
-    // int         std_in, std_out;
+    std::string cgi_response;
 
     env = vector_to_ptr();
-
-    // std_in = dup(STDIN_FILENO);
-	// std_out = dup(STDOUT_FILENO);
 
     pipe(fds);
 
@@ -106,31 +104,34 @@ std::string cgi_handler::exec()
     if (cgi_pid == -1)
     {
         std::cerr << "ERROR: fork() failed\n";
-        return "500 Intenal Server";
+        response.setstatusCode("500");
+        response.setstatusDescription("Internal Server Error");
+        // add page error
+        response.mergeRespondStrings();
+        return ;
     }
     else if (cgi_pid == 0)
     {
-        dup2(STDOUT_FILENO, fds[1]); //handle error when r = -1;
-        dup2(STDIN_FILENO, fds[0]); //handle error when r = -1;
-        std::cout << "<<< cgi-process >>> \n";
-        // execve(_location.getCgiPathObject().c_str(),  NULL, env);
-        execve("/bin/ls",  NULL, NULL);
+        dup2(fds[1], STDOUT_FILENO); //handle error when r = -1;
+        dup2(fds[0], STDIN_FILENO); //handle error when r = -1;
+
+        execve(_location.getCgiPathObject().c_str(), NULL, env);
+
         std::cerr << "ERROR: execve() failed\n";
-        write(fds[1], "500 Intenal Server", 18);
+        write(fds[1], "500", 3);
     }
     else
     {
         char    buffer[CGI_BUFFER] = {0};
-        int     r = 1;
-    
-        std::cout << "<<< parent-process-1 >>> \n";
+
         waitpid(-1, NULL, 0);
-        std::cout << "<<< parent-process-2 >>> \n";
-        while (r > 0)
+        fcntl(fds[0], F_SETFL, O_NONBLOCK);
+        while (1)
         {
             memset(buffer, 0, CGI_BUFFER);
-            r = read(fds[0], buffer, CGI_BUFFER - 1);
-            body += buffer;
+            if (read(fds[0], buffer, CGI_BUFFER - 1) <= 0)
+                break ;
+            cgi_response.append(buffer);
         }
     }
 
@@ -140,6 +141,57 @@ std::string cgi_handler::exec()
     for (size_t i = 0; i < _env.size(); i++)
         delete [] env[i];
     delete [] env;
+    if (cgi_pid == 0)
+        exit(0);
 
-    return body;
+    generate_response(cgi_response, response);
+}
+
+
+void    cgi_handler::generate_response(std::string & cgi_response, respond & response)
+{
+    size_t      pos = 0;
+    size_t      i = 0;
+    size_t      j;
+    std::string header, element;
+    size_t      content_length;
+
+    if (cgi_response.find("500") != std::string::npos)
+    {
+        response.setstatusCode("500");
+        response.setstatusDescription("Internal Server Error");
+        // add page error
+        response.mergeRespondStrings();
+        return ;
+    }
+
+    while ((pos = cgi_response.find("\r\n", i)) != std::string::npos)
+    {
+        if (pos == i)
+            break ;
+        
+        header = cgi_response.substr(i, pos - i);
+
+        if ((j = header.find(':')) != std::string::npos)
+        {
+            element = header.substr(0, j);
+            if (element == "Content-Length")
+                response.setContentLenght(header.substr(j));
+            else if (element == "Content-type")
+                response.setContentType(header.substr(j));
+        }
+        i += header.size() + 2;
+        element.clear();
+        header.clear();
+    }
+
+    response.setBody(cgi_response.substr(pos + 2));
+
+    std::stringstream ss(response.getContentLenght());
+    ss >> content_length;
+
+    if (content_length == 0 && !response.getBody().empty())
+        response.setContentLenght(std::to_string(response.getBody().size()));
+
+    response.mergeRespondStrings();
 }

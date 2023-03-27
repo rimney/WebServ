@@ -6,8 +6,10 @@
 
 # include <vector>
 # include <unistd.h>
+# include <fcntl.h>
 # include "request.hpp"
 # include "parsing.hpp"
+# include "respond.hpp"
 
 # define CGI_BUFFER 1024
 
@@ -27,7 +29,8 @@ class cgi_handler
 
         cgi_handler &   operator=(cgi_handler const & c);
         void            init_env();
-        std::string     exec(std::string const & script);
+        void            exec(respond & response);
+        void            generate_response(std::string & cgi_response, respond & response);
     
     private:
         cgi_handler();
