@@ -31,6 +31,7 @@ class cgi_handler
         void            init_env();
         void            exec(respond & response);
         void            generate_response(std::string & cgi_response, respond & response);
+        char**          get_argv();
     
     private:
         cgi_handler();

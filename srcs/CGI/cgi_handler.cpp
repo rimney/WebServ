@@ -41,7 +41,6 @@ void            cgi_handler::init_env()
 
     _env.push_back(std::string("REMOTE_IDENT=") + headers["Authorization"]);
     _env.push_back(std::string("REMOTE_USER=") + headers["Authorization"]);
-    // _env.push_back(std::string("REQUEST_URI=") + )
     
     if (headers.find("Content-Length") != headers.end())
         _env.push_back(std::string("CONTENT_LENGTH=") + headers["Content-Length"]);
@@ -112,10 +111,24 @@ void cgi_handler::exec(respond & response)
     }
     else if (cgi_pid == 0)
     {
-        dup2(fds[1], STDOUT_FILENO); //handle error when r = -1;
-        dup2(fds[0], STDIN_FILENO); //handle error when r = -1;
+        if (dup2(fds[1], STDOUT_FILENO) == -1)
+        {
+            std::cerr << "ERROR: dup2() failed\n";
+            write(fds[1], "500", 3);
+        }
+        if (dup2(fds[0], STDIN_FILENO) == -1)
+        {
+            std::cerr << "ERROR: dup2() failed\n";
+            write(fds[1], "500", 3);
+        }
 
-        execve(_location.getCgiPathObject().c_str(), NULL, env);
+        char * const argv[3] = {
+            (char *) _location.getCgiPathObject().c_str(),
+            (char *) _request.get_start_line().full_path.c_str(),
+            NULL
+        };
+
+        execve(_location.getCgiPathObject().c_str(), argv, env);
 
         std::cerr << "ERROR: execve() failed\n";
         write(fds[1], "500", 3);
@@ -156,7 +169,7 @@ void    cgi_handler::generate_response(std::string & cgi_response, respond & res
     std::string header, element;
     size_t      content_length;
 
-    if (cgi_response.find("500") != std::string::npos)
+    if (cgi_response.find("500") != std::string::npos || cgi_response.empty())
     {
         response.setstatusCode("500");
         response.setstatusDescription("Internal Server Error");
@@ -185,7 +198,13 @@ void    cgi_handler::generate_response(std::string & cgi_response, respond & res
         header.clear();
     }
 
-    response.setBody(cgi_response.substr(pos + 2));
+    if (pos == std::string::npos)
+    {
+        response.setBody(cgi_response);
+        response.setContentType("text/html");
+    }
+    else
+        response.setBody(cgi_response.substr(pos + 2));
 
     std::stringstream ss(response.getContentLenght());
     ss >> content_length;
