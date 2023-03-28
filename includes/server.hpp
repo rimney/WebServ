@@ -19,6 +19,7 @@
 # include <stdio.h>
 # include "request.hpp"
 # include "respond.hpp"
+# include "cgi_handler.hpp"
 
 // TO BE DELETED //
 #include <string.h>
@@ -57,7 +58,7 @@ class server
         void            send(int fd);
         void            set_server_config(server_parser & server_config);
         void            setup(server_parser & server_config);
-        void            delete_method(std::string & path);
+        void            delete_method(std::string & path, respond & response);
         server_parser   getServerData(void) {return this->_server_config;}
         void            process(int fd);
         void            Get(int location_index , std::string path, int fd);

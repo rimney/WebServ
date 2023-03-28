@@ -6,7 +6,7 @@
 /*   By: eel-ghan <eel-ghan@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/10 00:38:14 by eel-ghan          #+#    #+#             */
-/*   Updated: 2023/03/22 23:40:55 by eel-ghan         ###   ########.fr       */
+/*   Updated: 2023/03/23 23:50:34 by eel-ghan         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -50,10 +50,10 @@ int servers::setup(std::vector<server_parser> servers_config)
         {
             std::cerr << msg << '\n';
             if (_servers[i].get_error_flag())
-                for (int j = 0; j < i + 1; j++)
+                for (size_t j = 0; j < i + 1; j++)
                     _servers[j].close();
             else
-                for (int j = 0; j < i; j++)
+                for (size_t j = 0; j < i; j++)
                     _servers[j].close();
             _servers.clear();
             return 1;

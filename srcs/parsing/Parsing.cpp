@@ -6,7 +6,7 @@
 /*   By: eel-ghan <eel-ghan@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/07 03:50:36 by rimney            #+#    #+#             */
-/*   Updated: 2023/03/22 20:32:23 by eel-ghan         ###   ########.fr       */
+/*   Updated: 2023/03/26 01:42:00 by eel-ghan         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -118,7 +118,7 @@ server_location::server_location(server_location const  & s)
     this->has_redirection = s.has_redirection;
     this->redirection = s.redirection;
 }
-server_location server_location::operator=(server_location const & s)
+server_location & server_location::operator=(server_location const & s)
 {
     this->location_index = s.location_index;
     this->location_name = s.location_name;
