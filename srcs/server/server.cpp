@@ -6,7 +6,7 @@
 /*   By: eel-ghan <eel-ghan@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/10 00:38:09 by eel-ghan          #+#    #+#             */
-/*   Updated: 2023/03/27 21:46:03 by eel-ghan         ###   ########.fr       */
+/*   Updated: 2023/03/28 01:34:02 by eel-ghan         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -188,7 +188,7 @@ int is_file_or_dir(std::string & path)
     return -1;
 }
 
-void    server::delete_method(std::string  & path)
+void    server::delete_method(std::string  & path, respond & response)
 {
     
     if (is_path_exist(path))
@@ -196,72 +196,78 @@ void    server::delete_method(std::string  & path)
         int r = is_file_or_dir(path);
         if (r == 1) // handle file cases
         {
-            // if location has cgi
-            // call cgi to handle this case
-            // else if :
             if (remove(path.c_str()) == 0)
             {
-                std::cout << "HTTP/1.1 204 No Content\r\n";
-                std::cout << "Content-Type: text/plain\r\n";
-                std::cout << "\r\n";
+                response.setstatusCode("204");
+                response.setstatusDescription("No Content");
+                response.mergeRespondStrings();
                 return ;
             }
-            std::cout << "HTTP/1.1 500 Internal Server Error\r\n";
-            std::cout << "Content-Type: text/plain\r\n";
-            std::cout << "\r\n";
-            std::cout << "Internal Server Error\n";
+            response.setstatusCode("500");
+            response.setstatusDescription("Internal Server Error");
+            response.setContentType("text/plain");
+            response.setContentLenght("30");
+            response.setBody("<h1>Internal Server Error</h1>");
+            response.mergeRespondStrings();
             return ;
         }
         else if (r == 2) // handle dir cases
         {
             if (path.back() == '/')
             {
-                // if location has cgi
-                // call cgi to handle this case
-                // else if :
                 if (access(path.c_str(), W_OK) == 0)
                 {
                     if (remove(path.c_str()) == 0)
                     {
-                        std::cout << "HTTP/1.1 204 No Content\r\n";
-                        std::cout << "Content-Type: text/plain\r\n";
-                        std::cout << "\r\n";
+                        response.setstatusCode("204");
+                        response.setstatusDescription("No Content");
+                        response.mergeRespondStrings();
                         return ;
                     }
-                    std::cout << "500 Internal Server Error\r\n";
-                    std::cout << "Content-Type: text/plain\r\n";
-                    std::cout << "\r\n";
-                    std::cout << "Internal Server Error\n";
+                    response.setstatusCode("500");
+                    response.setstatusDescription("Internal Server Error");
+                    response.setContentType("text/plain");
+                    response.setContentLenght("30");
+                    response.setBody("<h1>Internal Server Error</h1>"); // set error page
+                    response.mergeRespondStrings();
                     return ;
                 }
-                std::cout << "HTTP/1.1 403 Forbidden\r\n";
-                std::cout << "Content-Type: text/plain\r\n";
-                std::cout << "\r\n";
-                std::cout << "Forbidden\n";
+                response.setstatusCode("403");
+                response.setstatusDescription("Forbidden");
+                response.setContentType("text/plain");
+                response.setContentLenght("18");
+                response.setBody("<h1>Forbidden</h1>"); // set error page
+                response.mergeRespondStrings();
                 return ;
             }
             else
             {
-                std::cout << "HTTP/1.1 409 Conflict\r\n";
-                std::cout << "Content-Type: text/plain\r\n";
-                std::cout << "\r\n";
-                std::cout << "Conflict\n";
+                response.setstatusCode("409");
+                response.setstatusDescription("Conflict");
+                response.setContentType("text/plain");
+                response.setContentLenght("17");
+                response.setBody("<h1>Conflict</h1>"); // set error page
+                response.mergeRespondStrings();
                 return ;
             }
         }
         else // error
         {
-            std::cout << "500 Internal Server Error\r\n";
-            std::cout << "Content-Type: text/plain\r\n";
-            std::cout << "\r\n";
-            std::cout << "Internal Server Error\n";
+            response.setstatusCode("500");
+            response.setstatusDescription("Internal Server Error");
+            response.setContentType("text/plain");
+            response.setContentLenght("30");
+            response.setBody("<h1>Internal Server Error</h1>"); // set error page
+            response.mergeRespondStrings();
             return ;
         }
     }
-    std::cout << "HTTP/1.1 404 Not Found\r\n";
-    std::cout << "Content-Type: text/plain\r\n";
-    std::cout << "\r\n";
-    std::cout << "Not Found\n";
+    response.setstatusCode("404");
+    response.setstatusDescription("Not Found");
+    response.setContentType("text/plain");
+    response.setContentLenght("18");
+    response.setBody("<h1>Not Found</h1>"); // set error page
+    response.mergeRespondStrings();
 }
 
 void server::Get(int location_index , std::string path, int fd) 
@@ -280,7 +286,7 @@ void server::Get(int location_index , std::string path, int fd)
         if(isFOrD == "file")
         {
             if(location.getHasCgi()) // check if the extention of file compatible with extentions 
-            {                        // that's setting the in config (if ext == ".php" || == ".py")
+            {                        // that's setting in the config, ex:(if ext == ".php" || == ".py")
                 std::cout << "CGI <<<\n";
                 cgi_handler cgi(_server_config, _request[fd]);
                 cgi.exec(_respond[fd]);
@@ -348,7 +354,7 @@ void    server::process(int fd)
             }
             if(_request[fd].get_start_line().method == "DELETE")
             {
-                delete_method(_request[fd].get_start_line().full_path);
+                delete_method(_request[fd].get_start_line().full_path, _respond[fd]);
             }
         }
         //respond  
