@@ -165,7 +165,6 @@ void    server::send(int fd)
     
     if(_respond[fd].getBodyFlag() == true)
         _respond[fd].setFinalString(_respond[fd].chunkedFileToString(_respond[fd].getPathSave()));
-    std::cout << _respond[fd].getfinalString() << " << HERE\n";
     if(_respond[fd].getfinalString().size() > 0)
     {
         if ((::send(fd, _respond[fd].getfinalString().c_str(), _respond[fd].getfinalString().size(), 0)) == -1)
