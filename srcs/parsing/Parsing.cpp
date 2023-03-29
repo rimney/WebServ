@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Parsing.cpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: rimney <rimney@student.42.fr>              +#+  +:+       +#+        */
+/*   By: rimney < rimney@student.1337.ma>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/07 03:50:36 by rimney            #+#    #+#             */
-/*   Updated: 2023/03/29 07:42:01 by rimney           ###   ########.fr       */
+/*   Updated: 2023/03/29 17:21:01 by rimney           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -253,7 +253,12 @@ void    server_location::getLocationName(std::string *Keys, size_t size)
         std::cerr << "Error Location Name Arguments\n";
         exit(0);
     }
-    this->location_name = Keys[size - 2];
+    if(Keys[size - 1] != "{")
+        this->location_name = Keys[size - 1];
+    else
+        this->location_name = Keys[size - 2];
+    std::cout << this->location_name << " << LOCATION_NAME\n";
+    
     delete [] Keys;
 }
 
@@ -278,7 +283,7 @@ void server_location::construct_location(std::vector<std::string>::iterator firs
     for(size_t i = 0; i < locationVec.size(); i++)
     {
         this->client_max_body_size = 0;
-        if(!strncmp(locationVec[i].c_str(), "location", 8) && locationVec[i].back() == '{')
+        if ((!strncmp(locationVec[i].c_str(), "location", 8) && locationVec[i].back() == '{') || (!strncmp(locationVec[i].c_str(), "location", 8) && locationVec[i + 1] == "{"))
         {
             getLocationName(stringSplit(locationVec[i], ' ', &temp_size), temp_size);
         }
@@ -328,7 +333,7 @@ void server_location::construct_location(std::vector<std::string>::iterator firs
             this->has_cgi = true;
             getCgiPath(stringSplit(locationVec[i], ' ', &temp_size), temp_size);
             // std::cout << this->cgiPath << " << here\n";
-            exit(0);
+            // exit(0);
         }
         else if (!strncmp(locationVec[i].c_str(), "cgi_exec ", 9))
         {
@@ -663,8 +668,11 @@ void    server_parser::construct_server(std::vector<std::string>::iterator first
         else if(!strncmp(serverVec[i].c_str(), "index", 5))
         {
             getIndexPage(stringSplit(serverVec[i], ' ', &temp_size), temp_size);
-            if(isFileOrDirectory(this->getIndexObject()) == "error")
+            std::cout << serverVec[i] << " <<|\n"; 
+            if(isFileOrDirectory(this->getRootObject() + this->getIndexObject()) == "error")
             {
+                std::cout << this->getRootObject() << "<<<<<\n";
+                std::cout << this->getRootObject() + this->getIndexObject() << " <<\n";
                 std::cerr << "Error : Check The Server Index Path\n";
                 exit(0);
             }
@@ -672,6 +680,7 @@ void    server_parser::construct_server(std::vector<std::string>::iterator first
         else if(!strncmp(serverVec[i].c_str(), "root", 4))
         {
             getRoot(stringSplit(serverVec[i], ' ', &temp_size), temp_size);
+            std::cout << getRootObject() << "<<\n";
             if(isFileOrDirectory(this->getRootObject()) == "error")
             {
                 std::cerr << "Error : Check The Server Root Path\n";
@@ -690,7 +699,7 @@ void    server_parser::construct_server(std::vector<std::string>::iterator first
         {
             getCmds(stringSplit(serverVec[i], ' ', &temp_size), temp_size);
         }
-        else if (!strncmp(serverVec[i].c_str(), "location ", 9) && serverVec[i].back() == '{')
+        else if ((!strncmp(serverVec[i].c_str(), "location", 8) && serverVec[i].back() == '{') || (!strncmp(serverVec[i].c_str(), "location", 8) && serverVec[i + 1] == "{"))
         {
             opening_bracket = i;
             i++;
@@ -835,8 +844,8 @@ config_parser::config_parser(std::string filename)
             opening_bracket = i;
             while(tempConf[i] != "}")
             {
-                if (!strncmp(tempConf[i].c_str(), "location", 8) && tempConf[i].back() == '{')
-                {
+            if ((!strncmp(tempConf[i].c_str(), "location", 8) && tempConf[i].back() == '{') || (!strncmp(tempConf[i].c_str(), "location", 8) && tempConf[i + 1] == "{"))
+            {
                     while(tempConf[i] != "}")
                         i++;
                 }

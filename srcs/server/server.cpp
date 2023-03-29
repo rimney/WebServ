@@ -289,6 +289,7 @@ void server::Get(int location_index , std::string path, int fd)
 {
     server_location location = _server_config.getOneLocationObject(location_index);
     std::string isFOrD = isFileOrDirectory(path);
+    std::cout << "path >>" << path << std::endl;
     if(location.getHasRedirection())
     {
         _respond[fd].setBody(_respond[fd].fileToSring(location.getLocationRedirectionObject()));
@@ -330,13 +331,18 @@ void server::Get(int location_index , std::string path, int fd)
         }
         else if(isFOrD == "directory")
         {
-            std::cout << "HERE\n";
-            if(isFileOrDirectory(location.getLocationRootObject() + "/" + location.getLocationIndexObject()) == "file")
+            if(path[path.size() - 1] != '/')
             {
-                Get(location_index, location.getLocationRootObject() + "/" + location.getLocationIndexObject(), fd);
+                path = path + "/";
+                std::cout << path << " <<<<< path\n";
+            }
+            if(isFileOrDirectory(path + location.getLocationIndexObject()) == "file")
+            {
+                std::cout << "EEEE\n";
+                Get(location_index, path + location.getLocationIndexObject(), fd);
             }
             else if (location.getLocationIndexObject().size() > 0 &&
-                isFileOrDirectory(location.getLocationRootObject() + "/" + location.getLocationIndexObject()) == "error")
+                isFileOrDirectory(path + location.getLocationIndexObject()) == "error")
             {
                 _respond[fd].setRespond(path, _respond[fd].gethttpVersion(), "404");
                 return ;
