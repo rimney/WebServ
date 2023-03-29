@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   respond.cpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: eel-ghan <eel-ghan@student.42.fr>          +#+  +:+       +#+        */
+/*   By: rimney < rimney@student.1337.ma>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/15 20:32:17 by rimney            #+#    #+#             */
-/*   Updated: 2023/03/29 05:02:53 by eel-ghan         ###   ########.fr       */
+/*   Updated: 2023/03/29 18:48:56 by rimney           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -115,6 +115,8 @@ bool respond::isAmongErrorCodes(int error_code)
 std::string respond::chunkedFileToString(std::string path)
 {
     int fd = open(path.c_str(), O_RDONLY);
+    std::cout << path << " << EE\n" ;
+    exit(0);
     if (fd == -1) 
     {
         std::cerr << "Error opening file " << path << std::endl;

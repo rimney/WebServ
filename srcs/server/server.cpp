@@ -167,9 +167,11 @@ void    server::send(int fd)
     if(_respond[fd].getBody().empty())
         _respond[fd].recoverBody(atoi(_respond[fd].getstatusCode().c_str()));
     
-    if(_respond[fd].getBodyFlag() == true)
-        _respond[fd].setFinalString(_respond[fd].chunkedFileToString(_respond[fd].getPathSave()));
-    
+    // if(_respond[fd].getBodyFlag() == true)
+    // {
+    //     std::cout << "BARAE\n";
+    //     _respond[fd].setFinalString(_respond[fd].chunkedFileToString(_respond[fd].getPathSave()));
+    // }  
     // if(_respond[fd].getfinalString().size() > 0)
     // {
         if ((::send(fd, _respond[fd].getfinalString().c_str(), _respond[fd].getfinalString().size(), 0)) == -1)
@@ -290,6 +292,7 @@ void server::Get(int location_index , std::string path, int fd)
     server_location location = _server_config.getOneLocationObject(location_index);
     std::string isFOrD = isFileOrDirectory(path);
     std::cout << "path >>" << path << std::endl;
+    std::cout << "flag >> " << _respond[fd].getBodyFlag();
     if(location.getHasRedirection())
     {
         _respond[fd].setBody(_respond[fd].fileToSring(location.getLocationRedirectionObject()));
@@ -299,8 +302,10 @@ void server::Get(int location_index , std::string path, int fd)
     }
     else if(_respond[fd].getstatusCode() == "200" && _respond[fd].getBodyFlag() == false)
     {
+        std::cout << isFOrD << " <<\n";
         if(isFOrD == "file")
         {
+
             // if(location.getHasCgi())
             // {
             //     std::cout << "location has CGI !!\n";  // BARAE << 
@@ -311,6 +316,7 @@ void server::Get(int location_index , std::string path, int fd)
                 
                 if(_respond[fd].fileToSring(path).size() > 50000 || _respond[fd].getBodyFlag() == true)
                 {
+                    std::cout << " << FF\n";
                     if(_respond[fd].getBodyFlag() == true)
                     {
                         return ;
@@ -325,12 +331,13 @@ void server::Get(int location_index , std::string path, int fd)
                     _respond[fd].setContentLenght(std::to_string(_respond[fd].fileToSring(path).size()));
                     _respond[fd].mergeRespondStrings();
                 }
-                
                 return ;
             // }
         }
         else if(isFOrD == "directory")
         {
+            std::cout << "HEEREg\n";
+            exit(0);
             if(path[path.size() - 1] != '/')
             {
                 path = path + "/";
@@ -361,6 +368,7 @@ void server::Get(int location_index , std::string path, int fd)
             }
         }
     }
+    std::cout << "EEEEE\n";
 }
 
 void    server::process(int fd)
