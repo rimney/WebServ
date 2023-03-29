@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Parsing.cpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: rimney < rimney@student.1337.ma>           +#+  +:+       +#+        */
+/*   By: rimney <rimney@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/07 03:50:36 by rimney            #+#    #+#             */
-/*   Updated: 2023/03/29 04:25:25 by rimney           ###   ########.fr       */
+/*   Updated: 2023/03/29 07:42:01 by rimney           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -63,7 +63,7 @@ std::ostream & operator<<(std::ostream & os, server_location & s)
         os << "     | Location Methods : "<< locationMethods[i] << '\n';
     os << "     | Location AutoIndex : " << s.getLocationIsAutoIndexObject() << '\n'; 
     os << "     |------------->>\n";
-        return (os);
+    return (os);
 }
 
 std::ostream & operator<<(std::ostream & os, server_parser & s)
@@ -108,7 +108,7 @@ server_location::server_location(server_location const  & s)
     this->root = s.root;
     this->HttpMethods = s.HttpMethods;
     this->index = s.index;
-    this->cgiPath = s.cgiPath;
+    this->cgiPaths = s.cgiPaths;
     this->cgiExt = s.cgiExt;
     this->error_codes = s.error_codes;
     this->error_page = s.error_page;
@@ -125,7 +125,7 @@ server_location server_location::operator=(server_location const & s)
     this->root = s.root;
     this->HttpMethods = s.HttpMethods;
     this->index = s.index;
-    this->cgiPath = s.cgiPath;
+    this->cgiPaths = s.cgiPaths;
     this->cgiExt = s.cgiExt;
     this->error_codes = s.error_codes;
     this->error_page = s.error_page;
@@ -222,12 +222,15 @@ void    server_location::getMethods(std::string *Keys, size_t size)
 
 void    server_location::getCgiPath(std::string *Keys, size_t size)
 {
-    if(size <= 1 || size > 2)
+    if(size <= 1)
     {
         std::cerr << "Error Cgi Path Assignemt\n";
         exit(0);
     }
-    this->cgiPath = Keys[size - 1];
+    for(size_t i = 1; i < size; i++)
+        this->cgiPaths.push_back(Keys[i]);
+    for(size_t i = 0; i < this->cgiPaths.size() ; i++)
+       std::cout <<  this->cgiPaths[i] << '\n';
     delete [] Keys;
 }
 
@@ -324,6 +327,8 @@ void server_location::construct_location(std::vector<std::string>::iterator firs
         {
             this->has_cgi = true;
             getCgiPath(stringSplit(locationVec[i], ' ', &temp_size), temp_size);
+            // std::cout << this->cgiPath << " << here\n";
+            exit(0);
         }
         else if (!strncmp(locationVec[i].c_str(), "cgi_exec ", 9))
         {
