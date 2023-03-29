@@ -292,9 +292,12 @@ void server::Get(int location_index , std::string path, int fd)
     {
         if(isFOrD == "file")
         {
-            if(location.getHasCgi())
+            if(location.getHasCgi() == 1)
             {
+
+                std::cout << location.getHasCgi() << " << here\n";
                 std::cout << "location has CGI !!\n";  // BARAE << 
+                exit(0);
                 return ;
             }
             else
@@ -323,6 +326,13 @@ void server::Get(int location_index , std::string path, int fd)
         else if(isFOrD == "directory")
         {
             std::cout << "HERE\n";
+            if(location.getHasCgi() == 1)
+            {
+
+                std::cout << location.getHasCgi() << " << here\n";
+                std::cout << "location has CGI !!\n";  // BARAE << 
+                return ;
+            }
             if(isFileOrDirectory(location.getLocationRootObject() + "/" + location.getLocationIndexObject()) == "file")
             {
                 Get(location_index, location.getLocationRootObject() + "/" + location.getLocationIndexObject(), fd);
