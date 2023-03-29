@@ -180,6 +180,7 @@ void    server::send(int fd)
             throw(std::string("ERROR: send() failed to send response / file: " + _respond[fd].getPathSave()));
         }
     // }
+        
     _respond[fd].cleanAll();
 }
 
