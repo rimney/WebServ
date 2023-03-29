@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   respond.cpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: rimney <rimney@student.42.fr>              +#+  +:+       +#+        */
+/*   By: eel-ghan <eel-ghan@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/15 20:32:17 by rimney            #+#    #+#             */
-/*   Updated: 2023/03/27 18:10:30 by rimney           ###   ########.fr       */
+/*   Updated: 2023/03/29 05:02:53 by eel-ghan         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -95,7 +95,7 @@ bool theFileExists(const std::string& fileName)
     return (false);
 }
 
-std::string respond::getPathSave(void)
+std::string & respond::getPathSave(void)
 {
     return (this->pathSave);
 }
@@ -131,7 +131,7 @@ std::string respond::chunkedFileToString(std::string path)
         std::cout << "THE END !\n";
         bodyFlag = false;
         pathSave.clear();
-        this->cleanAll();
+        // this->cleanAll();
         this->chunkPosition = 0;
         return ("0\r\n\r\n");
     }
