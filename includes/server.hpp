@@ -16,7 +16,8 @@
 # include "parsing.hpp"
 #include "request.hpp"
 #include "respond.hpp"
-
+#include <dirent.h>
+#include <cstring>
 
 // TO BE DELETED //
 #include <string.h>
