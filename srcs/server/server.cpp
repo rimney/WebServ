@@ -110,7 +110,11 @@ void    server::set_addr()
 
 void server::accept()
 {
+    int optval = 1;
+
     _fd_connection = ::accept(_fd_socket, NULL, NULL);
+    if (setsockopt(_fd_connection, SOL_SOCKET, SO_NOSIGPIPE, &optval, sizeof(optval)) == -1)
+        throw(std::string("ERROR: faild to set socket option (setsockopt()) for _fd_socket."));
     if (_fd_connection == -1)
         throw(std::string("ERROR: connection faild."));
     if (fcntl(_fd_connection, F_SETFL, O_NONBLOCK) == -1)
@@ -165,15 +169,18 @@ void    server::send(int fd)
     
     if(_respond[fd].getBodyFlag() == true)
         _respond[fd].setFinalString(_respond[fd].chunkedFileToString(_respond[fd].getPathSave()));
-    if(_respond[fd].getfinalString().size() > 0)
-    {
+    
+    // if(_respond[fd].getfinalString().size() > 0)
+    // {
         if ((::send(fd, _respond[fd].getfinalString().c_str(), _respond[fd].getfinalString().size(), 0)) == -1)
         {
-            throw(std::string("ERROR: send() faild to send response"));
+            // ::close(fd);
+            // _respond[fd].cleanAll();
+            // _respond[fd].setBodyFlag(false);
+            throw(std::string("ERROR: send() failed to send response / file: " + _respond[fd].getPathSave()));
         }
-    }
-        
-        _respond[fd].cleanAll();
+    // }
+    _respond[fd].cleanAll();
 }
 
 void    server::set_server_config(server_parser  & server_config)
@@ -292,13 +299,13 @@ void server::Get(int location_index , std::string path, int fd)
     {
         if(isFOrD == "file")
         {
-            if(location.getHasCgi())
-            {
-                std::cout << "location has CGI !!\n";  // BARAE << 
-                return ;
-            }
-            else
-            {
+            // if(location.getHasCgi())
+            // {
+            //     std::cout << "location has CGI !!\n";  // BARAE << 
+            //     return ;
+            // }
+            // else
+            // {
                 
                 if(_respond[fd].fileToSring(path).size() > 50000 || _respond[fd].getBodyFlag() == true)
                 {
@@ -318,7 +325,7 @@ void server::Get(int location_index , std::string path, int fd)
                 }
                 
                 return ;
-            }
+            // }
         }
         else if(isFOrD == "directory")
         {
