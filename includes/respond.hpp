@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   respond.hpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: rimney < rimney@student.1337.ma>           +#+  +:+       +#+        */
+/*   By: eel-ghan <eel-ghan@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/14 17:42:24 by rimney            #+#    #+#             */
-/*   Updated: 2023/03/27 05:02:20 by rimney           ###   ########.fr       */
+/*   Updated: 2023/03/29 04:38:16 by eel-ghan         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -69,7 +69,7 @@ class respond
         std::string	getAutoIndexPage(std::string path);
         bool        getBodyFlag();
         void        setBodyFlag(bool v);
-        std::string getPathSave(void);
+        std::string & getPathSave(void);
         void    setBodyChunked(std::string s);
         std::string chunkedFileToString(std::string path);
         respond     getRespond(void);
