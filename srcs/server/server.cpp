@@ -86,16 +86,20 @@ void server::setup(server_parser & server_config)
     if (_fd_socket == -1)
     {
         _error_flag = 0;
-        throw(std::string("ERROR: failed to create the socket."));
+        throw(std::string("ERROR: failed to create the socket by the host: ") 
+            + std::to_string(_host) + std::string(" on port: ") + std::to_string(_port));
     }
     //Allow socket descriptor to be reuseable
     if (setsockopt(_fd_socket, SOL_SOCKET, SO_REUSEADDR, &optval, sizeof(optval)) == -1)
-        throw(std::string("ERROR: faild to set socket option (setsockopt()) for _fd_socket."));
+        throw(std::string("ERROR: faild to set socket option (setsockopt()) for _fd_socket by the host: ")
+            + std::to_string(_host) + std::string(" on port: ") + std::to_string(_port));
     set_addr();
     if (bind(_fd_socket, (struct sockaddr*)&_addr, sizeof(_addr)) == -1)
-        throw(std::string("ERROR: failed to bind the socket."));
+        throw(std::string("ERROR: failed to bind the socket by the host: ")
+            + std::to_string(_host) + std::string(" on port: ") + std::to_string(_port));
     if (listen(_fd_socket, 100) == -1)
-        throw(std::string("ERROR: failed to listen."));
+        throw(std::string("ERROR: failed to listen by the host: ")
+            + std::to_string(_host) + std::string(" on port: ") + std::to_string(_port));
     set_server_config(server_config);
     std::cout << "host: " << _host << " is listening on port " << _port << "...\n\n";
 }

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   servers.cpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: rimney <rimney@student.42.fr>              +#+  +:+       +#+        */
+/*   By: eel-ghan <eel-ghan@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/10 00:38:14 by eel-ghan          #+#    #+#             */
-/*   Updated: 2023/03/30 00:18:01 by rimney           ###   ########.fr       */
+/*   Updated: 2023/03/30 03:23:20 by eel-ghan         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -49,26 +49,26 @@ int servers::setup(std::vector<server_parser> servers_config)
         catch(const std::string& msg)
         {
             std::cerr << msg << '\n';
-            if (_servers[i].get_error_flag())
-                for (size_t j = 0; j < i + 1; j++)
-                    _servers[j].close();
-            else
-                for (size_t j = 0; j < i; j++)
-                    _servers[j].close();
-            _servers.clear();
-            return 1;
+            if (_servers[i].get_error_flag() == 1)
+                _servers[i].close();
+            _servers.erase(_servers.begin() + i);
         }
     }
 
     FD_ZERO(&_set_fds);
 
     _max_fd = 0;
-    for (i = 0; i < servers_config.size(); i++)
+    for (i = 0; i < _servers.size(); i++)
     {
         fd = _servers[i].get_fd_socket();
         FD_SET(fd, &_set_fds);
         if (_max_fd < _servers[i].get_fd_socket())
             _max_fd = _servers[i].get_fd_socket();
+    }
+    if (_max_fd == 0)
+    {
+        std::cerr << "ERROR: couldn't run servers\n";
+        return 1;
     }
     return 0;
 }
