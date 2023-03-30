@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   respond.cpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: rimney < rimney@student.1337.ma>           +#+  +:+       +#+        */
+/*   By: rimney <rimney@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/15 20:32:17 by rimney            #+#    #+#             */
-/*   Updated: 2023/03/29 18:48:56 by rimney           ###   ########.fr       */
+/*   Updated: 2023/03/30 00:07:47 by rimney           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -115,8 +115,6 @@ bool respond::isAmongErrorCodes(int error_code)
 std::string respond::chunkedFileToString(std::string path)
 {
     int fd = open(path.c_str(), O_RDONLY);
-    std::cout << path << " << EE\n" ;
-    exit(0);
     if (fd == -1) 
     {
         std::cerr << "Error opening file " << path << std::endl;
@@ -226,6 +224,16 @@ std::string	respond::getAutoIndexPage(std::string path)
     return (temp);
 }
 
+std::string respond::getLocation(void)
+{
+    return ("Location: " + this->location);
+}
+
+void    respond::setLocation(std::string location)
+{
+    this->location = location;
+}
+
 std::string     respond::fileToSring(std::string path)
 {
     std::ifstream file(path);
@@ -267,7 +275,7 @@ std::string		respond::setErrorBody(std::string status_code)
 
 std::string		respond::mergeRespondStrings(void)
 {
-	std::string response = this->gethttpVersion() + " " + this->getstatusCode() + " " + this->getstatusDescription() + "\r\nContent-Length: " + this->getContentLenght() + "\r\n" + this->content_type + "\r\n\r\n" + this->getBody();
+	std::string response = this->gethttpVersion() + " " + this->getstatusCode() + " " + this->getstatusDescription() + "\r\nContent-Length: " + this->getContentLenght() + "\r\n" + this->getLocation() + "\r\n" +  this->content_type + "\r\n\r\n" + this->getBody();
 	this->finalString = response;
 	return (response); 
 }

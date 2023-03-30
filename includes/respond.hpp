@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   respond.hpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: eel-ghan <eel-ghan@student.42.fr>          +#+  +:+       +#+        */
+/*   By: rimney <rimney@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/14 17:42:24 by rimney            #+#    #+#             */
-/*   Updated: 2023/03/29 04:38:16 by eel-ghan         ###   ########.fr       */
+/*   Updated: 2023/03/29 22:16:22 by rimney           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,6 +35,7 @@ class respond
         std::string		content_type;
         std::string		statusDescription;
 		std::string		pathSave;
+        std::string     location;
         server_parser	server;
 		std::string		tempAutoIndexFile;// set a header flag << // set a path to the file
     
@@ -54,6 +55,8 @@ class respond
         void        setstatusDescription(std::string statusDescription);
         void        setContentLenght(std::string ContentLenght);
         void        setBody(std::string Body);
+        void        setLocation(std::string  location);
+        std::string getLocation(void);
         void        setFinalString(std::string finalString);
         void        setRespond(std::string path, std::string httpVersion, std::string error);
         std::string setErrorBody(std::string status_code);

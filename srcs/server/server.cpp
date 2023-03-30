@@ -167,11 +167,8 @@ void    server::send(int fd)
     if(_respond[fd].getBody().empty())
         _respond[fd].recoverBody(atoi(_respond[fd].getstatusCode().c_str()));
     
-    // if(_respond[fd].getBodyFlag() == true)
-    // {
-    //     std::cout << "BARAE\n";
-    //     _respond[fd].setFinalString(_respond[fd].chunkedFileToString(_respond[fd].getPathSave()));
-    // }  
+    if(_respond[fd].getBodyFlag() == true)
+        _respond[fd].setFinalString(_respond[fd].chunkedFileToString(_respond[fd].getPathSave()));
     // if(_respond[fd].getfinalString().size() > 0)
     // {
         if ((::send(fd, _respond[fd].getfinalString().c_str(), _respond[fd].getfinalString().size(), 0)) == -1)
@@ -336,16 +333,15 @@ void server::Get(int location_index , std::string path, int fd)
         }
         else if(isFOrD == "directory")
         {
-            std::cout << "HEEREg\n";
-            exit(0);
             if(path[path.size() - 1] != '/')
             {
-                path = path + "/";
-                std::cout << path << " <<<<< path\n";
+                _respond[fd].setRespond(_request[fd].get_start_line().path + '/', _respond[fd].gethttpVersion(), "301");
+                _respond[fd].setLocation(_request[fd].get_start_line().path + '/');
+                _respond[fd].mergeRespondStrings();
+                std::cout << _respond[fd].getfinalString() << std::endl;
             }
             if(isFileOrDirectory(path + location.getLocationIndexObject()) == "file")
             {
-                std::cout << "EEEE\n";
                 Get(location_index, path + location.getLocationIndexObject(), fd);
             }
             else if (location.getLocationIndexObject().size() > 0 &&
@@ -368,7 +364,6 @@ void server::Get(int location_index , std::string path, int fd)
             }
         }
     }
-    std::cout << "EEEEE\n";
 }
 
 void    server::process(int fd)
