@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Parsing.cpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: rimney < rimney@student.1337.ma>           +#+  +:+       +#+        */
+/*   By: rimney <rimney@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/07 03:50:36 by rimney            #+#    #+#             */
-/*   Updated: 2023/03/29 17:21:01 by rimney           ###   ########.fr       */
+/*   Updated: 2023/03/30 00:18:13 by rimney           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -118,7 +118,7 @@ server_location::server_location(server_location const  & s)
     this->has_redirection = s.has_redirection;
     this->redirection = s.redirection;
 }
-server_location server_location::operator=(server_location const & s)
+server_location & server_location::operator=(server_location const & s)
 {
     this->location_index = s.location_index;
     this->location_name = s.location_name;
