@@ -6,7 +6,7 @@
 /*   By: rimney <rimney@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/07 03:50:36 by rimney            #+#    #+#             */
-/*   Updated: 2023/03/30 04:08:18 by rimney           ###   ########.fr       */
+/*   Updated: 2023/03/30 04:17:00 by rimney           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -739,7 +739,7 @@ void    server_parser::construct_server(std::vector<std::string>::iterator first
             getServerName(stringSplit(serverVec[i], ' ', &temp_size), temp_size);
             if(this->server_names.size() == 0)
                 this->server_names.push_back("localhost ");
-            std::cout << getServerNamesObject()
+            // std::cout << getServerNamesObject();
         }
         else if(!strncmp(serverVec[i].c_str(), "error", 5))
         {
