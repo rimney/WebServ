@@ -6,7 +6,7 @@
 /*   By: rimney <rimney@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/24 21:53:42 by rimney            #+#    #+#             */
-/*   Updated: 2023/03/30 00:17:31 by rimney           ###   ########.fr       */
+/*   Updated: 2023/03/30 03:33:39 by rimney           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -60,7 +60,7 @@ class server_location
         std::vector<int>			getLocationErrorCodesObject(void) {return (this->error_codes);}
         std::vector<std::string>	getLocationMethodsObject(void){return (this->HttpMethods);}
 
-        std::vector<std::string>                 getCgiPathObject(void) {return (this->cgiPaths);}
+        std::string                 getCgiPathObject(std::string path);
         std::string                 getUploadObject(void) {return (this->upload);}
         bool                        getHasCgi(void) {return (has_cgi);}
         bool                        getHasRedirection(void) {return (this->has_redirection);}
@@ -80,6 +80,7 @@ class server_location
         void    getCgiExec(std::string *Keys, size_t size);
         void    getUpload(std::string *Keys, size_t size);
         void    getLocationName(std::string *Keys, size_t size);
+        void    checkCgiAllowed(void);
         void    construct_location(std::vector<std::string>::iterator first, std::vector<std::string>::iterator last);
 		////////////// Parsing Fucntions //////////////
 };
