@@ -6,7 +6,7 @@
 /*   By: rimney <rimney@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/07 03:50:36 by rimney            #+#    #+#             */
-/*   Updated: 2023/03/30 00:18:13 by rimney           ###   ########.fr       */
+/*   Updated: 2023/03/30 03:31:54 by rimney           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -272,6 +272,71 @@ void    server_location::getUpload(std::string *Keys, size_t size)
     this->upload = Keys[size - 1];
     delete [] Keys; 
 }
+
+
+
+void    server_location::checkCgiAllowed(void)
+{
+    bool f = false;
+    std::string path_holder;
+    std::string ext_holder;
+
+    for(size_t i = 0; i < this->cgiPaths.size(); i++)
+    {
+        f = false;
+        if(isFileOrDirectory(this->cgiPaths[i]) != "file")
+        {
+            std::cerr << "Error : " << this->cgiPaths[i] << " Check This Path\n";
+            exit(0);
+        }
+        std::cout << strrchr(this->cgiPaths[i].c_str(), '/') + 1 << " <<<\n";
+        if(!strcmp(strrchr(this->cgiPaths[i].c_str(), '/') + 1, "php") || !strcmp(strrchr(this->cgiPaths[i].c_str(), '/') + 1, "php-cgi"))
+        {
+            for(size_t i = 0; i < this->cgiExt.size(); i++)
+            {
+                if(this->cgiExt[i] == ".php")
+                    f = true;
+            }
+            if(f == false)
+            {
+                std::cerr << "Error : There's No Extention Of : " << this->cgiPaths[i] << std::endl;
+                exit(1);
+            }
+        }
+        if(!strcmp(strrchr(this->cgiPaths[i].c_str(), '/') + 1, "python") || !strcmp(strrchr(this->cgiPaths[i].c_str(), '/') + 1, "python3"))
+        {
+            for(size_t i = 0; i < this->cgiExt.size(); i++)
+            {
+                if(this->cgiExt[i] == ".py")
+                    f = true;
+            }
+            if(f == false)
+            {
+                std::cerr << "Error : There's No Extention Of : " << this->cgiPaths[i] << std::endl;
+                exit(1);
+            }
+        }
+        if(!strcmp(strrchr(this->cgiPaths[i].c_str(), '/') + 1, "ruby"))
+        {
+            for(size_t i = 0; i < this->cgiExt.size(); i++)
+            {
+                if(this->cgiExt[i] == ".rb")
+                    f = true;
+            }
+            if(f == false)
+            {
+                std::cerr << "Error : There's No Extention Of : " << this->cgiPaths[i] << std::endl;
+                exit(1);
+            }
+        }
+    }
+    for(size_t i = 0; i < this->cgiExt.size(); i++)
+        std::cout << this->cgiExt[i] << " << cgiExt\n";
+    for(size_t i = 0; i < this->cgiPaths.size(); i++)
+        std::cout << this->cgiPaths[i] << " << cgiPaths\n";
+    
+        exit(0);
+}
 void server_location::construct_location(std::vector<std::string>::iterator first, std::vector<std::string>::iterator last)
 {
     std::vector<std::string> locationVec(first, last);
@@ -332,8 +397,8 @@ void server_location::construct_location(std::vector<std::string>::iterator firs
         {
             this->has_cgi = true;
             getCgiPath(stringSplit(locationVec[i], ' ', &temp_size), temp_size);
-            // std::cout << this->cgiPath << " << here\n";
-            // exit(0);
+ 
+            checkCgiAllowed();
         }
         else if (!strncmp(locationVec[i].c_str(), "cgi_exec ", 9))
         {
