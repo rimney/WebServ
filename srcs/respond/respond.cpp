@@ -6,7 +6,7 @@
 /*   By: rimney <rimney@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/15 20:32:17 by rimney            #+#    #+#             */
-/*   Updated: 2023/03/30 00:07:47 by rimney           ###   ########.fr       */
+/*   Updated: 2023/03/30 03:55:50 by rimney           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -80,6 +80,7 @@ void    respond::setContentLenght(std::string ContentLenght)
 void    respond::setBody(std::string Body)
 {
     this->Body = Body;
+    this->ContentLenght = this->Body.size();
 }
 
 void    respond::setFinalString(std::string finalString)
@@ -275,9 +276,11 @@ std::string		respond::setErrorBody(std::string status_code)
 
 std::string		respond::mergeRespondStrings(void)
 {
-	std::string response = this->gethttpVersion() + " " + this->getstatusCode() + " " + this->getstatusDescription() + "\r\nContent-Length: " + this->getContentLenght() + "\r\n" + this->getLocation() + "\r\n" +  this->content_type + "\r\n\r\n" + this->getBody();
-	this->finalString = response;
-	return (response); 
+    if (this->location.empty())
+	    this->finalString =  this->gethttpVersion() + " " + this->getstatusCode() + " " + this->getstatusDescription() + "\r\nContent-Length: " + this->getContentLenght() + "\r\n" + this->content_type + "\r\n\r\n" + this->getBody();
+    else
+	    this->finalString = this->gethttpVersion() + " " + this->getstatusCode() + " " + this->getstatusDescription() + "\r\nContent-Length: " + this->getContentLenght() + "\r\n" + this->getLocation() + "\r\n" +  this->content_type + "\r\n\r\n" + this->getBody();
+    return (this->finalString);
 }
 
 void    respond::recoverBody(int status_code)

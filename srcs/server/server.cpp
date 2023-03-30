@@ -169,6 +169,7 @@ void    server::send(int fd)
     
     if(_respond[fd].getBodyFlag() == true)
         _respond[fd].setFinalString(_respond[fd].chunkedFileToString(_respond[fd].getPathSave()));
+    std::cout << _respond[fd].getfinalString();
     // if(_respond[fd].getfinalString().size() > 0)
     // {
         if ((::send(fd, _respond[fd].getfinalString().c_str(), _respond[fd].getfinalString().size(), 0)) == -1)
@@ -313,9 +314,8 @@ void server::Get(int location_index , std::string path, int fd)
             {
                 std::cout << path << " < cgi exec\n";                   // that's setting in the config, ex:(if ext == ".php" || == ".py")
                 std::cout << "CGI <<<\n";
-                exit(0);
-                // cgi_handler cgi(_server_config, _request[fd]);
-                // cgi.exec(_respond[fd]);
+                cgi_handler cgi(_server_config, _request[fd]);
+                cgi.exec(_respond[fd]);
                 return ;
             }
             // {

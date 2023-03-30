@@ -6,7 +6,7 @@
 /*   By: rimney <rimney@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/07 03:50:36 by rimney            #+#    #+#             */
-/*   Updated: 2023/03/30 03:31:54 by rimney           ###   ########.fr       */
+/*   Updated: 2023/03/30 04:04:57 by rimney           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -257,7 +257,6 @@ void    server_location::getLocationName(std::string *Keys, size_t size)
         this->location_name = Keys[size - 1];
     else
         this->location_name = Keys[size - 2];
-    std::cout << this->location_name << " << LOCATION_NAME\n";
     
     delete [] Keys;
 }
@@ -281,6 +280,14 @@ void    server_location::checkCgiAllowed(void)
     std::string path_holder;
     std::string ext_holder;
 
+    for(size_t i = 0; i < this->cgiExt.size(); i++)
+    {
+        if(this->cgiExt[i] != ".php" && this->cgiExt[i] != ".rb" && this->cgiExt[i] != ".py")
+        {
+            std::cerr << "Error : CGI Extention Not Allowed\n";
+            exit(1);
+        }
+    }
     for(size_t i = 0; i < this->cgiPaths.size(); i++)
     {
         f = false;
@@ -289,7 +296,6 @@ void    server_location::checkCgiAllowed(void)
             std::cerr << "Error : " << this->cgiPaths[i] << " Check This Path\n";
             exit(0);
         }
-        std::cout << strrchr(this->cgiPaths[i].c_str(), '/') + 1 << " <<<\n";
         if(!strcmp(strrchr(this->cgiPaths[i].c_str(), '/') + 1, "php") || !strcmp(strrchr(this->cgiPaths[i].c_str(), '/') + 1, "php-cgi"))
         {
             for(size_t i = 0; i < this->cgiExt.size(); i++)
@@ -303,7 +309,7 @@ void    server_location::checkCgiAllowed(void)
                 exit(1);
             }
         }
-        if(!strcmp(strrchr(this->cgiPaths[i].c_str(), '/') + 1, "python") || !strcmp(strrchr(this->cgiPaths[i].c_str(), '/') + 1, "python3"))
+        else if(!strcmp(strrchr(this->cgiPaths[i].c_str(), '/') + 1, "python") || !strcmp(strrchr(this->cgiPaths[i].c_str(), '/') + 1, "python3"))
         {
             for(size_t i = 0; i < this->cgiExt.size(); i++)
             {
@@ -316,7 +322,7 @@ void    server_location::checkCgiAllowed(void)
                 exit(1);
             }
         }
-        if(!strcmp(strrchr(this->cgiPaths[i].c_str(), '/') + 1, "ruby"))
+        else if(!strcmp(strrchr(this->cgiPaths[i].c_str(), '/') + 1, "ruby"))
         {
             for(size_t i = 0; i < this->cgiExt.size(); i++)
             {
@@ -329,13 +335,29 @@ void    server_location::checkCgiAllowed(void)
                 exit(1);
             }
         }
+        else
+        {
+            std::cerr << "Error : Cgi Not Supported\n";
+            exit(1);
+        }
     }
-    for(size_t i = 0; i < this->cgiExt.size(); i++)
-        std::cout << this->cgiExt[i] << " << cgiExt\n";
+}
+
+std::string server_location::getCgiPathObject(std::string path)
+{
+
     for(size_t i = 0; i < this->cgiPaths.size(); i++)
-        std::cout << this->cgiPaths[i] << " << cgiPaths\n";
-    
-        exit(0);
+    {
+        if((!strcmp(strrchr(this->cgiPaths[i].c_str(), '/') + 1, "php") || !strcmp(strrchr(this->cgiPaths[i].c_str(), '/') + 1, "php-cgi")) && !strcmp(strrchr(path.c_str(), '.') + 1, "php"))
+            return (this->cgiPaths[i]);
+        if((!strcmp(strrchr(this->cgiPaths[i].c_str(), '/') + 1, "python") || !strcmp(strrchr(this->cgiPaths[i].c_str(), '/') + 1, "python3")) && !strcmp(strrchr(path.c_str(), '.') + 1, "py"))
+            return (this->cgiPaths[i]);
+        if(!strcmp(strrchr(this->cgiPaths[i].c_str(), '/') + 1, "ruby") && !strcmp(strrchr(path.c_str(), '.') + 1, "py"))
+            return (this->cgiPaths[i]);
+    }
+    std::cout << path;
+    exit(0);
+    return path;
 }
 void server_location::construct_location(std::vector<std::string>::iterator first, std::vector<std::string>::iterator last)
 {

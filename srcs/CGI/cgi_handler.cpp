@@ -122,13 +122,13 @@ void cgi_handler::exec(respond & response)
             write(fds[1], "500", 3);
         }
 
-        // char * const argv[3] = {
-        //     (char *) _location.getCgiPathObject().c_str(),
-        //     (char *) _request.get_start_line().full_path.c_str(),
-        //     NULL
-        // };
+        char * const argv[3] = {
+            (char *) _location.getCgiPathObject(_request.get_start_line().full_path).c_str(),
+            (char *) _request.get_start_line().full_path.c_str(),
+            NULL
+        };
 
-        // execve(_location.getCgiPathObject().c_str(), argv, env);
+        execve(_location.getCgiPathObject(_request.get_start_line().full_path).c_str(), argv, env);
 
         std::cerr << "ERROR: execve() failed\n";
         write(fds[1], "500", 3);
