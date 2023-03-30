@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   parsing.hpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: rimney < rimney@student.1337.ma>           +#+  +:+       +#+        */
+/*   By: rimney <rimney@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/24 21:53:42 by rimney            #+#    #+#             */
-/*   Updated: 2023/03/19 16:47:34 by rimney           ###   ########.fr       */
+/*   Updated: 2023/03/30 00:17:31 by rimney           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,19 +32,19 @@ class server_location
         std::string					root; // root key
         std::string					index; // index 
         std::string					redirection; // return aaa/aaaa/html
-        std::string					cgiPath; // location of the interpreter 
         std::string					error_page; // same as the previous class
-        std::vector<int>			error_codes; // // // // 
+        std::vector<int>			error_codes; // // // //
         std::vector<std::string>	cgiExt; // cgi extension
-        std::vector<std::string>	HttpMethods; // GET, POST, DELETE
         std::string                 upload;
+        std::vector<std::string>	cgiPaths; // location of the interpreter 
+        std::vector<std::string>	HttpMethods; // GET, POST, DELETE
         
     public :
 		////////////// Constructors and Overloads //////////////
         server_location(){};
         ~server_location(){};
         server_location(server_location const & s);
-        server_location operator=(server_location const & s);
+        server_location & operator=(server_location const & s);
 		////////////// Constructors and Overloads //////////////
 		
 		////////////// Getters and Setters //////////////
@@ -60,7 +60,7 @@ class server_location
         std::vector<int>			getLocationErrorCodesObject(void) {return (this->error_codes);}
         std::vector<std::string>	getLocationMethodsObject(void){return (this->HttpMethods);}
 
-        std::string                 getCgiPathObject(void) {return (this->cgiPath);}
+        std::vector<std::string>                 getCgiPathObject(void) {return (this->cgiPaths);}
         std::string                 getUploadObject(void) {return (this->upload);}
         bool                        getHasCgi(void) {return (has_cgi);}
         bool                        getHasRedirection(void) {return (this->has_redirection);}

@@ -3,14 +3,14 @@
 /*                                                        :::      ::::::::   */
 /*   respond.cpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: rimney < rimney@student.1337.ma>           +#+  +:+       +#+        */
+/*   By: rimney <rimney@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/15 20:32:17 by rimney            #+#    #+#             */
-/*   Updated: 2023/03/19 17:12:42 by rimney           ###   ########.fr       */
+/*   Updated: 2023/03/30 00:07:47 by rimney           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../../includes/respond.hpp"
+#include "../../includes/webserv.hpp"
 
 std::string respond::gethttpVersion(void)
 {
@@ -31,6 +31,21 @@ std::string respond::getContentLenght(void)
 {
     return (this->ContentLenght);
 }
+
+size_t respond::getContentLenght_sizet(void)
+{
+    return (this->Body.size());
+}
+
+bool respond::getBodyFlag(void)
+{
+    return (this->bodyFlag);
+}
+
+void respond::setBodyFlag(bool v)
+{
+    this->bodyFlag = v;
+}   
 
 std::string respond::getBody(void)
 {
@@ -80,6 +95,11 @@ bool theFileExists(const std::string& fileName)
     return (false);
 }
 
+std::string & respond::getPathSave(void)
+{
+    return (this->pathSave);
+}
+
 bool respond::isAmongErrorCodes(int error_code)
 {
     std::vector<int> errors = server.getErrorCodesObject();
@@ -89,6 +109,129 @@ bool respond::isAmongErrorCodes(int error_code)
             return (true);
     }
     return (false);
+}
+
+
+std::string respond::chunkedFileToString(std::string path)
+{
+    int fd = open(path.c_str(), O_RDONLY);
+    if (fd == -1) 
+    {
+        std::cerr << "Error opening file " << path << std::endl;
+        return "";
+    }
+    
+    // Move file pointer to current chunk position
+    lseek(fd, this->chunkPosition, SEEK_SET);
+    
+    char buffer[CHUNK_SIZE];
+    int bytes_read = read(fd, buffer, CHUNK_SIZE);
+    if (bytes_read == 0)
+    {
+        std::cout << "THE END !\n";
+        bodyFlag = false;
+        pathSave.clear();
+        // this->cleanAll();
+        this->chunkPosition = 0;
+        return ("0\r\n\r\n");
+    }
+    else if (bytes_read == -1)
+    {
+        std::cerr << "Error while chunking";
+        return "";
+    }
+    
+    std::string content(buffer, bytes_read);
+    
+    // Update current chunk position
+    this->chunkPosition += bytes_read;
+    
+    close(fd);
+    
+    if (getfinalString().size() > 0) {
+        return getfinalString() + content;
+    }
+    else
+        finalString.clear();
+    return content;
+}
+
+std::string respond::getFileType(const std::string& fileName)
+{
+    // Get the file extension
+    std::string ext = fileName.substr(fileName.find_last_of(".") + 1);
+    // Check the file extension and return the content-type
+    if (ext == "txt")
+        return "text/plain";
+    else if (ext == "jpg" || ext == "jpeg")
+        return "image/jpeg";
+    else if (ext == "png")
+        return "image/png";
+    else if (ext == "pdf")
+        return "application/pdf";
+    else if (ext == "html")
+        return "text/html";
+    else if (ext == "css")
+        return "text/css";
+    else if(ext == "mp4")
+        return "video/mp4";
+    else if (ext == "mp3")
+        return ("audio/mp3");
+    else
+        return "text/html";
+}
+
+
+void    respond::cleanAll(void)
+{
+    this->Body.clear();
+    this->httpVersion.clear();
+    this->statusCode.clear();
+    this->statusDescription.clear();
+    this->ContentLenght.clear();
+    this->finalString.clear();
+    this->content_type.clear();
+}
+
+std::string	respond::getAutoIndexPage(std::string path)
+{
+    std::string temp;
+    DIR *dir;
+    struct dirent *ent;
+    
+    temp = "<html>\n<head>\n<title>Directory listing</title>\n</head>\n<body>\n<ul>\n";
+    if ((dir = opendir(path.c_str())) != NULL)
+    { // replace "." with the path to the directory you want to list
+        while ((ent = readdir (dir)) != NULL)
+        {
+            if (ent->d_type == DT_REG || ent->d_type == DT_DIR) { // list regular files and directories
+            std::string type = (ent->d_type == DT_REG) ? "file" : "directory";
+            temp = temp + "<li><a href=\"" + ent->d_name + "\">" + ent->d_name + "</a> (" + type + ")</li>\n";
+        }
+    }
+    closedir (dir);
+    }
+    else
+    {
+        std::cout << "Unable to open directory";
+        return "";
+    }
+    temp = temp + "</ul>\n";
+    temp = temp + "</body>\n";
+    temp = temp + "</html>\n";
+    
+    std::cout << temp << "\n";
+    return (temp);
+}
+
+std::string respond::getLocation(void)
+{
+    return ("Location: " + this->location);
+}
+
+void    respond::setLocation(std::string location)
+{
+    this->location = location;
 }
 
 std::string     respond::fileToSring(std::string path)
@@ -115,9 +258,9 @@ std::string     respond::errorStringToString(int error)
     else if(error == 400)
         return ("<h1>\n400 Bad Request\n</h1>\n");
     else if(error == 404)
-        return ("<h1>\n404 Page Not Found\n</h1>\n");
+        return ("");
     else if(error == 403)
-        return ("<h1>\n 403 Error Forbidden</h1>\n");
+        return ("<h1>\n 403 Error Forbidden</h1>");
     return ("OK");
 }
 
@@ -127,14 +270,57 @@ std::string		respond::setErrorBody(std::string status_code)
         return (fileToSring(this->server.getServerErrorPageObject()));
     else if(this->isAmongErrorCodes(atoi(status_code.c_str())))
         return (fileToSring(this->server.getServerErrorPageObject()));    
-    return (errorStringToString(atoi(status_code.c_str())));
+    return ("");   
 }
 
 std::string		respond::mergeRespondStrings(void)
 {
-	std::string response = this->gethttpVersion() + " " + this->getstatusCode() + " " + this->getstatusDescription() + "\r\nContent-Length: " + this->getContentLenght() + "\r\n\r\n" + this->getBody();
+	std::string response = this->gethttpVersion() + " " + this->getstatusCode() + " " + this->getstatusDescription() + "\r\nContent-Length: " + this->getContentLenght() + "\r\n" + this->getLocation() + "\r\n" +  this->content_type + "\r\n\r\n" + this->getBody();
 	this->finalString = response;
 	return (response); 
+}
+
+void    respond::recoverBody(int status_code)
+{
+    if(status_code == 404)
+    {
+        this->setFinalString("HTTP/1.1 404 Not Found\r\nContent-Type: text/html\r\nContent-Length: 22\r\n\r\n<h1>404 Not Found</h1>\r\n");
+        this->setContentLenght(std::to_string(this->getfinalString().size()));
+    }
+    else if(status_code == 501)
+    {
+        this->setFinalString("HTTP/1.1 501 Not Implementedr\nContent-Type: text/html\r\nContent-Length: 29\r\n\r\n<h1>501 Not Implemented</h1>\r\n");
+        this->setContentLenght(std::to_string(this->getfinalString().size()));
+    }
+    else if(status_code == 400)
+    {
+        this->setFinalString("HTTP/1.1 400 Bad Request\r\nContent-Type: text/html\r\nContent-Length: 22\r\n\r\n<h1>\n400 Bad Request\n</h1>");
+        this->setContentLenght(std::to_string(this->getfinalString().size()));
+    }
+    else if(status_code == 413)
+    {
+        this->setFinalString("HTTP/1.1 413 Request Entity Too Large\r\nContent-Type: text/html\r\nContent-Length: 41\r\n\r\n<h1>\n413 Request Entity Too Large\n</h1>\r\n");
+        this->setContentLenght(std::to_string(this->getfinalString().size()));
+    }
+    else if(status_code == 414)
+    {
+        this->setFinalString("HTTP/1.1 414 Request-URI Too Longer\nContent-Type: text/html\r\nContent-Length: 37\r\n\r\n<h1>\n414 Request-URI Too Long\n</h1>\r\n");
+        this->setContentLenght(std::to_string(this->getfinalString().size()));
+    }
+    else if (status_code == 403)
+    {
+        this->setFinalString("HTTP/1.1 403 Error Forbidden\r\nContent-Type: text/html\r\nContent-Length: 31\r\n\r\n<h1>\n 403 Error Forbidden</h1>\r\n");
+        this->setContentLenght(std::to_string(this->getfinalString().size()));
+        
+    }
+}
+
+
+
+
+void    respond::setContentType(std::string const & content_type)
+{
+    this->content_type = "Content-Type: " + content_type;
 }
 
 void	respond::setRespond(std::string path, std::string httpVersion, std::string error)
@@ -143,6 +329,7 @@ void	respond::setRespond(std::string path, std::string httpVersion, std::string 
     {
         if(error == "501 Not Implemented")
         {
+            this->bodyFlag = false;
             this->sethttpVersion(httpVersion);
             this->setstatusCode("501");
             this->setstatusDescription("Not Implemented");
@@ -153,7 +340,7 @@ void	respond::setRespond(std::string path, std::string httpVersion, std::string 
         }
         else if(error == "403")
         {
-            std::cout << "respond\n";
+            this->bodyFlag = false;
             this->sethttpVersion(httpVersion);
             this->setstatusCode("403");
             this->setstatusDescription("Forbidden");
@@ -164,6 +351,7 @@ void	respond::setRespond(std::string path, std::string httpVersion, std::string 
         }
         else if(error == "400 Bad Request")
         {
+            this->bodyFlag = false;
             this->sethttpVersion(httpVersion);
             this->setstatusCode("400");
             this->setstatusDescription("Bad Request");
@@ -174,6 +362,7 @@ void	respond::setRespond(std::string path, std::string httpVersion, std::string 
         }
         else if(error == "413 Request Entity Too Large")
         {
+            this->bodyFlag = false;
             this->sethttpVersion(httpVersion);
             this->setstatusCode("413");
             this->setstatusDescription("Request Entity Too Large");
@@ -184,6 +373,7 @@ void	respond::setRespond(std::string path, std::string httpVersion, std::string 
         }
         else if(error == "414 Request-URI Too Long")
         {
+            this->bodyFlag = false;
             this->sethttpVersion(httpVersion);
             this->setstatusCode("414");
             this->setstatusDescription("Request-URI Too Long");
@@ -194,6 +384,7 @@ void	respond::setRespond(std::string path, std::string httpVersion, std::string 
         }
         else if(error == "400 Bad Request")
         {
+            this->bodyFlag = false;
             this->sethttpVersion(httpVersion);
             this->setstatusCode("400");
             this->setstatusDescription("400 Bad Request");
@@ -204,6 +395,7 @@ void	respond::setRespond(std::string path, std::string httpVersion, std::string 
         }
         else if(error == "404")
         {
+            this->bodyFlag = false;
             this->sethttpVersion(httpVersion);
             this->setstatusCode("404");
             this->setstatusDescription("Not Found");
@@ -214,6 +406,7 @@ void	respond::setRespond(std::string path, std::string httpVersion, std::string 
         }
         else if(error == "405")
         {
+            this->bodyFlag = false;
             this->sethttpVersion(httpVersion);
             this->setstatusCode("405");
             this->setstatusDescription("Method Not Allowed");
@@ -221,10 +414,10 @@ void	respond::setRespond(std::string path, std::string httpVersion, std::string 
             this->setContentLenght(std::to_string(this->getBody().size()));
 			this->mergeRespondStrings();
             return ;
-        
         }
         else if(error == "301") // << HERE
         {
+            this->bodyFlag = false;
             this->sethttpVersion(httpVersion);
             this->setstatusCode("301");
             this->setstatusDescription("Moved Permanently");
@@ -232,11 +425,22 @@ void	respond::setRespond(std::string path, std::string httpVersion, std::string 
             this->setContentLenght(std::to_string(this->getBody().size()));
 			this->mergeRespondStrings();
             return ;
-        }   
+        }
+        else if(error == "201") // << HERE
+        {
+            this->bodyFlag = false;
+            this->sethttpVersion(httpVersion);
+            this->setstatusCode("201");
+            this->setstatusDescription("Created");
+            setContentType("text/plain");
+            this->setBody("Crated");
+            this->setContentLenght(std::to_string(this->getBody().size()));
+			this->mergeRespondStrings();
+            return ;
+        } 
     }
-    if(theFileExists(path) == false && isFileOrDirectory(path) == "file")
+    if(theFileExists(path) == false || isFileOrDirectory(path) == "error")
     {
-        std::cout << path << " < PASSED\n";
         this->sethttpVersion(httpVersion);
         this->setstatusCode("404");
         this->setstatusDescription("Not Found");
@@ -246,15 +450,34 @@ void	respond::setRespond(std::string path, std::string httpVersion, std::string 
         return ;
     }
     else
-    {
-        this->sethttpVersion(httpVersion);
-        this->setstatusCode("200");
-        this->setstatusDescription("OK");
-        this->setBody(this->setErrorBody(this->getstatusCode()));   
-        this->setContentLenght(std::to_string(this->getBody().size()));
-		this->mergeRespondStrings();
+    { 
+        this->pathSave = path;
+        cleanAll();
+        if(this->getBodyFlag() == false)
+        {
+            std::cout << "Header Set !\n"; 
+            this->setChunkPosition(0);
+            this->setContentType(getFileType(path));
+            this->sethttpVersion(httpVersion);
+            this->setstatusCode("200");
+            this->setstatusDescription("OK");
+            this->setContentLenght(std::to_string(fileToSring(path).size()));
+            this->Body.clear();
+            if(getfinalString().size() == 0)
+		        this->mergeRespondStrings();
+        }
         return ;
     }
+}
+
+int respond::getChunkPosition(void)
+{
+    return (this->chunkPosition);
+}
+
+void respond::setChunkPosition(int chunk)
+{
+    this->chunkPosition = chunk;
 }
 
 bool isDirectory(const char* path) {
@@ -265,14 +488,19 @@ bool isDirectory(const char* path) {
     return S_ISDIR(file_stat.st_mode);
 }
 
-std::string	isFileOrDirectory(std::string path)
+std::string	isFileOrDirectory(std::string path) // need to fix this one !!
 {
+    std::ifstream init(path);
     if (isDirectory(path.c_str()))
 	{
         return ("directory");
     }
-	else {
+	else if(init.good())
         return ("file");
-    }
 	return ("error");
+}
+
+respond respond::getRespond(void)
+{
+    return (*this);    
 }

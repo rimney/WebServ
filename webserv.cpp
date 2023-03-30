@@ -6,7 +6,7 @@
 /*   By: rimney < rimney@student.1337.ma>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/25 20:56:08 by eel-ghan          #+#    #+#             */
-/*   Updated: 2023/03/15 18:54:00 by rimney           ###   ########.fr       */
+/*   Updated: 2023/03/27 02:29:45 by rimney           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,7 +21,7 @@ int main(int argc, char **argv)
         {
             config_parser config(argv[1]);
             
-            servers     s(config);
+            servers     s;
             if (s.setup(config.getServersObject()))
             {
                 return 1;
@@ -35,7 +35,7 @@ int main(int argc, char **argv)
         }
     }
     else
-        std::cout << "ERROR: bad args number\n";
+        std::cerr << "ERROR: bad args number\n";
     
     return 0;
 }

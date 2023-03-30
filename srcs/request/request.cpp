@@ -46,6 +46,7 @@ void Request::parser(std::string value)
         wait_body = false;
     else
     {
+            
         if(!header.find("Transfer-Encoding")->first.empty())
         {
             if(header.find("Transfer-Encoding")->second == "chunked" )
@@ -67,64 +68,71 @@ void Request::parser(std::string value)
 void Request::body_handling(std::string buffer)
 {
     std::string hexa;
+
     if(!header.find("Transfer-Encoding")->first.empty())
     {
-
-        if(header.find("Transfer-Encoding")->second == "chunked")
+        if(buffer[buffer.length() - 1] == 10 && buffer[buffer.length() - 2] == 13 && buffer[buffer.length() - 3] == 10
+                                && buffer[buffer.length() - 4] == 13 && buffer[buffer.length() - 5] == '0' && buffer[buffer.length() - 6] == 10 && buffer[buffer.length() - 7] == 13)
         {
-            if(buffer[0] == '0' && buffer[buffer.length() - 1] == 10 && buffer[buffer.length() - 2] == 13 && buffer[buffer.length() - 3] == 10
-                            && buffer[buffer.length() - 4] == 13 && buffer[buffer.length() - 5] == '0')
-            {
-                body.clear();
-                wait_body = false;
-            }
-            else if(buffer[buffer.length() - 1] == 10 && buffer[buffer.length() - 2] == 13 && buffer[buffer.length() - 3] == 10
-                            && buffer[buffer.length() - 4] == 13 && buffer[buffer.length() - 5] == '0' && buffer[buffer.length() - 6] == 10 && buffer[buffer.length() - 7] == 13)
-            {
-                buffer.erase(buffer.length() - 7);
-                wait_body = false;
-            }
+        
+            buffer.erase(buffer.length() - 7 , buffer.length() - 1);
+            wait_body = false;
+        }
+        if(header.find("Transfer-Encoding")->second == "chunked" )
+        {
             if(body_size == 0)
             {
-                body.erase(0,body.find("\r\n") + 2);
-                body_size = 1;
+                for(long i = 0 ; i < (long)buffer.length(); i++)
+                {
+                    if(buffer[i] == 13 && buffer[i + 1] == 10)
+                    {
+                        buffer.erase(0,i + 2);
+                        break;
+                    }
+                    else
+                        hexa += buffer[i];
+                }
+                std::cerr << "*"<< hexa << "*"<< std::endl;
+                body_size = std::stoul(hexa, nullptr, 16);
+                body = buffer;
             }
             else
-               body += buffer;
-            if(wait_body == false)
             {
-                bool is_hexa = true;
-                for(long long pos = 0; pos != -1;)
+                
+                for (int  i = 0; i < (int)buffer.length() ; i++)
                 {
-                    pos = body.find("\r\n",pos + 1);
-                    for(size_t j = pos + 2 ; j < body.length() ; j++)
+                    if(buffer[i] == 13 && buffer[i + 1] == 10)
                     {
-                        if(body[j] == 13 && body[j + 1] == 10)
+                        for(int j = i + 2 ; j < (int)buffer.length() ; j++)
                         {
-                            if(is_hexa == true)
+                            if(buffer[j] == 13 && buffer[j + 1] == 10)
                             {
-                                body.erase(body.begin() + pos, body.begin() + (j + 2));
-                                is_hexa = false;
+
+                                if(!hexa.empty())
+                                {
+                                    std::cerr << hexa << std::endl;
+                                    body_size = std::stoul(hexa, nullptr, 16);
+                                    i = j + 2;
+                                    break;
+                                }
+                            }
+                            hexa += buffer[j];
+                            if((buffer[j] < 48 || buffer[j] > 57) &&  (buffer[j] < 65 || buffer[j] > 70) )
+                            {
+                                hexa.clear();
                                 break;
                             }
                         }
-                        if((body[j] >= '0' && body[j] <= '9') ||  (body[j] >= 'a' && body[j] <= 'f') )
-                            is_hexa = true;
-                        else
-                        {
-                            is_hexa = false;
-                            break;
-                        }
                     }
+                    body += buffer[i];
                 }
-                
             }
         }
     }
     else if(!header.find("Content-Length")->first.empty())
     {
         body += buffer;
-        if(body.length() >= (size_t)body_size)
+        if((unsigned long)body.length() >= body_size)
             wait_body = false;
     }
 }
@@ -142,7 +150,7 @@ void Request::location_well(server_parser &serv)
     long index = start_line.location_index = -1;
     size_t index_of_charachter = 0;
     bool method_allowed = false;
-    for(size_t i = 0 ; i < (size_t)serv.getServerLocationsObject().size(); i++)//serche path
+    for(size_t i = 0 ; i < (size_t)serv.getServerLocationsObject().size(); i++)
     {
         found = start_line.path.find(serv.getServerLocationsObject()[i].getLocationNameObject());
         if (found != (size_t) -1  && index_of_charachter <= serv.getServerLocationsObject()[i].getLocationNameObject().length())
@@ -167,9 +175,23 @@ void Request::location_well(server_parser &serv)
                 r_error = "405";
         }
         if(!serv.getServerLocationsObject()[index].getLocationRootObject().empty())//404 Not Found
+        {
+            if(serv.getServerLocationsObject()[index].getLocationRootObject() [serv.getServerLocationsObject()[index].getLocationRootObject() .length() - 1] == '/' && start_line.path[0] == '/')
+                 start_line.path.erase(0,1);
             start_line.full_path = serv.getServerLocationsObject()[index].getLocationRootObject() + start_line.path;
+            // for(int i = 0; i < (int)start_line.full_path.length();i++)
+            // {
+            //     if(start_line.full_path[i] == '/' && start_line.full_path[i + 1] == '/')
+            //     {
+            //         start_line.full_path.erase(i,1);
+            //         break;
+            //     }
+            // }
+        }
         else if(!serv.getRootObject().empty())
         {
+            if(serv.getRootObject()[serv.getRootObject().length() - 1] == '/' && start_line.path[0] == '/')
+                 start_line.path.erase(0);
             start_line.full_path = serv.getRootObject() + start_line.path;
         }
         else
@@ -186,6 +208,7 @@ void Request::location_well(server_parser &serv)
     }
     else
         r_error = "404";
+   
 }
 
 void Request::request_well_formed(server_parser &serv)
@@ -210,10 +233,7 @@ void Request::request_well_formed(server_parser &serv)
     {
         if(((tmp_path[i] < 95 || tmp_path[i] > 'z') && (tmp_path[i] < 33 || tmp_path[i] > 90))
             || tmp_path[i] == 34 || tmp_path[i] == 60 || tmp_path[i] == 62 || tmp_path[i] == 96)
-        {
-            r_error = "400 Bad Request";
-            break;
-        }
+                r_error = "400 Bad Request";
     }
 }
 

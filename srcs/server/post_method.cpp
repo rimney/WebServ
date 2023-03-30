@@ -2,7 +2,7 @@
 #include "../../includes/request.hpp"
 
 
-int is_file_or_dir(std::string & path)
+int is_file_or_dir_(std::string & path)
 {
     struct stat file_info;
 
@@ -49,7 +49,7 @@ size_t remove_header(std::string &request, size_t i,std::string &buffer,std::str
     return i ;
 }
 
-void    server::post_method(server_parser &serv)
+void    server::post_method(server_parser &serv,Request & request, int fd)
 {
     std::string extention;
     std::string boundary;
@@ -58,7 +58,7 @@ void    server::post_method(server_parser &serv)
     std::string buffer;
     bool is_boundary = false;
     int is_dir_or_not = 0;
-    int error;
+    std::string error;
     DIR* dir;
     struct dirent* entry;
     // std::cout << request.get_body() << std::endl;
@@ -75,13 +75,14 @@ void    server::post_method(server_parser &serv)
     // }
     // std::cout <<"**";
     // std::cout <<" *end* " << "\n";
+    std::cout << serv.getServerLocationsObject()[request.get_start_line().location_index].getUploadObject() << "<<" << std::endl;
     if(!request.get_body().empty())
     {
         // if(!serv.getServerLocationsObject()[request.get_start_line().location_index].getHasRedirection())
         // {
 
         // }
-        // std::cout << "**" << serv.getServerLocationsObject()[request.get_start_line().location_index].getUploadObject() <<std::endl;
+        std::cout << "**" << serv.getServerLocationsObject()[request.get_start_line().location_index].getUploadObject() <<std::endl;
         if(!serv.getServerLocationsObject()[request.get_start_line().location_index].getUploadObject().empty())
         {
             if(!request.get_header().find("Content-Type")->first.empty())
@@ -117,30 +118,30 @@ void    server::post_method(server_parser &serv)
                 }
                 else
                 {
+                    std::cout << " <<<<<< 1 \n";
                     buffer = request.get_header().find("Content-Type")->second;
                     for(int i = 0 ; i < (int)buffer.length();i++)
                         if(buffer[i] == '/')
                             for(int j = i + 1 ; j < (int)buffer.length();j++)
                                 extention += buffer[j];
-                    std::ofstream post(serv.getServerLocationsObject()[request.get_start_line().location_index].getUploadObject() + request.get_header().find("Postman-Token")->second +'.'+ extention);
+                    std::ofstream post(serv.getServerLocationsObject()[request.get_start_line().location_index].getUploadObject() + request.get_header().find("Postman-Token")->second +'.'+ extention);//check /
                     post << request.get_body();
                     post.close();
                 }
             } 
-            error = 201;
+            error = "201";
         }
         else
         {
-           is_dir_or_not =  is_file_or_dir(request.get_start_line().full_path);
+           is_dir_or_not =  is_file_or_dir_(request.get_start_line().full_path);
            if(is_dir_or_not == -1 )//notfound
-                error = 404;
+                error = "404";
            else if(is_dir_or_not == 2 ) //dir
            {
                 bool is_found = false;
                 if(request.get_start_line().full_path[request.get_start_line().full_path.length() - 1] != '/')
                 {
-                    error = 301;
-                    std::cout << "301\n";
+                    error = "301";
                     //add "/" to uri and return it
                 }
                 else
@@ -159,23 +160,33 @@ void    server::post_method(server_parser &serv)
                     }
                     
                 }
-                if(is_found == true);
-                    // cgi
-                else
-                    error = 403;//dosent have index file
-                // else if(!serv.getServerLocationsObject()[request.get_start_line().location_index].getLocationIndexObject().empty())
-                // {
-                //     //cgi
-                // }
+                if(!is_found)
+                    error = "403";//dosent have index file : "403 Forbidden"
+                else if(!serv.getServerLocationsObject()[request.get_start_line().location_index].getCgiPathObject().empty() && is_found)
+                {
+                    request.get_start_line().full_path += "index.php";
+                    cgi_handler cgi(_server_config, request);
+                     cgi.exec(_respond[fd]);
+                }
+                else 
+                   error = "403";//location doesn’t have cgi : "403 Forbidden" 
                  
            }
            else//file
            {
-                //cgi
+                if(!serv.getServerLocationsObject()[request.get_start_line().location_index].getCgiPathObject().empty())
+                {
+                    cgi_handler cgi(_server_config, request);
+                    cgi.exec(_respond[fd]);
+                }
+                else 
+                   error = "403";//location doesn’t have cgi : "403 Forbidden" 
            }
         }
 
     }
+    _respond[fd].setRespond(request.get_start_line().full_path, request.get_start_line().vertion,error);
+    std::cout << _respond[fd].getfinalString();
+    // exit(0);
    
 }
-

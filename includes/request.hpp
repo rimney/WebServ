@@ -28,12 +28,11 @@ class Request
         std::string r_error;
         bool         wait_body;
         unsigned long          body_size;
-        std::string buffer_body;
     public:
         Request(): wait_body(false),body_size(0){}
         Request(Request const & r)
         {*this = r;}
-        Request operator=(Request const & r)
+        Request & operator=(Request const & r)
         {
             this->start_line.method = r.start_line.method;
             this->start_line.path = r.start_line.path;
@@ -60,7 +59,6 @@ class Request
         std::string &get_body(){return body;}
         std::string &get_error(){return r_error;}
         bool &get_wait_body(){return wait_body;}
-
 };
 
 

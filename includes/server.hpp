@@ -3,8 +3,8 @@
 
 # define DEFAULT_PORT 8080
 # define DEFAULT_PROTOCOL 0
-# define RECV_SIZE 2048
-
+# define RECV_SIZE 1024
+# define CHUNK_SIZE 1024
 
 # include <netinet/in.h>
 # include <string>
@@ -14,35 +14,34 @@
 # include <vector>
 # include <fcntl.h>
 # include "parsing.hpp"
-#include "request.hpp"
-#include "respond.hpp"
-#include <dirent.h>
-#include <cstring>
+# include <cstring>
+# include <sys/stat.h>
+# include <stdio.h>
+# include "request.hpp"
+# include "respond.hpp"
+# include "cgi_handler.hpp"
 
 // TO BE DELETED //
 #include <string.h>
 //______________//
 
-
 class server
 {
     private:
-        int                 _port;
-        unsigned int        _host;
-        int                 _fd_socket;
-        int                 _fd_connection;
-        struct sockaddr_in  _addr;
-        server_parser       _server_config;
-        int                 _error_flag;
-        //
-        std::string         _request;
-        Request             request;
-        respond             respond;
-        //
+        int                         _port;
+        unsigned int                _host;
+        int                         _fd_socket;
+        int                         _fd_connection;
+        struct sockaddr_in          _addr;
+        server_parser               _server_config;
+        int                         _error_flag;
+        std::map<int, std::string>  _request_map;
+        std::map<int, respond>      _respond;
+        std::map<int, Request>      _request;
 
     public:
         server();
-        server(int port, unsigned int host, server_parser s);
+        server(int port, unsigned int host);
         server(server const & s);
         ~server();
 
@@ -55,13 +54,16 @@ class server
         server  &       operator=(server const & s);
         void            accept();
         void            close();
-        void            receive();
+        void            receive(int fd);
+        void            send(int fd);
         void            set_server_config(server_parser & server_config);
         void            setup(server_parser & server_config);
+        void            delete_method(std::string & path, respond & response);
         server_parser   getServerData(void) {return this->_server_config;}
-        void            process();
-        void            post_method(server_parser &serv);
-        void            Get(int location_index , std::string path);
+        void            process(int fd);
+        void            Get(int location_index , std::string path, int fd);
+        respond         getRespond(int fd);
+        void            post_method(server_parser &serv,Request &request, int fd);
     
     private:
         void            set_addr();
