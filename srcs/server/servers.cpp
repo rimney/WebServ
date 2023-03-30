@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   servers.cpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: eel-ghan <eel-ghan@student.42.fr>          +#+  +:+       +#+        */
+/*   By: rimney <rimney@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/10 00:38:14 by eel-ghan          #+#    #+#             */
-/*   Updated: 2023/03/23 23:50:34 by eel-ghan         ###   ########.fr       */
+/*   Updated: 2023/03/30 00:18:01 by rimney           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -86,8 +86,8 @@ void    servers::run()
     {
         _set_read_fds = _set_fds;
         FD_ZERO(&_set_write_fds);
-        for (std::map<int, server>::iterator it = _fds_ready.begin(); it != _fds_ready.end(); it++)
-            FD_SET((*it).first, &_set_write_fds);
+        for (std::vector<int>::iterator it = _fds_ready.begin(); it != _fds_ready.end(); it++)
+            FD_SET(*it, &_set_write_fds);
         r = select(_max_fd + 1, &_set_read_fds, &_set_write_fds, NULL, &time);
 
         if (r == -1)
@@ -144,7 +144,7 @@ void    servers::run()
                 {
                     (*it).second.receive((*it).first);
                     (*it).second.process((*it).first);
-                    _fds_ready.insert(std::make_pair((*it).first, (*it).second));
+                    _fds_ready.push_back((*it).first);
                 }
                 catch(const std::string& msg)
                 {
@@ -158,15 +158,15 @@ void    servers::run()
         }
         
         // send response
-        for (std::map<int, server>::iterator it = _fds_ready.begin(); it != _fds_ready.end(); it++)
+        for (size_t i = 0; i < _fds_ready.size(); i++)
         {
-            if (FD_ISSET((*it).first, &_set_write_fds))
+            if (FD_ISSET(_fds_ready[i], &_set_write_fds))
             {
                 try
                 {
-                    (*it).second.send((*it).first);
-                    _fds_ready.erase(it);
-                    break;
+                    _fds_cnx[_fds_ready[i]].send(_fds_ready[i]);
+                    if (_fds_cnx[_fds_ready[i]].getRespond(_fds_ready[i]).getBodyFlag() == false)
+                        _fds_ready.erase(_fds_ready.begin() + i);
                 }
                 catch(const std::string& msg)
                 {

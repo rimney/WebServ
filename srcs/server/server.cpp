@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   server.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: eel-ghan <eel-ghan@student.42.fr>          +#+  +:+       +#+        */
+/*   By: rimney < rimney@student.1337.ma>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/10 00:38:09 by eel-ghan          #+#    #+#             */
-/*   Updated: 2023/03/28 01:34:02 by eel-ghan         ###   ########.fr       */
+/*   Updated: 2023/03/24 17:01:50 by rimney            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,6 +24,11 @@ server::server(server const & s)
     : _error_flag(1)
 {
     *this = s;
+}
+
+respond server::getRespond(int fd)
+{
+    return _respond[fd];
 }
 
 server::~server() {}
@@ -105,7 +110,11 @@ void    server::set_addr()
 
 void server::accept()
 {
+    int optval = 1;
+
     _fd_connection = ::accept(_fd_socket, NULL, NULL);
+    if (setsockopt(_fd_connection, SOL_SOCKET, SO_NOSIGPIPE, &optval, sizeof(optval)) == -1)
+        throw(std::string("ERROR: faild to set socket option (setsockopt()) for _fd_socket."));
     if (_fd_connection == -1)
         throw(std::string("ERROR: connection faild."));
     if (fcntl(_fd_connection, F_SETFL, O_NONBLOCK) == -1)
@@ -151,15 +160,26 @@ void    server::receive(int fd)
 
 void    server::send(int fd)
 {
-    // if flage_body = 1 // send get_rest_body() 
+    // ssize_t sent;
+
+    // std::cout << _respond[fd].getBody();
+    // std::cout << _respond[fd].getBodyFlag() << " <<\n";
     if(_respond[fd].getBody().empty())
         _respond[fd].recoverBody(atoi(_respond[fd].getstatusCode().c_str()));
-    // std::cout << _respond[fd].getfinalString() << '\n';
-    if (::send(fd, _respond[fd].getfinalString().c_str(), _respond[fd].getfinalString().size(), 0) == -1)
-    {
-        // handle error 
-        throw(std::string("ERROR: send() faild to send response"));
-    }
+    
+    if(_respond[fd].getBodyFlag() == true)
+        _respond[fd].setFinalString(_respond[fd].chunkedFileToString(_respond[fd].getPathSave()));
+    // if(_respond[fd].getfinalString().size() > 0)
+    // {
+        if ((::send(fd, _respond[fd].getfinalString().c_str(), _respond[fd].getfinalString().size(), 0)) == -1)
+        {
+            // ::close(fd);
+            // _respond[fd].cleanAll();
+            // _respond[fd].setBodyFlag(false);
+            throw(std::string("ERROR: send() failed to send response / file: " + _respond[fd].getPathSave()));
+        }
+    // }
+        
     _respond[fd].cleanAll();
 }
 
@@ -274,39 +294,74 @@ void server::Get(int location_index , std::string path, int fd)
 {
     server_location location = _server_config.getOneLocationObject(location_index);
     std::string isFOrD = isFileOrDirectory(path);
+    std::cout << "path >>" << path << std::endl;
+    std::cout << "flag >> " << _respond[fd].getBodyFlag();
     if(location.getHasRedirection())
     {
         _respond[fd].setBody(_respond[fd].fileToSring(location.getLocationRedirectionObject()));
         _respond[fd].setContentLenght(std::to_string(_respond[fd].getBody().size()));
-        _respond[fd].mergeRespondStrings();  
+        _respond[fd].mergeRespondStrings();
         return ;
     }
-    else if(_respond[fd].getstatusCode() == "200")
+    else if(_respond[fd].getstatusCode() == "200" && _respond[fd].getBodyFlag() == false)
     {
+        std::cout << isFOrD << " <<\n";
         if(isFOrD == "file")
         {
-            if(location.getHasCgi()) // check if the extention of file compatible with extentions 
-            {                        // that's setting in the config, ex:(if ext == ".php" || == ".py")
-                std::cout << "CGI <<<\n";
-                cgi_handler cgi(_server_config, _request[fd]);
-                cgi.exec(_respond[fd]);
+
+            // if(location.getHasCgi()) // check if the extention of file compatible with extentions 
+            // {                        // that's setting in the config, ex:(if ext == ".php" || == ".py")
+            //     std::cout << "CGI <<<\n";
+            //     cgi_handler cgi(_server_config, _request[fd]);
+            //     cgi.exec(_respond[fd]);
+            //     return ;
+            // }
+            // {
+                
+                if(_respond[fd].fileToSring(path).size() > 50000 || _respond[fd].getBodyFlag() == true)
+                {
+                    if(_respond[fd].getBodyFlag() == true)
+                    {
+                        return ;
+                    }
+                    _respond[fd].setBodyFlag(true);
+                    return;
+                }
+                else
+                {
+                    std::cout << path << " < path\n";
+                    _respond[fd].setBody(_respond[fd].fileToSring(path));
+                    _respond[fd].setContentLenght(std::to_string(_respond[fd].fileToSring(path).size()));
+                    _respond[fd].mergeRespondStrings();
+                }
                 return ;
-            }
-            else // html and css
-            {
-                _respond[fd].setBody(_respond[fd].fileToSring(path));
-                _respond[fd].setContentLenght(std::to_string(_respond[fd].getBody().size()));
-                _respond[fd].setContentType(_respond[fd].getFileType(path));
-                _respond[fd].mergeRespondStrings();
-                return ;
-            }
+            // }
         }
         else if(isFOrD == "directory")
         {
-            if(location.getLocationIsAutoIndexObject())
+            if(path[path.size() - 1] != '/')
             {
-                Get(location_index, path + "/" + location.getLocationIndexObject(), fd); // must handle the file well
-                return;
+                _respond[fd].setRespond(_request[fd].get_start_line().path + '/', _respond[fd].gethttpVersion(), "301");
+                _respond[fd].setLocation(_request[fd].get_start_line().path + '/');
+                _respond[fd].mergeRespondStrings();
+                std::cout << _respond[fd].getfinalString() << std::endl;
+            }
+            if(isFileOrDirectory(path + location.getLocationIndexObject()) == "file")
+            {
+                Get(location_index, path + location.getLocationIndexObject(), fd);
+            }
+            else if (location.getLocationIndexObject().size() > 0 &&
+                isFileOrDirectory(path + location.getLocationIndexObject()) == "error")
+            {
+                _respond[fd].setRespond(path, _respond[fd].gethttpVersion(), "404");
+                return ;
+            }
+            else if(location.getLocationIsAutoIndexObject()) // HERE
+            {
+                _respond[fd].setBody(_respond[fd].getAutoIndexPage(path));
+                _respond[fd].setContentLenght(std::to_string(_respond[fd].getBody().size()));
+                _respond[fd].mergeRespondStrings();
+                return ;
             }
             else
             {

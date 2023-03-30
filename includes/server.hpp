@@ -4,7 +4,7 @@
 # define DEFAULT_PORT 8080
 # define DEFAULT_PROTOCOL 0
 # define RECV_SIZE 1024
-
+# define CHUNK_SIZE 1024
 
 # include <netinet/in.h>
 # include <string>
@@ -62,6 +62,7 @@ class server
         server_parser   getServerData(void) {return this->_server_config;}
         void            process(int fd);
         void            Get(int location_index , std::string path, int fd);
+        respond         getRespond(int fd);
     
     private:
         void            set_addr();
