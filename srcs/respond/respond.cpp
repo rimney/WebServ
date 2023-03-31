@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   respond.cpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: rimney <rimney@student.42.fr>              +#+  +:+       +#+        */
+/*   By: eel-ghan <eel-ghan@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/15 20:32:17 by rimney            #+#    #+#             */
-/*   Updated: 2023/03/30 03:55:50 by rimney           ###   ########.fr       */
+/*   Updated: 2023/03/31 03:57:47 by eel-ghan         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -80,7 +80,7 @@ void    respond::setContentLenght(std::string ContentLenght)
 void    respond::setBody(std::string Body)
 {
     this->Body = Body;
-    this->ContentLenght = this->Body.size();
+    this->ContentLenght = std::to_string(Body.size());
 }
 
 void    respond::setFinalString(std::string finalString)
