@@ -6,7 +6,7 @@
 /*   By: rimney <rimney@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/07 03:50:36 by rimney            #+#    #+#             */
-/*   Updated: 2023/03/31 21:50:16 by rimney           ###   ########.fr       */
+/*   Updated: 2023/03/31 22:46:10 by rimney           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -752,6 +752,19 @@ int server_parser::getLocationByName(std::string name) const
     }
     return (-1);
 }
+
+void    server_parser::getHost(std::string *keys, size_t size)
+{
+    // this->host = ipToInt(temparray[0]);
+    if(size < 1 || size > 2)
+    {
+        std::cerr << "Error : Check The Host Argumets";
+        exit(1);
+    }
+    this->host = ipToInt(keys[1]);
+    delete [] keys;
+}
+
 void    server_parser::construct_server(std::vector<std::string>::iterator first, std::vector<std::string>::iterator last)
 {
     this->port = 8080;
@@ -769,8 +782,11 @@ void    server_parser::construct_server(std::vector<std::string>::iterator first
 
     for(size_t i = 1; i < serverVec.size(); i++)
     {
-        if(!strncmp(serverVec[i].c_str(), "listen ", 7))
+        if(!strncmp(serverVec[i].c_str(), "host ", 5))
         {
+            std::cout << "Host Found >> " << serverVec[i] << std::endl;
+            getHost(stringSplit(serverVec[i], ' ', &temp_size), temp_size);
+            exit(1);
             getPort(stringSplit(serverVec[i], ' ', &temp_size), temp_size); // host and port parsing;
             if(this->host == 0)
                 host = 2130706433;

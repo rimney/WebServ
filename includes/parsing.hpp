@@ -6,7 +6,7 @@
 /*   By: rimney <rimney@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/24 21:53:42 by rimney            #+#    #+#             */
-/*   Updated: 2023/03/31 21:45:22 by rimney           ###   ########.fr       */
+/*   Updated: 2023/03/31 22:22:44 by rimney           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -144,6 +144,7 @@ class server_parser : public server_location
         void			getCmds(std::string *keys, size_t size);
         void			getRoot(std::string *keys, size_t size);
         void    		getErrorPage(std::string *keys, size_t size);
+        void            getHost(std::string *keys, size_t size);
         void	  		getPort(std::string *Port, size_t temp_size);
         void			getIndexPage(std::string *keys, size_t size);
         void			getAutoIndex(std::string *keys, size_t size);
