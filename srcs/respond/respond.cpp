@@ -6,7 +6,7 @@
 /*   By: rimney <rimney@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/15 20:32:17 by rimney            #+#    #+#             */
-/*   Updated: 2023/03/30 03:55:50 by rimney           ###   ########.fr       */
+/*   Updated: 2023/03/31 03:45:42 by rimney           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -192,6 +192,7 @@ void    respond::cleanAll(void)
     this->ContentLenght.clear();
     this->finalString.clear();
     this->content_type.clear();
+    this->location.clear();
 }
 
 std::string	respond::getAutoIndexPage(std::string path)

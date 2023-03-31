@@ -6,7 +6,7 @@
 /*   By: rimney <rimney@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/07 03:50:36 by rimney            #+#    #+#             */
-/*   Updated: 2023/03/30 04:17:00 by rimney           ###   ########.fr       */
+/*   Updated: 2023/03/31 01:08:13 by rimney           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -117,7 +117,8 @@ server_location::server_location(server_location const  & s)
     this->has_cgi = s.has_cgi;
     this->has_redirection = s.has_redirection;
     this->redirection = s.redirection;
-    upload = s.upload;
+    this->upload = s.upload;
+    this->has_301_code = s.has_301_code;
 }
 server_location & server_location::operator=(server_location const & s)
 {
@@ -135,7 +136,8 @@ server_location & server_location::operator=(server_location const & s)
     this->is_auto_index = s.is_auto_index;
     this->has_redirection = s.has_redirection;
     this->redirection = s.redirection;
-    upload = s.upload;
+    this->upload = s.upload;
+    this->has_301_code = s.has_301_code;
     return (*this);
 }
 void    server_location::getErrorPage(std::string *keys, size_t size)
@@ -187,16 +189,26 @@ void    server_location::getRoot(std::string *keys, size_t size)
     this->root = keys[size - 1];
     delete [] keys;
 }
+
 void    server_location::getRedirection(std::string *keys, size_t size)
 {
-    if(size <= 1 || size > 2)
+    if(size <= 1 || size > 3)
     {
         std::cerr << "Error Redirection Arguments !\n";
         exit(0);
     }
+    if(size == 3 && keys[1] == "301")
+        this->has_301_code = true;
+    else if (size == 3 && keys[1] != "301")
+    {
+        std::cerr << "Error : Check Redirection Code Value\n";
+        exit(1);
+    }
     this->redirection = keys[size - 1];
+
     delete [] keys;
 }
+
 void    server_location::getCmds(std::string *keys, size_t size)
 {
     if(size <= 1 || size > 2)
@@ -235,6 +247,7 @@ void    server_location::getCgiPath(std::string *Keys, size_t size)
        std::cout <<  this->cgiPaths[i] << '\n';
     delete [] Keys;
 }
+
 
 void    server_location::getCgiExec(std::string *Keys, size_t size)
 {
@@ -355,9 +368,7 @@ std::string server_location::getCgiPathObject(std::string path)
         if(!strcmp(strrchr(this->cgiPaths[i].c_str(), '/') + 1, "ruby") && !strcmp(strrchr(path.c_str(), '.') + 1, "py"))
             return (this->cgiPaths[i]);
     }
-    std::cout << path;
-    exit(0);
-    return path;
+    return "";
 }
 void server_location::construct_location(std::vector<std::string>::iterator first, std::vector<std::string>::iterator last)
 {
@@ -665,6 +676,7 @@ void    server_parser::getIndexPage(std::string *keys, size_t size)
     this->index = keys[size - 1];
     delete [] keys;
 }
+
 void    server_parser::getAutoIndex(std::string *keys, size_t size)
 {
     if(size <= 1 || size > 2)
@@ -683,6 +695,7 @@ void    server_parser::getAutoIndex(std::string *keys, size_t size)
     }
     delete [] keys;
 }
+
 void    server_parser::getRoot(std::string *keys, size_t size)
 {
     if(size <= 1 || size > 2)
@@ -693,6 +706,7 @@ void    server_parser::getRoot(std::string *keys, size_t size)
     this->root = keys[size - 1];
     delete [] keys;
 }
+
 void    server_parser::getRedirection(std::string *keys, size_t size)
 {
     if(size <= 1 || size > 2)
@@ -703,6 +717,7 @@ void    server_parser::getRedirection(std::string *keys, size_t size)
     this->redirection = keys[size - 1];
     delete [] keys;
 }
+
 void    server_parser::getCmds(std::string *keys, size_t size)
 {
     if(size <= 1 || size > 2)
@@ -712,6 +727,17 @@ void    server_parser::getCmds(std::string *keys, size_t size)
     }
     this->client_max_body_size = stoi(keys[size - 1]);
     delete [] keys;
+}
+
+server_location server_parser::getLocationByName(std::string name) const
+{
+    for(size_t i = 0; i < location.size(); i++)
+    {
+        if(location[i].getLocationNameObject() == name)
+            return (location[i]);
+    }
+    exit(0);
+    return (location[0]);
 }
 void    server_parser::construct_server(std::vector<std::string>::iterator first, std::vector<std::string>::iterator last)
 {

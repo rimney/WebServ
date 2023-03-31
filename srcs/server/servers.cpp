@@ -6,7 +6,7 @@
 /*   By: rimney <rimney@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/10 00:38:14 by eel-ghan          #+#    #+#             */
-/*   Updated: 2023/03/30 00:18:01 by rimney           ###   ########.fr       */
+/*   Updated: 2023/03/31 00:12:59 by rimney           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -79,7 +79,7 @@ void    servers::run()
     int             fd;
     struct timeval  time;
 
-    time.tv_sec = 10;
+    time.tv_sec = 1;
     time.tv_usec = 0;
 
     while(1)

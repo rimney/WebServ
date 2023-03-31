@@ -6,7 +6,7 @@
 /*   By: rimney <rimney@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/24 21:53:42 by rimney            #+#    #+#             */
-/*   Updated: 2023/03/30 03:33:39 by rimney           ###   ########.fr       */
+/*   Updated: 2023/03/31 01:02:20 by rimney           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,6 +28,7 @@ class server_location
         bool						is_auto_index; // is autoindex
         bool                        has_cgi;
         bool                        has_redirection;
+        bool                        has_301_code;
         std::string					location_name; // /location/example
         std::string					root; // root key
         std::string					index; // index 
@@ -59,6 +60,7 @@ class server_location
         std::string					getLocationNameObject(void) const {return this->location_name;}
         std::vector<int>			getLocationErrorCodesObject(void) {return (this->error_codes);}
         std::vector<std::string>	getLocationMethodsObject(void){return (this->HttpMethods);}
+        bool                        getLocationHas301Code(void) {return (this->has_301_code);}
 
         std::string                 getCgiPathObject(std::string path);
         std::string                 getUploadObject(void) {return (this->upload);}
@@ -157,6 +159,8 @@ class server_parser : public server_location
         void            restoreIndexObject(int i);
         void            restoreAutoIndex(int i);
         void restoreServerMethods(int i);
+        server_location getLocationByName(std::string name) const;
+
 
 
 		////////////// Parsing Fucntions //////////////		
@@ -182,6 +186,7 @@ class config_parser : public server_parser
         void			getServerName(std::string *keys, size_t size);
         void			servers_index_init();
         int				getServersCount(std::vector<std::string> vec);
+
 };
 
 std::ostream &	operator<<(std::ostream& os, config_parser& p);

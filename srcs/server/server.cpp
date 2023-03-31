@@ -292,18 +292,18 @@ void    server::delete_method(std::string  & path, respond & response)
 
 void server::Get(int location_index , std::string path, int fd) 
 {
-    server_location location = _server_config.getOneLocationObject(location_index);
-    std::string isFOrD = isFileOrDirectory(path);
-    std::cout << "path >>" << path << std::endl;
-    std::cout << "flag >> " << _respond[fd].getBodyFlag();
-    if(location.getHasRedirection())
+    if(!strcmp(strrchr(path.c_str(), '/'), "/favicon.ico"))
     {
-        _respond[fd].setBody(_respond[fd].fileToSring(location.getLocationRedirectionObject()));
-        _respond[fd].setContentLenght(std::to_string(_respond[fd].getBody().size()));
-        _respond[fd].mergeRespondStrings();
+        std::cout << "bypassed !\n";
         return ;
     }
-    else if(_respond[fd].getstatusCode() == "200" && _respond[fd].getBodyFlag() == false)
+    server_location location = _server_config.getOneLocationObject(location_index);
+    std::string isFOrD = isFileOrDirectory(path);
+    std::cout << path << " << path\n";
+    std::cout << isFOrD << " << type\n";
+    std::cout << _respond[fd].getstatusCode() << " code <<\n";
+
+    if((_respond[fd].getstatusCode() == "200" || _respond[fd].getstatusCode() == "301" ) && _respond[fd].getBodyFlag() == false)
     {
         std::cout << isFOrD << " <<\n";
         if(isFOrD == "file")
@@ -319,12 +319,11 @@ void server::Get(int location_index , std::string path, int fd)
             }
             // {
                 
-                if(_respond[fd].fileToSring(path).size() > 50000 || _respond[fd].getBodyFlag() == true)
+                if(_respond[fd].fileToSring(path).size() > 50000)
                 {
+                    std::cout << "PASSED\n";
                     if(_respond[fd].getBodyFlag() == true)
-                    {
                         return ;
-                    }
                     _respond[fd].setBodyFlag(true);
                     return;
                 }
@@ -340,7 +339,32 @@ void server::Get(int location_index , std::string path, int fd)
         }
         else if(isFOrD == "directory")
         {
-            if(path[path.size() - 1] != '/')
+            if(location.getHasRedirection())
+            {
+                if(location.getLocationHas301Code() && isFOrD == "directory")
+                {
+                    std::cout << "PASSSS\n";
+                    int index;
+                    index = _server_config.getLocationByName(location.getLocationRedirectionObject()).getLocationindexObject();
+                    if(path[path.size() - 1] == '/')
+                        path = path.substr(0, path.length() - 1);
+                    _respond[fd].setRespond( location.getLocationRedirectionObject() + '/', _respond[fd].gethttpVersion(), "301");
+                    _respond[fd].setLocation(location.getLocationRedirectionObject() + '/');
+                    _respond[fd].mergeRespondStrings();
+                    std::cout << _respond[fd].getfinalString() << std::endl;
+                    Get(index, path + location.getLocationRedirectionObject() + '/', fd);
+                    return ;
+                }
+                else if(location.getLocationHas301Code()  == false)
+                {
+                    int index = _server_config.getLocationByName(location.getLocationRedirectionObject()).getLocationindexObject();
+
+                    std::cout << "EEEEE\n";
+                        Get(index, path + location.getLocationRedirectionObject() + '/', fd);
+                        return ;
+                }
+            }
+            if(path[path.size() - 1] != '/' && _respond[fd].getLocation().size() == 0)
             {
                 _respond[fd].setRespond(_request[fd].get_start_line().path + '/', _respond[fd].gethttpVersion(), "301");
                 _respond[fd].setLocation(_request[fd].get_start_line().path + '/');
@@ -369,6 +393,11 @@ void server::Get(int location_index , std::string path, int fd)
                 _respond[fd].setRespond(path, _respond[fd].gethttpVersion(), "403");
                 return ;
             }
+        }
+        else
+        {
+            _respond[fd].setRespond(path, _respond[fd].gethttpVersion(), "404");
+            return ;
         }
     }
 }
@@ -406,14 +435,15 @@ void    server::process(int fd)
             }
             if(_request[fd].get_start_line().method == "POST")
             {
-                post_method(_server_config,_request[fd],fd);
+                //
             }
             if(_request[fd].get_start_line().method == "DELETE")
             {
                 delete_method(_request[fd].get_start_line().full_path, _respond[fd]);
             }
         }
-        //respond
+        //respond  
+        // _request[fd].clear();
         _request_map.erase(fd);
     }
 }
