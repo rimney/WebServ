@@ -1,6 +1,6 @@
 #include "../../includes/request.hpp"
 
-void Request::parser(std::string value)
+void Request::parser(std::string &value)
 {
     token _token;
     lexer _lexer(value);
@@ -42,27 +42,21 @@ void Request::parser(std::string value)
         _token.value.clear();
     }
 
-    if(body.empty())
-        wait_body = false;
-    else
+    if(!header.find("Transfer-Encoding")->first.empty())
     {
-            
-        if(!header.find("Transfer-Encoding")->first.empty())
-        {
-            if(header.find("Transfer-Encoding")->second == "chunked" )
-            {
-                wait_body = true;
-                body_handling(body);
-            }
-        }
-        else if (!header.find("Content-Length")->first.empty())
+        if(header.find("Transfer-Encoding")->second == "chunked" )
         {
             wait_body = true;
-            body_size = atol(header.find("Content-Length")->second.c_str());
-            if((unsigned long)body.length() >= body_size)
-                wait_body = false;
-        }  
+            body_handling(body);
+        }
     }
+    else if (!header.find("Content-Length")->first.empty())
+    {
+        wait_body = true;
+        body_size = atol(header.find("Content-Length")->second.c_str());
+        if((unsigned long)body.length() >= body_size)
+            wait_body = false;
+    }  
 }
 
 void Request::body_handling(std::string buffer)
@@ -242,6 +236,10 @@ void Request::clear()
     start_line.method.clear();
     start_line.path.clear();
     start_line.vertion.clear();
+    start_line.full_path.clear();
+    start_line.location_index = -1;
+    start_line.query.clear();
+    wait_body = false;
     body.clear();
     header.clear();
     r_error.clear();

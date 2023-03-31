@@ -15,9 +15,9 @@ int is_file_or_dir_(std::string & path)
     return -1;
 }
 
-size_t remove_header(std::string &request, size_t i,std::string &buffer,std::string &filename,std::string upload)
+size_t remove_header(std::string & request, size_t i,std::string &buffer,std::string &filename,std::string upload)
 {
-    int count_qouet = 0;
+    long pos = 0;
     if(i >= request.length() || !filename.empty())
     {
         std::ofstream post(upload + filename);
@@ -28,101 +28,102 @@ size_t remove_header(std::string &request, size_t i,std::string &buffer,std::str
     }
     else
     {
-        for(; i < (size_t)request.length();i++)
+        
+        pos =request.find("filename=" , i);
+        std::cout <<"****==== pos " << pos << std::endl;
+        if(pos != -1)
         {
-            if(request[i] == 13 && request[i + 1] == 10 
-                && request[i + 2] == 13 && request[i + 3] == 10)
-            {
-                    i += 4;
-                    break;
-            }
-            if(count_qouet == 3)
-            {   
-                for(;i < (size_t)request.length() && request[i] != '"' ;i++)
-                    filename += request[i];
-                count_qouet = 0;
-            }
-            else if(request[i] == '"')
-                count_qouet++;
+            for(size_t t = pos + 10; request[t] != '"' ;t++)
+                filename += request[t];
+            pos = request.find("\r\n\r\n",pos);
+            if(pos != -1)
+                return pos + 4;
+        }
+        else
+        {
+            pos = request.find("\r\n\r\n",i);
+            if(pos != -1)
+                return pos + 4;
         }
     }
     return i ;
 }
+void server::multi_part(server_parser &serv,int fd)
+{
+    bool is_boundary = false;
+    std::string boundary;
+    std::string filename;
+    std::string buffer;
+    for(size_t i = _request[fd].get_header().find("Content-Type")->second.find("=") + 1; i < (size_t)_request[fd].get_header().find("Content-Type")->second.length();i++)//find boundary
+    {
+        if (_request[fd].get_header().find("Content-Type")->second[i] != '-')
+                boundary +=  _request[fd].get_header().find("Content-Type")->second[i];
+    }
+    for (size_t i = 0 ; i < (size_t)_request[fd].get_body().length();i++)
+    {
+        i = remove_header(_request[fd].get_body(),i,buffer,filename,serv.getServerLocationsObject()[_request[fd].get_start_line().location_index].getUploadObject());
+        for(; i < (size_t)_request[fd].get_body().length();i++)
+        {
+            if((_request[fd].get_body()[i] == 13 && _request[fd].get_body()[i + 1] == 10 && _request[fd].get_body()[i + 2] == '-') 
+                || (_request[fd].get_body()[i ] == 10 && _request[fd].get_body()[i + 1] == '-') 
+                || (_request[fd].get_body()[i ] == 13 && _request[fd].get_body()[i + 1] == '-'))
+            {
+                if(_request[fd].get_body().find(boundary,_request[fd].get_body().find(boundary) + i) < i + 32)
+                {
+                    break;
+                    is_boundary = true;
+                }
+                is_boundary = false;
+            }  
+            if(is_boundary == false)
+                buffer += _request[fd].get_body()[i];
+        }
+    }
+}
 
-void    server::post_method(server_parser &serv,Request & request, int fd)
+void    server::post_method(server_parser &serv, int fd)
 {
     std::string extention;
     std::string boundary;
-    long boundary_pos = 0;
-    std::string filename;
     std::string buffer;
-    bool is_boundary = false;
     int is_dir_or_not = 0;
     std::string error = "";
     DIR* dir;
     struct dirent* entry;
-    // std::cout << request.get_body() << std::endl;
     //  std::cout <<"**";
-    // for(size_t i = 0; i < request.get_body().length(); i++)
+    // for(size_t i = 0; i < _request[fd].get_body().length(); i++)
     // {
-    //     if(request.get_body()[i] == 13)
+    //     if(_request[fd].get_body()[i] == 13)
     //         std::cout <<"</r>";
-    //     else if (request.get_body()[i] == 10)
+    //     else if (_request[fd].get_body()[i] == 10)
     //         std::cout <<"</n>";
-    //     if (request.get_body()[i] != 13)
-    //         std::cout <<request.get_body()[i];
+    //     if (_request[fd].get_body()[i] != 13)
+    //         std::cout <<_request[fd].get_body()[i];
         
     // }
-    // std::cout <<"**";
     // std::cout <<" *end* " << "\n";
-    if(!request.get_body().empty())
+    if(!_request[fd].get_body().empty())
     {
-        // if(!serv.getServerLocationsObject()[request.get_start_line().location_index].getHasRedirection())
+        // if(!serv.getServerLocationsObject()[_request[fd].get_start_line().location_index].getHasRedirection())
         // {
 
         // }
-        if(!serv.getServerLocationsObject()[request.get_start_line().location_index].getUploadObject().empty())
+        if(!serv.getServerLocationsObject()[_request[fd].get_start_line().location_index].getUploadObject().empty())
         {
-            if(!request.get_header().find("Content-Type")->first.empty())
+            if(!_request[fd].get_header().find("Content-Type")->first.empty())
             {
-                if(strncmp(request.get_header().find("Content-Type")->second.c_str(),"multipart",9) == 0)//multipart
-                {
-                    for(size_t i = request.get_header().find("Content-Type")->second.find("=") + 1; i < (size_t)request.get_header().find("Content-Type")->second.length();i++)//find boundary
-                    {
-                        if (request.get_header().find("Content-Type")->second[i] != '-')
-                               boundary +=  request.get_header().find("Content-Type")->second[i];
-                    }
-                    for (size_t i = 0 ; i < (size_t)request.get_body().length();i++)
-                    {
-                        boundary_pos = request.get_body().find(boundary,request.get_body().find(boundary) + boundary_pos);
-                        i = remove_header(request.get_body(),i,buffer,filename,serv.getServerLocationsObject()[request.get_start_line().location_index].getUploadObject());
-                        for(; i < (size_t)request.get_body().length();i++)
-                        {
-                            if((request.get_body()[i] == 13 && request.get_body()[i + 1] == 10 && request.get_body()[i + 2] == '-') 
-                                || (request.get_body()[i ] == 10 && request.get_body()[i + 1] == '-') 
-                                || (request.get_body()[i ] == 13 && request.get_body()[i + 1] == '-'))
-                            {
-                                if(request.get_body().find(boundary,request.get_body().find(boundary) + i) < i + 32)
-                                {
-                                    break;
-                                    is_boundary = true;
-                                }
-                                is_boundary = false;
-                            }  
-                            if(is_boundary == false)
-                                buffer += request.get_body()[i];
-                        }
-                    }
-                }
+
+                if(strncmp(_request[fd].get_header().find("Content-Type")->second.c_str(),"multipart",9) == 0)//multipart
+                    multi_part(serv,fd);
                 else
                 {
-                    buffer = request.get_header().find("Content-Type")->second;
+                    buffer = _request[fd].get_header().find("Content-Type")->second;
                     for(int i = 0 ; i < (int)buffer.length();i++)
                         if(buffer[i] == '/')
                             for(int j = i + 1 ; j < (int)buffer.length();j++)
                                 extention += buffer[j];
-                    std::ofstream post(serv.getServerLocationsObject()[request.get_start_line().location_index].getUploadObject() + request.get_header().find("Postman-Token")->second +'.'+ extention);//check /
-                    post << request.get_body();
+                    std::ofstream post(serv.getServerLocationsObject()[_request[fd].get_start_line().location_index].getUploadObject() + _request[fd].get_header().find("Postman-Token")->second +'.'+ extention);//check /
+                    post << _request[fd].get_body();
                     post.close();
                 }
             } 
@@ -130,7 +131,7 @@ void    server::post_method(server_parser &serv,Request & request, int fd)
         }
         else
         {
-           is_dir_or_not =  is_file_or_dir_(request.get_start_line().full_path);
+           is_dir_or_not =  is_file_or_dir_(_request[fd].get_start_line().full_path);
            if(is_dir_or_not == -1 )//notfound
            {
                 error = "404";
@@ -138,14 +139,14 @@ void    server::post_method(server_parser &serv,Request & request, int fd)
            else if(is_dir_or_not == 2 ) //dir
            {
                 bool is_found = false;
-                if(request.get_start_line().full_path[request.get_start_line().full_path.length() - 1] != '/')
+                if(_request[fd].get_start_line().full_path[_request[fd].get_start_line().full_path.length() - 1] != '/')
                 {
                     error = "301";
                     //add "/" to uri and return it
                 }
                 else
                 {
-                    if ((dir = opendir(request.get_start_line().full_path.c_str())) != 0) 
+                    if ((dir = opendir(_request[fd].get_start_line().full_path.c_str())) != 0) 
                     {
                         while ((entry = readdir(dir)) != 0) 
                         {
@@ -161,10 +162,10 @@ void    server::post_method(server_parser &serv,Request & request, int fd)
                 }
                 if(!is_found && error == "")
                     error = "403";//dosent have index file : "403 Forbidden"
-                else if(!serv.getServerLocationsObject()[request.get_start_line().location_index].getCgiPathObject(request.get_start_line().full_path).empty() && is_found)
+                else if(!serv.getServerLocationsObject()[_request[fd].get_start_line().location_index].getCgiPathObject(_request[fd].get_start_line().full_path).empty() && is_found)
                 {
-                    request.get_start_line().full_path += "index.php";
-                    cgi_handler cgi(_server_config, request);
+                    _request[fd].get_start_line().full_path += "index.php";
+                    cgi_handler cgi(_server_config, _request[fd]);
                      cgi.exec(_respond[fd]);
                 }
                 else if(error == "")
@@ -173,9 +174,9 @@ void    server::post_method(server_parser &serv,Request & request, int fd)
            }
            else//file
            {
-                if(!serv.getServerLocationsObject()[request.get_start_line().location_index].getCgiPathObject(request.get_start_line().full_path).empty())
+                if(!serv.getServerLocationsObject()[_request[fd].get_start_line().location_index].getCgiPathObject(_request[fd].get_start_line().full_path).empty())
                 {
-                    cgi_handler cgi(_server_config, request);
+                    cgi_handler cgi(_server_config, _request[fd]);
                     cgi.exec(_respond[fd]);
                 }
                 else
@@ -184,7 +185,7 @@ void    server::post_method(server_parser &serv,Request & request, int fd)
         }
     }
     std::cout << error << std::endl;
-    _respond[fd].setRespond(request.get_start_line().full_path, request.get_start_line().vertion,error);
+    _respond[fd].setRespond(_request[fd].get_start_line().full_path, _request[fd].get_start_line().vertion,error);
     std::cout << _respond[fd].getfinalString();
     // exit(0);
    

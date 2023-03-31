@@ -48,7 +48,7 @@ class Request
         }
         ~Request(){}
 
-        void parser(std::string value);
+        void parser(std::string &value);
         void body_handling(std::string buffer);
         void errors(server_parser &serv);
         void request_well_formed(server_parser &serv);

@@ -57,7 +57,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             <center><a href="?logout">Logout</a></center>
         </p>
     <?php else: ?>
-        <form method="post" enctype="Content-Length">
+        <form method="post" enctype="multipart/form-data">
             <input type="text" name="name" placeholder="Name" />
             <input type="text" name="email" placeholder="Email" />
             <input type="file" id="avatar" name="avatar" accept="image/png, image/jpeg" />

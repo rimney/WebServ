@@ -375,6 +375,18 @@ void server::Get(int location_index , std::string path, int fd)
 
 void    server::process(int fd)
 {
+    // for(int i = 0; i < (int)_request_map[fd].length(); i++)
+    // {
+    //     if(_request_map[fd][i] == 13)
+    //         std::cerr <<"</r>";
+    //     else if (_request_map[fd][i] == 10)
+    //         std::cerr <<"</n>";
+    //     if (_request_map[fd][i] != 13)
+    //         std::cerr <<_request_map[fd][i];
+                
+    // }
+    std::cout << " ** "<<  _request_map[fd] << "++"<< std::endl;
+
     if(!_request[fd].get_wait_body())
         _request[fd].parser(_request_map[fd]);
     else
@@ -393,11 +405,10 @@ void    server::process(int fd)
         std::cout <<  _request[fd].get_start_line().vertion << std::endl;
         std::cout <<  _request[fd].get_start_line().full_path << std::endl;
         std::cout <<  _request[fd].get_start_line().query << std::endl;
-        std::cout << _request[fd].get_error() << "\n";
-        std::cout << "//////////////// REQUEST ///////////////////\n\n";
-        
+        // std::cout << _request[fd].get_error() << "\n";
+        // std::cout <<"****" << _request[fd].get_body() << std::endl;
+       // std::cout << "//////////////// REQUEST ///////////////////\n\n";
         _respond[fd].setRespond(_request[fd].get_start_line().full_path, _request[fd].get_start_line().vertion, _request[fd].get_error());
-        
         if(_request[fd].get_error().empty() || _respond[fd].getstatusCode() == "301")
         {
             if(_request[fd].get_start_line().method == "GET")
@@ -406,7 +417,7 @@ void    server::process(int fd)
             }
             if(_request[fd].get_start_line().method == "POST")
             {
-                post_method(_server_config,_request[fd],fd);
+                post_method(_server_config,fd);
             }
             if(_request[fd].get_start_line().method == "DELETE")
             {
@@ -414,6 +425,7 @@ void    server::process(int fd)
             }
         }
         //respond
+        // _request[fd].clear();
         _request_map.erase(fd);
     }
 }
