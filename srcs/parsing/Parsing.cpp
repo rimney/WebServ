@@ -6,7 +6,7 @@
 /*   By: rimney <rimney@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/07 03:50:36 by rimney            #+#    #+#             */
-/*   Updated: 2023/03/31 01:08:13 by rimney           ###   ########.fr       */
+/*   Updated: 2023/03/31 06:11:15 by rimney           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -729,15 +729,14 @@ void    server_parser::getCmds(std::string *keys, size_t size)
     delete [] keys;
 }
 
-server_location server_parser::getLocationByName(std::string name) const
+int server_parser::getLocationByName(std::string name) const
 {
     for(size_t i = 0; i < location.size(); i++)
     {
         if(location[i].getLocationNameObject() == name)
-            return (location[i]);
+            return (i);
     }
-    exit(0);
-    return (location[0]);
+    return (-1);
 }
 void    server_parser::construct_server(std::vector<std::string>::iterator first, std::vector<std::string>::iterator last)
 {

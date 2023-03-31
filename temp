@@ -346,11 +346,9 @@ void server::Get(int location_index , std::string path, int fd)
                     std::cout << location.getLocationRedirectionObject();
                     if(location.getLocationRedirectionObject().substr(0, 5) == "http:" || location.getLocationRedirectionObject().substr(0, 6) == "https:")
                     {
-                        
                         _respond[fd].setRespond(location.getLocationRedirectionObject(), _respond[fd].gethttpVersion(), "301");
                         _respond[fd].setLocation(location.getLocationRedirectionObject());
                         _respond[fd].mergeRespondStrings();
-                        std::cout << _respond[fd].getfinalString();
                         return ;
                     }
                     else if(index != -1)
@@ -371,7 +369,7 @@ void server::Get(int location_index , std::string path, int fd)
                     }
                 }
             }
-            if(path[path.size() - 1] != '/' && _respond[fd].getstatusCode() != "301")
+            if(path[path.size() - 1] != '/' && _respond[fd].getLocation().size() == 0)
             {
                 std::cout << "EEEEE\n";
                 _respond[fd].setRespond(_request[fd].get_start_line().path + '/', _respond[fd].gethttpVersion(), "301");
@@ -454,4 +452,4 @@ void    server::process(int fd)
         // _request[fd].clear();
         _request_map.erase(fd);
     }
-}
+
