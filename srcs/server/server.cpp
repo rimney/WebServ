@@ -405,9 +405,17 @@ void    server::process(int fd)
         std::cout <<  _request[fd].get_start_line().vertion << std::endl;
         std::cout <<  _request[fd].get_start_line().full_path << std::endl;
         std::cout <<  _request[fd].get_start_line().query << std::endl;
+
         // std::cout << _request[fd].get_error() << "\n";
         // std::cout <<"****" << _request[fd].get_body() << std::endl;
-       // std::cout << "//////////////// REQUEST ///////////////////\n\n";
+
+
+        std::map<std::string,std::string>::iterator it;
+        for(it = _request[fd].get_header().begin(); it != _request[fd].get_header().end();it++)
+        {
+            std::cout << it->first << "  " << it->second << std::endl;
+         }
+       std::cout << "//////////////// REQUEST ///////////////////\n" << std::endl;
         _respond[fd].setRespond(_request[fd].get_start_line().full_path, _request[fd].get_start_line().vertion, _request[fd].get_error());
         if(_request[fd].get_error().empty() || _respond[fd].getstatusCode() == "301")
         {

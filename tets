@@ -1,0 +1,25 @@
+/Users/brmohamm/Desktop/WebServ/srcs/bin/php-cgi
+/usr/bin/python
+/usr/bin/ruby
+host: 2130706433 is listening on port 8081...
+
+host: 2130706433, port: 8081 accept a new connections
+
+//////////////// REQUEST ///////////////////
+HTTP/1.1
+POST
+/
+HTTP/1.1
+/Users/brmohamm/Desktop/WebServ/
+
+Accept  */*
+Accept-Encoding  gzip, deflate, br
+Connection  keep-alive
+Content-Length  371168
+Content-Type  image/png
+Host  localhost:8081
+Postman-Token  123e57f9-8b08-4bf0-94b2-4356ab7689b2
+User-Agent  PostmanRuntime/7.31.3
+//////////////// REQUEST ///////////////////
+
+Header Set !

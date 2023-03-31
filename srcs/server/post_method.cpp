@@ -142,6 +142,7 @@ void    server::post_method(server_parser &serv, int fd)
            else if(is_dir_or_not == 2 ) //dir
            {
                 bool is_found = false;
+                std::cout << " ** "<< _request[fd].get_start_line().location_index << "++"<< std::endl;
                 if(_request[fd].get_start_line().full_path[_request[fd].get_start_line().full_path.length() - 1] != '/')
                 {
                     error = "301";
@@ -164,9 +165,13 @@ void    server::post_method(server_parser &serv, int fd)
                     
                 }
                 if(!is_found && error == "")
-                    error = "403";//dosent have index file : "403 Forbidden"
+                {
+                        error = "403";//dosent have index file : "403 Forbidden"
+                        std::cout << " ** "<< "errror 403" << "++"<< std::endl;
+                }
                 else if(!serv.getServerLocationsObject()[_request[fd].get_start_line().location_index].getCgiPathObject(_request[fd].get_start_line().full_path).empty() && is_found)
                 {
+                    std::cout << " ** "<< "<<<<<<<<< dir >>>>>>>>>" << "++"<< std::endl;
                     _request[fd].get_start_line().full_path += "index.php";
                     cgi_handler cgi(_server_config, _request[fd]);
                      cgi.exec(_respond[fd]);
@@ -180,7 +185,7 @@ void    server::post_method(server_parser &serv, int fd)
                 if(!serv.getServerLocationsObject()[_request[fd].get_start_line().location_index].getCgiPathObject(_request[fd].get_start_line().full_path).empty())
                 {
 
-                    std::cout << " ** "<< "<<<<<<<<< _request_map[fd]>>>>>>>>>" << "++"<< std::endl;
+                    std::cout << " ** "<< "<<<<<<<<<file >>>>>>>>>" << "++"<< std::endl;
                     cgi_handler cgi(_server_config, _request[fd]);
                     cgi.exec(_respond[fd]);
                 }
