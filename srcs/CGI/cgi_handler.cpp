@@ -55,7 +55,7 @@ void            cgi_handler::init_env()
     // _env.push_back(std::string("REMOTE_ADDR=") + _server_config.getHostObject());
     // _env.push_back(std::string("REMOTE_HOST" + ...);
     _env.push_back(std::string("REQUEST_METHOD=") + start_line.method);
-    // _env.push_back(std::string("SCRIPT_NAME=") + _location.getCgiPathObject());
+    _env.push_back(std::string("SCRIPT_NAME=") + _location.getCgiPathObject(start_line.full_path));
     
     if (headers.find("Hostname") != headers.end())
         _env.push_back(std::string("SERVER_NAME=") + headers["Hostname"]);
@@ -122,13 +122,13 @@ void cgi_handler::exec(respond & response)
             write(fds[1], "500", 3);
         }
 
-        // char * const argv[3] = {
-        //     (char *) _location.getCgiPathObject().c_str(),
-        //     (char *) _request.get_start_line().full_path.c_str(),
-        //     NULL
-        // };
+        char * const argv[3] = {
+            (char *) _location.getCgiPathObject(_request.get_start_line().full_path).c_str(),
+            (char *) _request.get_start_line().full_path.c_str(),
+            NULL
+        };
 
-        // execve(_location.getCgiPathObject().c_str(), argv, env);
+        execve(_location.getCgiPathObject(_request.get_start_line().full_path).c_str(), argv, env);
 
         std::cerr << "ERROR: execve() failed\n";
         write(fds[1], "500", 3);

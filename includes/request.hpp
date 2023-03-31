@@ -59,7 +59,6 @@ class Request
         std::string &get_body(){return body;}
         std::string &get_error(){return r_error;}
         bool &get_wait_body(){return wait_body;}
-
 };
 
 

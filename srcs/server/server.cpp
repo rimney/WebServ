@@ -318,13 +318,14 @@ void server::Get(int location_index , std::string path, int fd)
         if(isFOrD == "file")
         {
 
-            // if(location.getHasCgi()) // check if the extention of file compatible with extentions 
-            // {                        // that's setting in the config, ex:(if ext == ".php" || == ".py")
-            //     std::cout << "CGI <<<\n";
-            //     cgi_handler cgi(_server_config, _request[fd]);
-            //     cgi.exec(_respond[fd]);
-            //     return ;
-            // }
+            if(location.getHasCgi()) // check if the extention of file compatible with extentions 
+            {
+                std::cout << path << " < cgi exec\n";                   // that's setting in the config, ex:(if ext == ".php" || == ".py")
+                std::cout << "CGI <<<\n";
+                cgi_handler cgi(_server_config, _request[fd]);
+                cgi.exec(_respond[fd]);
+                return ;
+            }
             // {
                 
                 if(_respond[fd].fileToSring(path).size() > 50000 || _respond[fd].getBodyFlag() == true)
@@ -414,15 +415,14 @@ void    server::process(int fd)
             }
             if(_request[fd].get_start_line().method == "POST")
             {
-                //
+                post_method(_server_config,_request[fd],fd);
             }
             if(_request[fd].get_start_line().method == "DELETE")
             {
                 delete_method(_request[fd].get_start_line().full_path, _respond[fd]);
             }
         }
-        //respond  
-        // _request[fd].clear();
+        //respond
         _request_map.erase(fd);
     }
 }

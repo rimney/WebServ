@@ -63,6 +63,7 @@ class server
         void            process(int fd);
         void            Get(int location_index , std::string path, int fd);
         respond         getRespond(int fd);
+        void            post_method(server_parser &serv,Request &request, int fd);
     
     private:
         void            set_addr();
