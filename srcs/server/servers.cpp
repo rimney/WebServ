@@ -6,7 +6,7 @@
 /*   By: eel-ghan <eel-ghan@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/10 00:38:14 by eel-ghan          #+#    #+#             */
-/*   Updated: 2023/03/30 03:23:20 by eel-ghan         ###   ########.fr       */
+/*   Updated: 2023/03/31 03:12:53 by eel-ghan         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -166,13 +166,18 @@ void    servers::run()
                 {
                     _fds_cnx[_fds_ready[i]].send(_fds_ready[i]);
                     if (_fds_cnx[_fds_ready[i]].getRespond(_fds_ready[i]).getBodyFlag() == false)
+                    {
                         _fds_ready.erase(_fds_ready.begin() + i);
+                        std::cout << "send\n";
+                    }
                 }
                 catch(const std::string& msg)
                 {
                     std::cerr << msg << "\n";
-                    // FD_CLR((*it).first, &_set_write_fds);
-                    // FD_CLR((*it).first, &_set_read_fds);
+                    FD_CLR(_fds_ready[i], &_set_write_fds);
+                    FD_CLR(_fds_ready[i], &_set_read_fds);
+                    _fds_ready.erase(_fds_ready.begin() + i);
+                    _fds_cnx.erase(i);
                     break ;
                 }
             }
