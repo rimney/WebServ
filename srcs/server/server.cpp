@@ -214,29 +214,61 @@ int is_file_or_dir(std::string & path)
     return -1;
 }
 
-void    server::delete_method(std::string  & path, respond & response)
+
+int remove_dir(std::string path)
+{
+    DIR*    dir = opendir(path.c_str());
+    if (dir == NULL)
+        return 1;
+
+    struct dirent* entry;
+    while ((entry = readdir(dir)) != NULL)
+    {
+        if (strcmp(entry->d_name, ".") == 0 || strcmp(entry->d_name, "..") == 0)
+            continue;
+
+        std::string full_path = std::string(path) + "/" + entry->d_name;
+
+        struct stat st;
+        if (lstat(full_path.c_str(), &st) == 0)
+        {
+            if (S_ISDIR(st.st_mode))
+            {
+                if (remove_dir(full_path) == 1)
+                    return 1;
+            }
+            else 
+                unlink(full_path.c_str());
+        }
+    }
+
+    closedir(dir);
+    rmdir(path.c_str());
+    return 0;
+}
+
+void    server::delete_method(std::string  & path, int fd)
 {
     std::cout << "delete method <<<\n";   
     if (is_path_exist(path))
     {
-        response.setContentLenght("0");
         int r = is_file_or_dir(path);
         if (r == 1) // handle file cases
         {
             std::cout << "file <<\n";
             if (remove(path.c_str()) == 0)
             {
-                response.setstatusCode("204");
-                response.setstatusDescription("No Content");
-                response.mergeRespondStrings();
+                _respond[fd].setstatusCode("204");
+                _respond[fd].setContentLenght("0");
+                _respond[fd].setstatusDescription("No Content");
+                _respond[fd].mergeRespondStrings();
                 return ;
             }
-            response.setstatusCode("500");
-            response.setstatusDescription("Internal Server Error");
-            response.setContentType("text/html");
-            response.setContentLenght("30");
-            response.setBody("<h1>Internal Server Error</h1>");// set error page
-            response.mergeRespondStrings();
+            _respond[fd].setstatusCode("500");
+            _respond[fd].setstatusDescription("Internal Server Error");
+            _respond[fd].setContentType("text/html");
+            _respond[fd].setBody("<h1>Internal Server Error</h1>");// set error page
+            _respond[fd].mergeRespondStrings();
             return ;
         }
         else if (r == 2) // handle dir cases
@@ -244,59 +276,59 @@ void    server::delete_method(std::string  & path, respond & response)
             std::cout << "dir <<\n";
             if (path.back() == '/')
             {
-                if (access(path.c_str(), W_OK) == 0)
+                struct Start_line start_line = _request[fd].get_start_line();
+                if (access(path.c_str(), W_OK) == 0 
+                    && path != _server_config.getServerLocationsObject()[start_line.location_index].getLocationRootObject()
+                    && path < _server_config.getServerLocationsObject()[start_line.location_index].getLocationRootObject())
                 {
-                    if (remove(path.c_str()) == 0)
+                    if (remove_dir(path) == 0)
                     {
-                        response.setstatusCode("204");
-                        response.setstatusDescription("No Content");
-                        response.mergeRespondStrings();
+                        _respond[fd].setstatusCode("204");
+                        _respond[fd].setstatusDescription("No Content");
+                        _respond[fd].setContentLenght("0");
+                        _respond[fd].mergeRespondStrings();
                         return ;
                     }
-                    response.setstatusCode("500");
-                    response.setstatusDescription("Internal Server Error");
-                    response.setContentType("text/html");
-                    response.setContentLenght("30");
-                    response.setBody("<h1>Internal Server Error</h1>"); // set error page
-                    response.mergeRespondStrings();
+                    _respond[fd].setstatusCode("500");
+                    _respond[fd].setstatusDescription("Internal Server Error");
+                    _respond[fd].setContentType("text/html");
+                    _respond[fd].setBody("<h1>Internal Server Error</h1>"); // set error page
+                    _respond[fd].mergeRespondStrings();
                     return ;
                 }
-                response.setstatusCode("403");
-                response.setstatusDescription("Forbidden");
-                response.setContentType("text/html");
-                response.setContentLenght("18");
-                response.setBody("<h1>Forbidden</h1>"); // set error page
-                response.mergeRespondStrings();
+                _respond[fd].setstatusCode("403");
+                _respond[fd].setstatusDescription("Forbidden");
+                _respond[fd].setContentType("text/html");
+                _respond[fd].setBody("<h1>Forbidden</h1>"); // set error page
+                _respond[fd].mergeRespondStrings();
                 return ;
             }
             else
             {
-                response.setstatusCode("409");
-                response.setstatusDescription("Conflict");
-                response.setContentType("text/html");
-                response.setContentLenght("17");
-                response.setBody("<h1>Conflict</h1>"); // set error page
-                response.mergeRespondStrings();
+                std::cout << _respond[fd].getfinalString() << "\n";
+                _respond[fd].setstatusCode("409");
+                _respond[fd].setstatusDescription("Conflict");
+                _respond[fd].setContentType("text/html");
+                _respond[fd].setBody("<h1>Conflict</h1>"); // set error page
+                _respond[fd].mergeRespondStrings();
                 return ;
             }
         }
         else // error
         {
-            response.setstatusCode("500");
-            response.setstatusDescription("Internal Server Error");
-            response.setContentType("text/html");
-            response.setContentLenght("30");
-            response.setBody("<h1>Internal Server Error</h1>"); // set error page
-            response.mergeRespondStrings();
+            _respond[fd].setstatusCode("500");
+            _respond[fd].setstatusDescription("Internal Server Error");
+            _respond[fd].setContentType("text/html");
+            _respond[fd].setBody("<h1>Internal Server Error</h1>"); // set error page
+            _respond[fd].mergeRespondStrings();
             return ;
         }
     }
-    response.setstatusCode("404");
-    response.setstatusDescription("Not Found");
-    response.setContentType("text/html");
-    response.setContentLenght("18");
-    response.setBody("<h1>Not Found</h1>"); // set error page
-    response.mergeRespondStrings();
+    _respond[fd].setstatusCode("404");
+    _respond[fd].setstatusDescription("Not Found");
+    _respond[fd].setContentType("text/html");
+    _respond[fd].setBody("<h1>Not Found</h1>");
+    _respond[fd].mergeRespondStrings();
 }
 
 void server::Get(int location_index , std::string path, int fd) 
@@ -419,7 +451,7 @@ void    server::process(int fd)
             }
             if(_request[fd].get_start_line().method == "DELETE")
             {
-                delete_method(_request[fd].get_start_line().full_path, _respond[fd]);
+                delete_method(_request[fd].get_start_line().full_path, fd);
             }
         }
         //respond
