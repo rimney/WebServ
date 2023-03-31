@@ -117,12 +117,15 @@ void    server::post_method(server_parser &serv, int fd)
                     multi_part(serv,fd);
                 else
                 {
+                    struct timeval tp;
+                    gettimeofday(&tp, NULL);
+                    long int ms = tp.tv_sec * 1000 + tp.tv_usec / 1000;
                     buffer = _request[fd].get_header().find("Content-Type")->second;
                     for(int i = 0 ; i < (int)buffer.length();i++)
                         if(buffer[i] == '/')
                             for(int j = i + 1 ; j < (int)buffer.length();j++)
                                 extention += buffer[j];
-                    std::ofstream post(serv.getServerLocationsObject()[_request[fd].get_start_line().location_index].getUploadObject() + _request[fd].get_header().find("Postman-Token")->second +'.'+ extention);//check /
+                    std::ofstream post(serv.getServerLocationsObject()[_request[fd].get_start_line().location_index].getUploadObject() + std::to_string(ms) +'.'+ extention);//check /
                     post << _request[fd].get_body();
                     post.close();
                 }
@@ -176,6 +179,8 @@ void    server::post_method(server_parser &serv, int fd)
            {
                 if(!serv.getServerLocationsObject()[_request[fd].get_start_line().location_index].getCgiPathObject(_request[fd].get_start_line().full_path).empty())
                 {
+
+                    std::cout << " ** "<< "<<<<<<<<< _request_map[fd]>>>>>>>>>" << "++"<< std::endl;
                     cgi_handler cgi(_server_config, _request[fd]);
                     cgi.exec(_respond[fd]);
                 }

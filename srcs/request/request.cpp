@@ -212,6 +212,8 @@ void Request::request_well_formed(server_parser &serv)
     {
         if(header.find("Transfer-Encoding")->second != "chunked")
             r_error = "501 Not Implemented";
+        else if(serv.getCmbsObject() > 0 && body.size() < (size_t)serv.getCmbsObject())
+             r_error = "413 Request Entity Too Large";
     }
     else if((start_line.method == "POST" && header.find("Transfer-Encoding")->first.empty() && header.find("Content-Length")->first.empty())
         || (start_line.method == "POST" && !header.find("Transfer-Encoding")->first.empty() && !header.find("Content-Length")->first.empty()))

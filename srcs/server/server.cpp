@@ -385,7 +385,7 @@ void    server::process(int fd)
     //         std::cerr <<_request_map[fd][i];
                 
     // }
-    std::cout << " ** "<<  _request_map[fd] << "++"<< std::endl;
+    // std::cout << " ** "<<  _request_map[fd] << "++"<< std::endl;
 
     if(!_request[fd].get_wait_body())
         _request[fd].parser(_request_map[fd]);
@@ -425,7 +425,7 @@ void    server::process(int fd)
             }
         }
         //respond
-        // _request[fd].clear();
+        _request[fd].clear();
         _request_map.erase(fd);
     }
 }

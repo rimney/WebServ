@@ -20,6 +20,7 @@
 # include "request.hpp"
 # include "respond.hpp"
 # include "cgi_handler.hpp"
+#include <sys/time.h>
 
 // TO BE DELETED //
 #include <string.h>
