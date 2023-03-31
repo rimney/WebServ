@@ -168,6 +168,9 @@ void    server::send(int fd)
 
     // std::cout << _respond[fd].getBody();
     // std::cout << _respond[fd].getBodyFlag() << " <<\n";
+
+    std::cout << _respond[fd].getfinalString() << '\n';
+
     if(_respond[fd].getBody().empty())
         _respond[fd].recoverBody(atoi(_respond[fd].getstatusCode().c_str()));
     
@@ -183,7 +186,6 @@ void    server::send(int fd)
             throw(std::string("ERROR: send() failed to send response / file: " + _respond[fd].getPathSave()));
         }
     // }
-        
     _respond[fd].cleanAll();
 }
 
@@ -214,12 +216,14 @@ int is_file_or_dir(std::string & path)
 
 void    server::delete_method(std::string  & path, respond & response)
 {
-    
+    std::cout << "delete method <<<\n";   
     if (is_path_exist(path))
     {
+        response.setContentLenght("0");
         int r = is_file_or_dir(path);
         if (r == 1) // handle file cases
         {
+            std::cout << "file <<\n";
             if (remove(path.c_str()) == 0)
             {
                 response.setstatusCode("204");
@@ -229,14 +233,15 @@ void    server::delete_method(std::string  & path, respond & response)
             }
             response.setstatusCode("500");
             response.setstatusDescription("Internal Server Error");
-            response.setContentType("text/plain");
+            response.setContentType("text/html");
             response.setContentLenght("30");
-            response.setBody("<h1>Internal Server Error</h1>");
+            response.setBody("<h1>Internal Server Error</h1>");// set error page
             response.mergeRespondStrings();
             return ;
         }
         else if (r == 2) // handle dir cases
         {
+            std::cout << "dir <<\n";
             if (path.back() == '/')
             {
                 if (access(path.c_str(), W_OK) == 0)
@@ -250,7 +255,7 @@ void    server::delete_method(std::string  & path, respond & response)
                     }
                     response.setstatusCode("500");
                     response.setstatusDescription("Internal Server Error");
-                    response.setContentType("text/plain");
+                    response.setContentType("text/html");
                     response.setContentLenght("30");
                     response.setBody("<h1>Internal Server Error</h1>"); // set error page
                     response.mergeRespondStrings();
@@ -258,7 +263,7 @@ void    server::delete_method(std::string  & path, respond & response)
                 }
                 response.setstatusCode("403");
                 response.setstatusDescription("Forbidden");
-                response.setContentType("text/plain");
+                response.setContentType("text/html");
                 response.setContentLenght("18");
                 response.setBody("<h1>Forbidden</h1>"); // set error page
                 response.mergeRespondStrings();
@@ -268,7 +273,7 @@ void    server::delete_method(std::string  & path, respond & response)
             {
                 response.setstatusCode("409");
                 response.setstatusDescription("Conflict");
-                response.setContentType("text/plain");
+                response.setContentType("text/html");
                 response.setContentLenght("17");
                 response.setBody("<h1>Conflict</h1>"); // set error page
                 response.mergeRespondStrings();
@@ -279,7 +284,7 @@ void    server::delete_method(std::string  & path, respond & response)
         {
             response.setstatusCode("500");
             response.setstatusDescription("Internal Server Error");
-            response.setContentType("text/plain");
+            response.setContentType("text/html");
             response.setContentLenght("30");
             response.setBody("<h1>Internal Server Error</h1>"); // set error page
             response.mergeRespondStrings();
@@ -288,7 +293,7 @@ void    server::delete_method(std::string  & path, respond & response)
     }
     response.setstatusCode("404");
     response.setstatusDescription("Not Found");
-    response.setContentType("text/plain");
+    response.setContentType("text/html");
     response.setContentLenght("18");
     response.setBody("<h1>Not Found</h1>"); // set error page
     response.mergeRespondStrings();
