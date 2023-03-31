@@ -308,30 +308,28 @@ void server::Get(int location_index , std::string path, int fd)
         std::cout << isFOrD << " <<\n";
         if(isFOrD == "file")
         {
-            if(location.getHasCgi()) // check if the extention of file compatible with extentions 
+            if(location.getHasCgi() && location.isCgi(_request[fd].get_start_line().full_path)) // check if the extention of file compatible with extentions 
             {
+                std::cout << _request[fd].get_start_line().full_path << " << EE\n";
                 cgi_handler cgi(_server_config, _request[fd]);
                 cgi.exec(_respond[fd]);
                 return ;
-            }
-            // {
-                
-                if(_respond[fd].fileToSring(path).size() > 50000)
-                {
-                    if(_respond[fd].getBodyFlag() == true)
-                        return ;
-                    _respond[fd].setBodyFlag(true);
+            }    
+            if(_respond[fd].fileToSring(path).size() > 50000)
+            {
+                if(_respond[fd].getBodyFlag() == true)
+                    return ;
+                _respond[fd].setBodyFlag(true);
                     return;
-                }
-                else
-                {
-                    std::cout << path << " < path\n";
-                    _respond[fd].setBody(_respond[fd].fileToSring(path));
-                    _respond[fd].setContentLenght(std::to_string(_respond[fd].fileToSring(path).size()));
-                    _respond[fd].mergeRespondStrings();
-                }
-                return ;
-            // }
+            }
+            else
+            {
+                std::cout << path << " < path\n";
+                _respond[fd].setBody(_respond[fd].fileToSring(path));
+                _respond[fd].setContentLenght(std::to_string(_respond[fd].fileToSring(path).size()));
+                _respond[fd].mergeRespondStrings();
+            }
+            return ;
         }
         else if(isFOrD == "directory")
         {

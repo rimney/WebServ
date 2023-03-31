@@ -6,7 +6,7 @@
 /*   By: rimney <rimney@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/07 03:50:36 by rimney            #+#    #+#             */
-/*   Updated: 2023/03/31 06:11:15 by rimney           ###   ########.fr       */
+/*   Updated: 2023/03/31 21:50:16 by rimney           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -140,6 +140,20 @@ server_location & server_location::operator=(server_location const & s)
     this->has_301_code = s.has_301_code;
     return (*this);
 }
+
+bool server_location::isCgi(std::string path)
+{
+    std::cout << path << " << HERE\n";
+    for(size_t i = 0; i < this->cgiExt.size(); i++)
+    {
+        if(!strcmp(strrchr(path.c_str(), '.'), this->cgiExt[i].c_str()))
+        {
+            return (true);
+        }
+    }
+    return (false);
+}
+
 void    server_location::getErrorPage(std::string *keys, size_t size)
 {
     if (size <= 1)
