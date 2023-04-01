@@ -23,7 +23,7 @@ class cgi_handler
         
 
     public:
-        cgi_handler(server_parser server_config, Request request);
+        cgi_handler(server_parser & server_config, Request & request);
         cgi_handler(cgi_handler const & c);
         ~cgi_handler();
 

@@ -156,6 +156,7 @@ void    server::receive(int fd)
         _request.insert(std::make_pair(fd, Request()));
         _respond.insert(std::make_pair(fd, respond(_server_config)));
     }
+    std::cout << _request_map[fd] << '\n';
 }
 
 void    server::send(int fd)
@@ -309,15 +310,15 @@ void server::Get(int location_index , std::string path, int fd)
         if(isFOrD == "file")
         {
 
-            if(location.getHasCgi()) // check if the extention of file compatible with extentions 
-            {
-                std::cout << path << " < cgi exec\n";                   // that's setting in the config, ex:(if ext == ".php" || == ".py")
-                std::cout << "CGI <<<\n";
-                cgi_handler cgi(_server_config, _request[fd]);
-                cgi.exec(_respond[fd]);
-                return ;
-            }
+            // if( path.find_last_of("php") != std::string::npos && location.getHasCgi()) // check if the extention of file compatible with extentions 
             // {
+            //     std::cout << path << " < cgi exec\n";                   // that's setting in the config, ex:(if ext == ".php" || == ".py")
+            //     std::cout << "CGI <<<\n";
+            //     cgi_handler cgi(_server_config, _request[fd]);
+            //     cgi.exec(_respond[fd]);
+            //     return ;
+            // }
+            // // {
                 
                 if(_respond[fd].fileToSring(path).size() > 50000 || _respond[fd].getBodyFlag() == true)
                 {
@@ -405,9 +406,9 @@ void    server::process(int fd)
         std::cout <<  _request[fd].get_start_line().vertion << std::endl;
         std::cout <<  _request[fd].get_start_line().full_path << std::endl;
         std::cout <<  _request[fd].get_start_line().query << std::endl;
-
+        std::cout <<"****" << _request[fd].get_body() << std::endl;
+        
         // std::cout << _request[fd].get_error() << "\n";
-        // std::cout <<"****" << _request[fd].get_body() << std::endl;
 
 
         std::map<std::string,std::string>::iterator it;

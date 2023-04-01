@@ -345,14 +345,14 @@ void    server_location::checkCgiAllowed(void)
 
 std::string server_location::getCgiPathObject(std::string path)
 {
-
+    std::cout << path << "<< PATH" << std::endl;
     for(size_t i = 0; i < this->cgiPaths.size(); i++)
     {
         if((!strcmp(strrchr(this->cgiPaths[i].c_str(), '/') + 1, "php") || !strcmp(strrchr(this->cgiPaths[i].c_str(), '/') + 1, "php-cgi")) && !strcmp(strrchr(path.c_str(), '.') + 1, "php"))
             return (this->cgiPaths[i]);
-        if((!strcmp(strrchr(this->cgiPaths[i].c_str(), '/') + 1, "python") || !strcmp(strrchr(this->cgiPaths[i].c_str(), '/') + 1, "python3")) && !strcmp(strrchr(path.c_str(), '.') + 1, "py"))
+        else if((!strcmp(strrchr(this->cgiPaths[i].c_str(), '/') + 1, "python") || !strcmp(strrchr(this->cgiPaths[i].c_str(), '/') + 1, "python3")) && !strcmp(strrchr(path.c_str(), '.') + 1, "py"))
             return (this->cgiPaths[i]);
-        if(!strcmp(strrchr(this->cgiPaths[i].c_str(), '/') + 1, "ruby") && !strcmp(strrchr(path.c_str(), '.') + 1, "py"))
+        else if(!strcmp(strrchr(this->cgiPaths[i].c_str(), '/') + 1, "ruby") && !strcmp(strrchr(path.c_str(), '.') + 1, "py"))
             return (this->cgiPaths[i]);
     }
     std::cout << path;

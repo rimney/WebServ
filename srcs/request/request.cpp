@@ -173,14 +173,6 @@ void Request::location_well(server_parser &serv)
             if(serv.getServerLocationsObject()[index].getLocationRootObject() [serv.getServerLocationsObject()[index].getLocationRootObject() .length() - 1] == '/' && start_line.path[0] == '/')
                  start_line.path.erase(0,1);
             start_line.full_path = serv.getServerLocationsObject()[index].getLocationRootObject() + start_line.path;
-            // for(int i = 0; i < (int)start_line.full_path.length();i++)
-            // {
-            //     if(start_line.full_path[i] == '/' && start_line.full_path[i + 1] == '/')
-            //     {
-            //         start_line.full_path.erase(i,1);
-            //         break;
-            //     }
-            // }
         }
         else if(!serv.getRootObject().empty())
         {
@@ -199,10 +191,11 @@ void Request::location_well(server_parser &serv)
                     start_line.query += start_line.full_path[i];
             }
         }
+        if(!header.find("Content-Type")->first.empty() && header["Content-Type"] == "application/x-www-form-urlencoded")//query from post
+            start_line.query = body;
     }
     else
         r_error = "404";
-   
 }
 
 void Request::request_well_formed(server_parser &serv)

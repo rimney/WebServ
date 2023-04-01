@@ -4,7 +4,7 @@
 
 cgi_handler::cgi_handler() {}
 
-cgi_handler::cgi_handler(server_parser server_config, Request request)
+cgi_handler::cgi_handler(server_parser & server_config, Request & request)
     : _server_config(server_config), _request(request),
     _location(_server_config.getServerLocationsObject()[_request.get_start_line().location_index])
 {
@@ -68,8 +68,8 @@ void            cgi_handler::init_env()
     _env.push_back("REDIRECT_STATUS=200");
 
     // print all env variables
-    // for  (std::vector<std::string>::iterator it = _env.begin(); it != _env.end(); it++)
-    //     std::cout << *it << '\n';
+    for  (std::vector<std::string>::iterator it = _env.begin(); it != _env.end(); it++)
+        std::cout << *it << '\n';
 }
 
 char**  cgi_handler::vector_to_ptr()
@@ -168,6 +168,8 @@ void    cgi_handler::generate_response(std::string & cgi_response, respond & res
     size_t      j;
     std::string header, element;
     size_t      content_length;
+
+    std::cout << "cgi_response: " << cgi_response << '\n';
 
     if (cgi_response.find("500") != std::string::npos || cgi_response.empty())
     {

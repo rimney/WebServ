@@ -80,7 +80,7 @@ void    respond::setContentLenght(std::string ContentLenght)
 void    respond::setBody(std::string Body)
 {
     this->Body = Body;
-    this->ContentLenght = this->Body.size();
+    this->ContentLenght = std::to_string(this->Body.size());
 }
 
 void    respond::setFinalString(std::string finalString)
