@@ -6,7 +6,7 @@
 /*   By: rimney <rimney@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/07 03:50:36 by rimney            #+#    #+#             */
-/*   Updated: 2023/04/01 01:15:33 by rimney           ###   ########.fr       */
+/*   Updated: 2023/04/01 02:11:22 by rimney           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -630,7 +630,7 @@ void    server_parser::getPort(std::string *Port, size_t temp_size)
         exit(1);
     }
     for(size_t i = 1; i < this->port.size(); i++)
-        this->port.push_back(atoi(Port[i].c_str());
+        this->port.push_back(atoi(Port[i].c_str()));
     delete [] Port;
 }
 void    server_parser::getServerName(std::string *keys, size_t size)
