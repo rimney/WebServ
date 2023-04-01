@@ -6,7 +6,7 @@
 /*   By: rimney <rimney@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/07 03:50:36 by rimney            #+#    #+#             */
-/*   Updated: 2023/04/01 21:02:29 by rimney           ###   ########.fr       */
+/*   Updated: 2023/04/01 21:37:03 by rimney           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -990,8 +990,42 @@ config_parser::config_parser(std::string filename)
             server_index += 1;
         }
         
-    }  
+    }
+    if(hasDuplicatePorts())
+    {
+        std::cerr << "Error : Server Has Duplicate Ports\n";
+        exit(1);
+    }
 }
+
+bool    config_parser::hasDuplicatePorts()
+{
+    for (size_t i = 0; i < servers.size(); i++)
+    {
+        const server_parser & server1 = servers[i];
+        for (size_t j = i + 1; j < servers.size(); j++)
+        {
+            const server_parser & server2 = servers[j];
+            for (size_t k = 0; k < server1.getPortObject().size(); k++)
+            {
+
+                int port = server1.getPortObject()[k];
+                for (size_t l = 0; l < server2.getPortObject().size(); l++)
+                {
+                    int port2 =  server2.getPortObject()[l];
+                    if (port == port2)
+                    {
+
+                        std::cout << "DUPLICATE";
+                        return true;
+                    }
+                }
+            }
+        }
+    }
+    return false;
+}
+
 
 void    config_parser::servers_index_init()
 {
