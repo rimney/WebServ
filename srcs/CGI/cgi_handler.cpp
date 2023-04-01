@@ -52,11 +52,13 @@ void            cgi_handler::init_env()
     _env.push_back(std::string("PATH_INFO=") + start_line.full_path);
     _env.push_back(std::string("PATH_TRANSLATED=") + start_line.full_path);
     _env.push_back(std::string("QUERY_STRING=") + start_line.query);
+    // _env.push_back(std::string("CONTENT_LENGTH=29"));
+    // _env.push_back(std::string("QUERY_STRING=username=test%26password=test"));
+    
     // _env.push_back(std::string("REMOTE_ADDR=") + _server_config.getHostObject());
     // _env.push_back(std::string("REMOTE_HOST" + ...);
     _env.push_back(std::string("REQUEST_METHOD=") + start_line.method);
     // _env.push_back(std::string("SCRIPT_NAME=") + _location.getCgiPathObject());
-    
     if (headers.find("Hostname") != headers.end())
         _env.push_back(std::string("SERVER_NAME=") + headers["Hostname"]);
     else
@@ -98,6 +100,7 @@ void cgi_handler::exec(respond & response)
 
     pipe(fds);
 
+    write(fds[1], _request.get_start_line().query.c_str(),  _request.get_start_line().query.size());
     cgi_pid = fork();
 
     if (cgi_pid == -1)
