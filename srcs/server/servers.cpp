@@ -6,7 +6,7 @@
 /*   By: rimney <rimney@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/10 00:38:14 by eel-ghan          #+#    #+#             */
-/*   Updated: 2023/03/31 00:12:59 by rimney           ###   ########.fr       */
+/*   Updated: 2023/04/01 01:15:24 by rimney           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,7 +42,7 @@ int servers::setup(std::vector<server_parser> servers_config)
     {
         try
         {
-            _servers.push_back(server(servers_config[i].getPortObject(),
+            _servers.push_back(server(servers_config[i].getPortObject(), //
                 servers_config[i].getHostObject()));
             _servers[i].setup(servers_config[i]);
         }

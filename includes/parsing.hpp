@@ -6,7 +6,7 @@
 /*   By: rimney <rimney@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/24 21:53:42 by rimney            #+#    #+#             */
-/*   Updated: 2023/03/31 22:22:44 by rimney           ###   ########.fr       */
+/*   Updated: 2023/04/01 01:14:18 by rimney           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -91,7 +91,7 @@ class server_location
 class server_parser : public server_location
 {
     protected :
-        int							port; // 8080
+        std::vector<int>							port; // 8080
         int							host; // 0.0.0.1 --> into in int
         int							server_index; // server index in parsing
         int							client_max_body_size; // i mean that obvious
@@ -121,7 +121,7 @@ class server_parser : public server_location
 		////////////// Constructors and Overloads //////////////
 
 		////////////// Getters and Setters //////////////
-        int							getPortObject(void)	const;
+        std::vector<int>							getPortObject(void)	const;
         int							getServer_IndexLocationObject(void) const;
         int							getHostObject(void) const;
         int							getCmbsObject(void) const;

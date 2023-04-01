@@ -6,7 +6,7 @@
 /*   By: rimney <rimney@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/07 03:50:36 by rimney            #+#    #+#             */
-/*   Updated: 2023/03/31 22:46:10 by rimney           ###   ########.fr       */
+/*   Updated: 2023/04/01 01:15:33 by rimney           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -73,7 +73,8 @@ std::ostream & operator<<(std::ostream & os, server_parser & s)
     std::vector<server_location> serverLocations = s.getServerLocationsObject();
     os << "|------------->>\n";
     os << "| Server index : " << s.getServerIndexObject() << '\n';
-    os << "| Server Port : " << s.getPortObject() << '\n';
+
+    // os << "| Server Port : " << s.getPortObject() << '\n';
     os << "| Server Host : " << s.getHostObject() << " ( " << toIp(s.getHostObject())<<  " )" <<'\n';
     os << "| Server Location Count: " << s.getServerLocationCountObject() << '\n';
     os << "| Server CMBS : " << s.getCmbsObject() << '\n';
@@ -527,7 +528,7 @@ std::vector<std::string> server_parser::getServerNamesObject(void) const
 {
     return (this->server_names);
 }
-int server_parser::getPortObject(void) const
+std::vector<int> server_parser::getPortObject(void) const
 {
     return (this->port);
 }
@@ -622,33 +623,14 @@ int server_parser::ipToInt(std::string host)
 }
 void    server_parser::getPort(std::string *Port, size_t temp_size)
 {
-    std::string *temparray;
-    size_t temp_sizee;
-    size_t pos;
 
-    if(temp_size > 2)
+    if(temp_size < 1)
     {
-        std::cerr << "Error listen has more than one argument !\n";
-        exit(0);
+        std::cerr << "Error : Check The Port Arguments\n";
+        exit(1);
     }
-    pos = Port[1].find('.');
-    if(!strncmp(Port[1].c_str(), "localhost:", 10) || pos != Port[1].npos)
-    {
-        temparray = stringSplit(Port[1], ':', &temp_sizee);
-        if (temp_sizee > 2)
-        {
-            std::cerr << "Error port has more than one location\n";
-            exit(0);
-        }
-        this->port = stoi(temparray[1]);
-        if(strncmp(Port[1].c_str(), "localhost:", 10)) 
-            this->host = ipToInt(temparray[0]);
-        delete [] temparray;
-    }
-    else if (temp_size == 2 && is_digits(Port[1]))
-    {
-        this->port = stoi(Port[1]);
-    }
+    for(size_t i = 1; i < this->port.size(); i++)
+        this->port.push_back(atoi(Port[i].c_str());
     delete [] Port;
 }
 void    server_parser::getServerName(std::string *keys, size_t size)
@@ -767,7 +749,6 @@ void    server_parser::getHost(std::string *keys, size_t size)
 
 void    server_parser::construct_server(std::vector<std::string>::iterator first, std::vector<std::string>::iterator last)
 {
-    this->port = 8080;
     this->is_auto_index = false;
     this->server_had_delete_method = true;
     this->server_has_get_method = true;
@@ -784,10 +765,15 @@ void    server_parser::construct_server(std::vector<std::string>::iterator first
     {
         if(!strncmp(serverVec[i].c_str(), "host ", 5))
         {
-            std::cout << "Host Found >> " << serverVec[i] << std::endl;
             getHost(stringSplit(serverVec[i], ' ', &temp_size), temp_size);
-            exit(1);
-            getPort(stringSplit(serverVec[i], ' ', &temp_size), temp_size); // host and port parsing;
+            // getPort(stringSplit(serverVec[i], ' ', &temp_size), temp_size); // host and port parsing;
+            if(this->host == 0)
+                host = 2130706433;
+        }
+        else if(!strncmp(serverVec[i].c_str(), "port ", 5))
+        {
+            getPort(stringSplit(serverVec[i], ' ', &temp_size), temp_size);
+            // getPort(stringSplit(serverVec[i], ' ', &temp_size), temp_size); // host and port parsing;
             if(this->host == 0)
                 host = 2130706433;
         }
