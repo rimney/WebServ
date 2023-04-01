@@ -18,7 +18,7 @@ server::server()
     : _port(DEFAULT_PORT), _host(INADDR_ANY), _error_flag(1){}
 
 server::server(int port, unsigned int host)
-    : _port(port), _host(host) ,_error_flag(1) {}
+    : _host(host) ,_error_flag(1) { _port.push_back(port); _port.push_back(8081); _port.push_back(8082);}
 
 server::server(server const & s)
     : _error_flag(1)
@@ -33,9 +33,14 @@ respond server::getRespond(int fd)
 
 server::~server() {}
 
-int server::get_port() const
+std::vector<int>    server::get_port() const
 {
-    return _port;
+    _port;
+}
+
+int server::get_port(int i) const
+{
+    return _port[i];
 }
 
 unsigned int    server::get_host() const
@@ -78,7 +83,7 @@ server  & server::operator=(server const & s)
     return *this;
 }
 
-void server::setup(server_parser & server_config)
+void server::setup(server_parser & server_config, size_t i)
 {
     int optval = 1;
 
@@ -87,21 +92,21 @@ void server::setup(server_parser & server_config)
     {
         _error_flag = 0;
         throw(std::string("ERROR: failed to create the socket by the host: ") 
-            + std::to_string(_host) + std::string(" on port: ") + std::to_string(_port));
+            + std::to_string(_host) + std::string(" on port: ") + std::to_string(_port[i]));
     }
     //Allow socket descriptor to be reuseable
     if (setsockopt(_fd_socket, SOL_SOCKET, SO_REUSEADDR, &optval, sizeof(optval)) == -1)
         throw(std::string("ERROR: faild to set socket option (setsockopt()) for _fd_socket by the host: ")
-            + std::to_string(_host) + std::string(" on port: ") + std::to_string(_port));
+            + std::to_string(_host) + std::string(" on port: ") + std::to_string(_port[i]));
     set_addr();
     if (bind(_fd_socket, (struct sockaddr*)&_addr, sizeof(_addr)) == -1)
         throw(std::string("ERROR: failed to bind the socket by the host: ")
-            + std::to_string(_host) + std::string(" on port: ") + std::to_string(_port));
+            + std::to_string(_host) + std::string(" on port: ") + std::to_string(_port[i]));
     if (listen(_fd_socket, 100) == -1)
         throw(std::string("ERROR: failed to listen by the host: ")
-            + std::to_string(_host) + std::string(" on port: ") + std::to_string(_port));
+            + std::to_string(_host) + std::string(" on port: ") + std::to_string(_port[i]));
     set_server_config(server_config);
-    std::cout << "host: " << _host << " is listening on port " << _port << "...\n\n";
+    std::cout << "host: " << _host << " is listening on port " << _port[i] << "...\n\n";
 }
 
 void    server::set_addr()
@@ -110,6 +115,11 @@ void    server::set_addr()
     _addr.sin_family = AF_INET;
     _addr.sin_addr.s_addr = htonl(_host);
     _addr.sin_port = htons(_port);
+}
+
+void    server::set_error_flag(int error_flag)
+{
+    _error_flag = error_flag;
 }
 
 void server::accept()

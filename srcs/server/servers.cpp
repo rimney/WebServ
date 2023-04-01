@@ -6,7 +6,7 @@
 /*   By: eel-ghan <eel-ghan@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/10 00:38:14 by eel-ghan          #+#    #+#             */
-/*   Updated: 2023/03/31 03:12:53 by eel-ghan         ###   ########.fr       */
+/*   Updated: 2023/04/01 02:08:28 by eel-ghan         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,19 +40,42 @@ int servers::setup(std::vector<server_parser> servers_config)
 
     for (i = 0; i < servers_config.size(); i++)
     {
-        try
-        {
-            _servers.push_back(server(servers_config[i].getPortObject(),
-                servers_config[i].getHostObject()));
-            _servers[i].setup(servers_config[i]);
-        }
-        catch(const std::string& msg)
-        {
-            std::cerr << msg << '\n';
-            if (_servers[i].get_error_flag() == 1)
-                _servers[i].close();
-            _servers.erase(_servers.begin() + i);
-        }
+        server  s(servers_config[i].getPortObject(),servers_config[i].getHostObject());
+        // _servers.push_back(server(servers_config[i].getPortObject(),
+        //         servers_config[i].getHostObject()));
+        // try
+        // {
+            for (size_t j = 0; j < s.get_port().size(); j++)
+            {
+                try
+                {
+                    s.setup(servers_config[i], j);
+                    _servers.insert(std::make_pair(s.get_fd_socket(), s));
+                }
+                catch (std::string const & msg)
+                {
+                    std::cout << msg << '\n';
+                    if (s.get_error_flag() == 1)
+                    {
+                        s.close();
+                        s.set_error_flag(0); 
+                    }
+                    _servers.erase(s.get_fd_socket());
+                }
+            }
+            
+
+            // _servers.push_back(server(servers_config[i].getPortObject(),
+            //     servers_config[i].getHostObject()));
+            // _servers[i].setup(servers_config[i]);
+        // }
+        // catch(const std::string& msg)
+        // {
+        //     std::cerr << msg << '\n';
+        //     if (_servers[i].get_error_flag() == 1)
+        //         _servers[i].close();
+        //     _servers.erase(_servers.begin() + i);
+        // }
     }
 
     FD_ZERO(&_set_fds);
