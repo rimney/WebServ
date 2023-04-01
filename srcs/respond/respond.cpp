@@ -6,7 +6,7 @@
 /*   By: eel-ghan <eel-ghan@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/15 20:32:17 by rimney            #+#    #+#             */
-/*   Updated: 2023/03/31 03:57:47 by eel-ghan         ###   ########.fr       */
+/*   Updated: 2023/04/01 02:15:34 by eel-ghan         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -192,6 +192,7 @@ void    respond::cleanAll(void)
     this->ContentLenght.clear();
     this->finalString.clear();
     this->content_type.clear();
+    this->location.clear();
 }
 
 std::string	respond::getAutoIndexPage(std::string path)

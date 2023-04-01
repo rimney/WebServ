@@ -6,7 +6,7 @@
 /*   By: rimney <rimney@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/07 03:50:36 by rimney            #+#    #+#             */
-/*   Updated: 2023/03/30 04:17:00 by rimney           ###   ########.fr       */
+/*   Updated: 2023/04/01 02:11:22 by rimney           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -73,7 +73,8 @@ std::ostream & operator<<(std::ostream & os, server_parser & s)
     std::vector<server_location> serverLocations = s.getServerLocationsObject();
     os << "|------------->>\n";
     os << "| Server index : " << s.getServerIndexObject() << '\n';
-    os << "| Server Port : " << s.getPortObject() << '\n';
+
+    // os << "| Server Port : " << s.getPortObject() << '\n';
     os << "| Server Host : " << s.getHostObject() << " ( " << toIp(s.getHostObject())<<  " )" <<'\n';
     os << "| Server Location Count: " << s.getServerLocationCountObject() << '\n';
     os << "| Server CMBS : " << s.getCmbsObject() << '\n';
@@ -117,7 +118,8 @@ server_location::server_location(server_location const  & s)
     this->has_cgi = s.has_cgi;
     this->has_redirection = s.has_redirection;
     this->redirection = s.redirection;
-    upload = s.upload;
+    this->upload = s.upload;
+    this->has_301_code = s.has_301_code;
 }
 server_location & server_location::operator=(server_location const & s)
 {
@@ -135,9 +137,24 @@ server_location & server_location::operator=(server_location const & s)
     this->is_auto_index = s.is_auto_index;
     this->has_redirection = s.has_redirection;
     this->redirection = s.redirection;
-    upload = s.upload;
+    this->upload = s.upload;
+    this->has_301_code = s.has_301_code;
     return (*this);
 }
+
+bool server_location::isCgi(std::string path)
+{
+    std::cout << path << " << HERE\n";
+    for(size_t i = 0; i < this->cgiExt.size(); i++)
+    {
+        if(!strcmp(strrchr(path.c_str(), '.'), this->cgiExt[i].c_str()))
+        {
+            return (true);
+        }
+    }
+    return (false);
+}
+
 void    server_location::getErrorPage(std::string *keys, size_t size)
 {
     if (size <= 1)
@@ -187,16 +204,26 @@ void    server_location::getRoot(std::string *keys, size_t size)
     this->root = keys[size - 1];
     delete [] keys;
 }
+
 void    server_location::getRedirection(std::string *keys, size_t size)
 {
-    if(size <= 1 || size > 2)
+    if(size <= 1 || size > 3)
     {
         std::cerr << "Error Redirection Arguments !\n";
         exit(0);
     }
+    if(size == 3 && keys[1] == "301")
+        this->has_301_code = true;
+    else if (size == 3 && keys[1] != "301")
+    {
+        std::cerr << "Error : Check Redirection Code Value\n";
+        exit(1);
+    }
     this->redirection = keys[size - 1];
+
     delete [] keys;
 }
+
 void    server_location::getCmds(std::string *keys, size_t size)
 {
     if(size <= 1 || size > 2)
@@ -235,6 +262,7 @@ void    server_location::getCgiPath(std::string *Keys, size_t size)
        std::cout <<  this->cgiPaths[i] << '\n';
     delete [] Keys;
 }
+
 
 void    server_location::getCgiExec(std::string *Keys, size_t size)
 {
@@ -355,9 +383,7 @@ std::string server_location::getCgiPathObject(std::string path)
         if(!strcmp(strrchr(this->cgiPaths[i].c_str(), '/') + 1, "ruby") && !strcmp(strrchr(path.c_str(), '.') + 1, "py"))
             return (this->cgiPaths[i]);
     }
-    std::cout << path;
-    exit(0);
-    return path;
+    return "";
 }
 void server_location::construct_location(std::vector<std::string>::iterator first, std::vector<std::string>::iterator last)
 {
@@ -502,7 +528,7 @@ std::vector<std::string> server_parser::getServerNamesObject(void) const
 {
     return (this->server_names);
 }
-int server_parser::getPortObject(void) const
+std::vector<int> server_parser::getPortObject(void) const
 {
     return (this->port);
 }
@@ -597,33 +623,14 @@ int server_parser::ipToInt(std::string host)
 }
 void    server_parser::getPort(std::string *Port, size_t temp_size)
 {
-    std::string *temparray;
-    size_t temp_sizee;
-    size_t pos;
 
-    if(temp_size > 2)
+    if(temp_size < 1)
     {
-        std::cerr << "Error listen has more than one argument !\n";
-        exit(0);
+        std::cerr << "Error : Check The Port Arguments\n";
+        exit(1);
     }
-    pos = Port[1].find('.');
-    if(!strncmp(Port[1].c_str(), "localhost:", 10) || pos != Port[1].npos)
-    {
-        temparray = stringSplit(Port[1], ':', &temp_sizee);
-        if (temp_sizee > 2)
-        {
-            std::cerr << "Error port has more than one location\n";
-            exit(0);
-        }
-        this->port = stoi(temparray[1]);
-        if(strncmp(Port[1].c_str(), "localhost:", 10)) 
-            this->host = ipToInt(temparray[0]);
-        delete [] temparray;
-    }
-    else if (temp_size == 2 && is_digits(Port[1]))
-    {
-        this->port = stoi(Port[1]);
-    }
+    for(size_t i = 1; i < this->port.size(); i++)
+        this->port.push_back(atoi(Port[i].c_str()));
     delete [] Port;
 }
 void    server_parser::getServerName(std::string *keys, size_t size)
@@ -665,6 +672,7 @@ void    server_parser::getIndexPage(std::string *keys, size_t size)
     this->index = keys[size - 1];
     delete [] keys;
 }
+
 void    server_parser::getAutoIndex(std::string *keys, size_t size)
 {
     if(size <= 1 || size > 2)
@@ -683,6 +691,7 @@ void    server_parser::getAutoIndex(std::string *keys, size_t size)
     }
     delete [] keys;
 }
+
 void    server_parser::getRoot(std::string *keys, size_t size)
 {
     if(size <= 1 || size > 2)
@@ -693,6 +702,7 @@ void    server_parser::getRoot(std::string *keys, size_t size)
     this->root = keys[size - 1];
     delete [] keys;
 }
+
 void    server_parser::getRedirection(std::string *keys, size_t size)
 {
     if(size <= 1 || size > 2)
@@ -703,6 +713,7 @@ void    server_parser::getRedirection(std::string *keys, size_t size)
     this->redirection = keys[size - 1];
     delete [] keys;
 }
+
 void    server_parser::getCmds(std::string *keys, size_t size)
 {
     if(size <= 1 || size > 2)
@@ -713,9 +724,31 @@ void    server_parser::getCmds(std::string *keys, size_t size)
     this->client_max_body_size = stoi(keys[size - 1]);
     delete [] keys;
 }
+
+int server_parser::getLocationByName(std::string name) const
+{
+    for(size_t i = 0; i < location.size(); i++)
+    {
+        if(location[i].getLocationNameObject() == name)
+            return (i);
+    }
+    return (-1);
+}
+
+void    server_parser::getHost(std::string *keys, size_t size)
+{
+    // this->host = ipToInt(temparray[0]);
+    if(size < 1 || size > 2)
+    {
+        std::cerr << "Error : Check The Host Argumets";
+        exit(1);
+    }
+    this->host = ipToInt(keys[1]);
+    delete [] keys;
+}
+
 void    server_parser::construct_server(std::vector<std::string>::iterator first, std::vector<std::string>::iterator last)
 {
-    this->port = 8080;
     this->is_auto_index = false;
     this->server_had_delete_method = true;
     this->server_has_get_method = true;
@@ -730,9 +763,17 @@ void    server_parser::construct_server(std::vector<std::string>::iterator first
 
     for(size_t i = 1; i < serverVec.size(); i++)
     {
-        if(!strncmp(serverVec[i].c_str(), "listen ", 7))
+        if(!strncmp(serverVec[i].c_str(), "host ", 5))
         {
-            getPort(stringSplit(serverVec[i], ' ', &temp_size), temp_size); // host and port parsing;
+            getHost(stringSplit(serverVec[i], ' ', &temp_size), temp_size);
+            // getPort(stringSplit(serverVec[i], ' ', &temp_size), temp_size); // host and port parsing;
+            if(this->host == 0)
+                host = 2130706433;
+        }
+        else if(!strncmp(serverVec[i].c_str(), "port ", 5))
+        {
+            getPort(stringSplit(serverVec[i], ' ', &temp_size), temp_size);
+            // getPort(stringSplit(serverVec[i], ' ', &temp_size), temp_size); // host and port parsing;
             if(this->host == 0)
                 host = 2130706433;
         }
