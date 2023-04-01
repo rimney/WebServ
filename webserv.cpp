@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   webserv.cpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: rimney < rimney@student.1337.ma>           +#+  +:+       +#+        */
+/*   By: eel-ghan <eel-ghan@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/25 20:56:08 by eel-ghan          #+#    #+#             */
-/*   Updated: 2023/03/27 02:29:45 by rimney           ###   ########.fr       */
+/*   Updated: 2023/04/01 04:26:45 by eel-ghan         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,14 +20,13 @@ int main(int argc, char **argv)
         try
         {
             config_parser config(argv[1]);
-            
             servers     s;
+
             if (s.setup(config.getServersObject()))
             {
                 return 1;
             }
             s.run();
-
         }
         catch(const std::string& msg)
         {

@@ -28,45 +28,49 @@
 class server
 {
     private:
-        int                         _port;
+        std::vector<int>            _port;
         unsigned int                _host;
         int                         _fd_socket;
         int                         _fd_connection;
         struct sockaddr_in          _addr;
         server_parser               _server_config;
         int                         _error_flag;
+        std::map<int, int>          _fd_port_map;
         std::map<int, std::string>  _request_map;
         std::map<int, respond>      _respond;
         std::map<int, Request>      _request;
 
     public:
         server();
-        server(int port, unsigned int host);
+        server(std::vector<int> port, unsigned int host);
         server(server const & s);
         ~server();
 
-        int             get_port() const;
-        unsigned int    get_host() const;
-        std::string     get_request() const;
-        int             get_fd_socket() const;
-        int             get_fd_connection() const;
-        int             get_error_flag() const;
-        server  &       operator=(server const & s);
-        void            accept();
-        void            close();
-        void            receive(int fd);
-        void            send(int fd);
-        void            set_server_config(server_parser & server_config);
-        void            setup(server_parser & server_config);
-        void            delete_method(std::string & path, respond & response);
-        server_parser   getServerData(void) {return this->_server_config;}
-        void            process(int fd);
-        void            Get(int location_index , std::string path, int fd);
-        respond         getRespond(int fd);
-        void            post_method(server_parser &serv,Request &request, int fd);
+        std::vector<int>    get_port() const;
+        int                 get_port(int i) const;
+        unsigned int        get_host() const;
+        std::string         get_request() const;
+        int                 get_fd_socket() const;
+        int                 get_fd_connection() const;
+        int                 get_error_flag() const;
+        int                 get_fd_port(int fd);
+        server  &           operator=(server const & s);
+        void                accept();
+        void                close();
+        void                receive(int fd);
+        void                send(int fd);
+        void                set_server_config(server_parser & server_config);
+        void                set_error_flag(int error_flag);
+        void                setup(server_parser & server_config, size_t i);
+        void                delete_method(std::string & path, int fd);
+        server_parser       getServerData(void) {return this->_server_config;}
+        void                process(int fd);
+        void                Get(int location_index , std::string path, int fd);
+        respond             getRespond(int fd);
+        void                post_method(server_parser &serv,Request &request, int fd);
     
     private:
-        void            set_addr();
+        void            set_addr(int i);
 };
 
 #endif

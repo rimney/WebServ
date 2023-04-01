@@ -17,8 +17,11 @@
 server::server()
     : _port(DEFAULT_PORT), _host(INADDR_ANY), _error_flag(1){}
 
-server::server(int port, unsigned int host)
-    : _port(port), _host(host) ,_error_flag(1) {}
+server::server(std::vector<int> port, unsigned int host)
+    : _host(host) ,_error_flag(1)
+{
+    _port = port;
+}
 
 server::server(server const & s)
     : _error_flag(1)
@@ -33,9 +36,14 @@ respond server::getRespond(int fd)
 
 server::~server() {}
 
-int server::get_port() const
+std::vector<int>    server::get_port() const
 {
-    return _port;
+   return _port;
+}
+
+int server::get_port(int i) const
+{
+    return _port[i];
 }
 
 unsigned int    server::get_host() const
@@ -63,6 +71,11 @@ int server::get_error_flag() const
     return _error_flag;
 }
 
+int  server::get_fd_port(int fd)
+{
+    return _fd_port_map[fd];
+}
+
 server  & server::operator=(server const & s)
 {
     _port = s._port;
@@ -78,7 +91,7 @@ server  & server::operator=(server const & s)
     return *this;
 }
 
-void server::setup(server_parser & server_config)
+void server::setup(server_parser & server_config, size_t i)
 {
     int optval = 1;
 
@@ -86,26 +99,36 @@ void server::setup(server_parser & server_config)
     if (_fd_socket == -1)
     {
         _error_flag = 0;
-        throw(std::string("ERROR: failed to create the socket."));
+        throw(std::string("ERROR: failed to create the socket by the host: ") 
+            + std::to_string(_host) + std::string(" on port: ") + std::to_string(_port[i]));
     }
     //Allow socket descriptor to be reuseable
     if (setsockopt(_fd_socket, SOL_SOCKET, SO_REUSEADDR, &optval, sizeof(optval)) == -1)
-        throw(std::string("ERROR: faild to set socket option (setsockopt()) for _fd_socket."));
-    set_addr();
+        throw(std::string("ERROR: faild to set socket option (setsockopt()) for _fd_socket by the host: ")
+            + std::to_string(_host) + std::string(" on port: ") + std::to_string(_port[i]));
+    set_addr(i);
     if (bind(_fd_socket, (struct sockaddr*)&_addr, sizeof(_addr)) == -1)
-        throw(std::string("ERROR: failed to bind the socket."));
+        throw(std::string("ERROR: failed to bind the socket by the host: ")
+            + std::to_string(_host) + std::string(" on port: ") + std::to_string(_port[i]));
     if (listen(_fd_socket, 100) == -1)
-        throw(std::string("ERROR: failed to listen."));
+        throw(std::string("ERROR: failed to listen by the host: ")
+            + std::to_string(_host) + std::string(" on port: ") + std::to_string(_port[i]));
     set_server_config(server_config);
-    std::cout << "host: " << _host << " is listening on port " << _port << "...\n\n";
+    std::cout << "host: " << _host << " is listening on port " << _port[i] << "...\n\n";
+    _fd_port_map.insert(std::make_pair(_fd_socket, _port[i]));
 }
 
-void    server::set_addr()
+void    server::set_addr(int i)
 {
     memset((char *)&_addr, 0, sizeof(_addr)); // use ft_memset() of libft
     _addr.sin_family = AF_INET;
     _addr.sin_addr.s_addr = htonl(_host);
-    _addr.sin_port = htons(_port);
+    _addr.sin_port = htons(_port[i]);
+}
+
+void    server::set_error_flag(int error_flag)
+{
+    _error_flag = error_flag;
 }
 
 void server::accept()
@@ -164,6 +187,9 @@ void    server::send(int fd)
 
     // std::cout << _respond[fd].getBody();
     // std::cout << _respond[fd].getBodyFlag() << " <<\n";
+
+    std::cout << _respond[fd].getfinalString() << '\n';
+
     if(_respond[fd].getBody().empty())
         _respond[fd].recoverBody(atoi(_respond[fd].getstatusCode().c_str()));
     
@@ -179,7 +205,6 @@ void    server::send(int fd)
             throw(std::string("ERROR: send() failed to send response / file: " + _respond[fd].getPathSave()));
         }
     // }
-        
     _respond[fd].cleanAll();
 }
 
@@ -208,86 +233,121 @@ int is_file_or_dir(std::string & path)
     return -1;
 }
 
-void    server::delete_method(std::string  & path, respond & response)
+
+int remove_dir(std::string path)
 {
-    
+    DIR*    dir = opendir(path.c_str());
+    if (dir == NULL)
+        return 1;
+
+    struct dirent* entry;
+    while ((entry = readdir(dir)) != NULL)
+    {
+        if (strcmp(entry->d_name, ".") == 0 || strcmp(entry->d_name, "..") == 0)
+            continue;
+
+        std::string full_path = std::string(path) + "/" + entry->d_name;
+
+        struct stat st;
+        if (lstat(full_path.c_str(), &st) == 0)
+        {
+            if (S_ISDIR(st.st_mode))
+            {
+                if (remove_dir(full_path) == 1)
+                    return 1;
+            }
+            else 
+                unlink(full_path.c_str());
+        }
+    }
+
+    closedir(dir);
+    rmdir(path.c_str());
+    return 0;
+}
+
+void    server::delete_method(std::string  & path, int fd)
+{
+    std::cout << "delete method <<<\n";   
     if (is_path_exist(path))
     {
         int r = is_file_or_dir(path);
         if (r == 1) // handle file cases
         {
+            std::cout << "file <<\n";
             if (remove(path.c_str()) == 0)
             {
-                response.setstatusCode("204");
-                response.setstatusDescription("No Content");
-                response.mergeRespondStrings();
+                _respond[fd].setstatusCode("204");
+                _respond[fd].setContentLenght("0");
+                _respond[fd].setstatusDescription("No Content");
+                _respond[fd].mergeRespondStrings();
                 return ;
             }
-            response.setstatusCode("500");
-            response.setstatusDescription("Internal Server Error");
-            response.setContentType("text/plain");
-            response.setContentLenght("30");
-            response.setBody("<h1>Internal Server Error</h1>");
-            response.mergeRespondStrings();
+            _respond[fd].setstatusCode("500");
+            _respond[fd].setstatusDescription("Internal Server Error");
+            _respond[fd].setContentType("text/html");
+            _respond[fd].setBody("<h1>Internal Server Error</h1>");// set error page
+            _respond[fd].mergeRespondStrings();
             return ;
         }
         else if (r == 2) // handle dir cases
         {
+            std::cout << "dir <<\n";
             if (path.back() == '/')
             {
-                if (access(path.c_str(), W_OK) == 0)
+                struct Start_line start_line = _request[fd].get_start_line();
+                if (access(path.c_str(), W_OK) == 0 
+                    && path != _server_config.getServerLocationsObject()[start_line.location_index].getLocationRootObject()
+                    && path < _server_config.getServerLocationsObject()[start_line.location_index].getLocationRootObject())
                 {
-                    if (remove(path.c_str()) == 0)
+                    if (remove_dir(path) == 0)
                     {
-                        response.setstatusCode("204");
-                        response.setstatusDescription("No Content");
-                        response.mergeRespondStrings();
+                        _respond[fd].setstatusCode("204");
+                        _respond[fd].setstatusDescription("No Content");
+                        _respond[fd].setContentLenght("0");
+                        _respond[fd].mergeRespondStrings();
                         return ;
                     }
-                    response.setstatusCode("500");
-                    response.setstatusDescription("Internal Server Error");
-                    response.setContentType("text/plain");
-                    response.setContentLenght("30");
-                    response.setBody("<h1>Internal Server Error</h1>"); // set error page
-                    response.mergeRespondStrings();
+                    _respond[fd].setstatusCode("500");
+                    _respond[fd].setstatusDescription("Internal Server Error");
+                    _respond[fd].setContentType("text/html");
+                    _respond[fd].setBody("<h1>Internal Server Error</h1>"); // set error page
+                    _respond[fd].mergeRespondStrings();
                     return ;
                 }
-                response.setstatusCode("403");
-                response.setstatusDescription("Forbidden");
-                response.setContentType("text/plain");
-                response.setContentLenght("18");
-                response.setBody("<h1>Forbidden</h1>"); // set error page
-                response.mergeRespondStrings();
+                _respond[fd].setstatusCode("403");
+                _respond[fd].setstatusDescription("Forbidden");
+                _respond[fd].setContentType("text/html");
+                _respond[fd].setBody("<h1>Forbidden</h1>"); // set error page
+                _respond[fd].mergeRespondStrings();
                 return ;
             }
             else
             {
-                response.setstatusCode("409");
-                response.setstatusDescription("Conflict");
-                response.setContentType("text/plain");
-                response.setContentLenght("17");
-                response.setBody("<h1>Conflict</h1>"); // set error page
-                response.mergeRespondStrings();
+                std::cout << _respond[fd].getfinalString() << "\n";
+                _respond[fd].setstatusCode("409");
+                _respond[fd].setstatusDescription("Conflict");
+                _respond[fd].setContentType("text/html");
+                _respond[fd].setBody("<h1>Conflict</h1>"); // set error page
+                _respond[fd].mergeRespondStrings();
                 return ;
             }
         }
         else // error
         {
-            response.setstatusCode("500");
-            response.setstatusDescription("Internal Server Error");
-            response.setContentType("text/plain");
-            response.setContentLenght("30");
-            response.setBody("<h1>Internal Server Error</h1>"); // set error page
-            response.mergeRespondStrings();
+            _respond[fd].setstatusCode("500");
+            _respond[fd].setstatusDescription("Internal Server Error");
+            _respond[fd].setContentType("text/html");
+            _respond[fd].setBody("<h1>Internal Server Error</h1>"); // set error page
+            _respond[fd].mergeRespondStrings();
             return ;
         }
     }
-    response.setstatusCode("404");
-    response.setstatusDescription("Not Found");
-    response.setContentType("text/plain");
-    response.setContentLenght("18");
-    response.setBody("<h1>Not Found</h1>"); // set error page
-    response.mergeRespondStrings();
+    _respond[fd].setstatusCode("404");
+    _respond[fd].setstatusDescription("Not Found");
+    _respond[fd].setContentType("text/html");
+    _respond[fd].setBody("<h1>Not Found</h1>");
+    _respond[fd].mergeRespondStrings();
 }
 
 void server::Get(int location_index , std::string path, int fd) 
@@ -311,7 +371,7 @@ void server::Get(int location_index , std::string path, int fd)
             if(location.getHasCgi() && location.isCgi(_request[fd].get_start_line().full_path)) // check if the extention of file compatible with extentions 
             {
                 std::cout << _request[fd].get_start_line().full_path << " << EE\n";
-                cgi_handler cgi(_server_config, _request[fd]);
+                cgi_handler cgi(_server_config, _request[fd], _fd_port_map[fd]);
                 cgi.exec(_respond[fd]);
                 return ;
             }    
@@ -445,7 +505,7 @@ void    server::process(int fd)
             }
             if(_request[fd].get_start_line().method == "DELETE")
             {
-                delete_method(_request[fd].get_start_line().full_path, _respond[fd]);
+                delete_method(_request[fd].get_start_line().full_path, fd);
             }
         }
         //respond  

@@ -6,7 +6,7 @@
 /*   By: rimney <rimney@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/15 20:32:17 by rimney            #+#    #+#             */
-/*   Updated: 2023/04/01 20:21:50 by rimney           ###   ########.fr       */
+/*   Updated: 2023/04/01 20:28:56 by rimney           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -80,7 +80,7 @@ void    respond::setContentLenght(std::string ContentLenght)
 void    respond::setBody(std::string Body)
 {
     this->Body = Body;
-    this->ContentLenght = this->Body.size();
+    this->ContentLenght = std::to_string(Body.size());
 }
 
 void    respond::setFinalString(std::string finalString)
