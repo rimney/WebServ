@@ -49,15 +49,12 @@ void            cgi_handler::init_env()
         _env.push_back(std::string("CONTENT_TYPE=") + headers["Content-Type"]);
 
     _env.push_back("GATEWAY_INTERFACE=CGI/1.1");
-    _env.push_back(std::string("PATH_INFO=") + start_line.full_path);
+    _env.push_back(std::string("PATH_INFO=") + start_line.path);
     _env.push_back(std::string("PATH_TRANSLATED=") + start_line.full_path);
-    _env.push_back(std::string("QUERY_STRING=") + start_line.query);
-    // _env.push_back(std::string("CONTENT_LENGTH=29"));
-    // _env.push_back(std::string("QUERY_STRING=username=test%26password=test"));
-    
-    // _env.push_back(std::string("REMOTE_ADDR=") + _server_config.getHostObject());
-    // _env.push_back(std::string("REMOTE_HOST" + ...);
     _env.push_back(std::string("REQUEST_METHOD=") + start_line.method);
+    if (start_line.method == "GET")
+        _env.push_back(std::string("QUERY_STRING=") + start_line.query);
+    
     // _env.push_back(std::string("SCRIPT_NAME=") + _location.getCgiPathObject());
     if (headers.find("Hostname") != headers.end())
         _env.push_back(std::string("SERVER_NAME=") + headers["Hostname"]);
@@ -92,15 +89,33 @@ char**  cgi_handler::vector_to_ptr()
 void cgi_handler::exec(respond & response)
 {
     pid_t       cgi_pid;
-    int         fds[2];
+    int         fd_in, fd_out;
     char**      env;
     std::string cgi_response;
+    FILE*       file_in = tmpfile();
+    FILE*       file_out = tmpfile();
+
+    if (file_in == NULL || file_out == NULL)
+    {
+        if (file_in != NULL)
+            fclose(file_in);
+        if (file_out != NULL)
+            fclose(file_out);
+        std::cerr << "ERROR: CGI failed to create tmp file\n";
+        response.setstatusCode("500");
+        response.setstatusDescription("Internal Server Error");
+        // add page error
+        response.mergeRespondStrings();
+        return ;
+    }
 
     env = vector_to_ptr();
+    fd_in = fileno(file_in);
+    fd_out = fileno(file_out);
 
-    pipe(fds);
+    write(fd_in, _request.get_body().c_str(), _request.get_body().size());
+    lseek(fd_in, 0, SEEK_SET);
 
-    write(fds[1], _request.get_start_line().query.c_str(),  _request.get_start_line().query.size());
     cgi_pid = fork();
 
     if (cgi_pid == -1)
@@ -114,15 +129,15 @@ void cgi_handler::exec(respond & response)
     }
     else if (cgi_pid == 0)
     {
-        if (dup2(fds[1], STDOUT_FILENO) == -1)
+        if (dup2(fd_out, STDOUT_FILENO) == -1)
         {
             std::cerr << "ERROR: dup2() failed\n";
-            write(fds[1], "500", 3);
+            write(fd_out, "500", 3);
         }
-        if (dup2(fds[0], STDIN_FILENO) == -1)
+        if (dup2(fd_in, STDIN_FILENO) == -1)
         {
             std::cerr << "ERROR: dup2() failed\n";
-            write(fds[1], "500", 3);
+            write(fd_out, "500", 3);
         }
 
         char * const argv[3] = {
@@ -134,25 +149,26 @@ void cgi_handler::exec(respond & response)
         execve(_location.getCgiPathObject(_request.get_start_line().full_path).c_str(), argv, env);
 
         std::cerr << "ERROR: execve() failed\n";
-        write(fds[1], "500", 3);
+        write(fd_out, "500", 3);
     }
     else
     {
         char    buffer[CGI_BUFFER] = {0};
-
         waitpid(-1, NULL, 0);
-        fcntl(fds[0], F_SETFL, O_NONBLOCK);
+        lseek(fd_out, 0, SEEK_SET);
         while (1)
         {
             memset(buffer, 0, CGI_BUFFER);
-            if (read(fds[0], buffer, CGI_BUFFER - 1) <= 0)
+            if (read(fd_out, buffer, CGI_BUFFER - 1) <= 0)
                 break ;
             cgi_response.append(buffer);
         }
     }
 
-    close(fds[1]);
-    close(fds[0]);
+    close(fd_out);
+    close(fd_in);
+    fclose(file_out);
+    fclose(file_in);
 
     for (size_t i = 0; i < _env.size(); i++)
         delete [] env[i];
@@ -180,6 +196,7 @@ void    cgi_handler::generate_response(std::string & cgi_response, respond & res
         response.setstatusDescription("Internal Server Error");
         // add page error
         response.mergeRespondStrings();
+        std::cout << "500 from here \n";
         return ;
     }
 
@@ -197,6 +214,10 @@ void    cgi_handler::generate_response(std::string & cgi_response, respond & res
                 response.setContentLenght(header.substr(j));
             else if (element == "Content-type")
                 response.setContentType(header.substr(j));
+            else if (element == "Location:")
+                response.setLocation(header.substr(j));
+            else if (element == "Status:")
+                response.setstatusCode(header.substr(j));
         }
         i += header.size() + 2;
         element.clear();

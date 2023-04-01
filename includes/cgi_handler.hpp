@@ -11,7 +11,8 @@
 # include "parsing.hpp"
 # include "respond.hpp"
 
-# define CGI_BUFFER 1024
+# define CGI_BUFFER 5000
+
 
 class cgi_handler
 {
