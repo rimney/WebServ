@@ -308,28 +308,30 @@ void server::Get(int location_index , std::string path, int fd)
         std::cout << isFOrD << " <<\n";
         if(isFOrD == "file")
         {
-            if(location.getHasCgi() && location.isCgi(_request[fd].get_start_line().full_path)) // check if the extention of file compatible with extentions 
+            if(location.getHasCgi()) // check if the extention of file compatible with extentions 
             {
-                std::cout << _request[fd].get_start_line().full_path << " << EE\n";
                 cgi_handler cgi(_server_config, _request[fd]);
                 cgi.exec(_respond[fd]);
                 return ;
-            }    
-            if(_respond[fd].fileToSring(path).size() > 50000)
-            {
-                if(_respond[fd].getBodyFlag() == true)
-                    return ;
-                _respond[fd].setBodyFlag(true);
+            }
+            // {
+                
+                if(_respond[fd].fileToSring(path).size() > 50000)
+                {
+                    if(_respond[fd].getBodyFlag() == true)
+                        return ;
+                    _respond[fd].setBodyFlag(true);
                     return;
-            }
-            else
-            {
-                std::cout << path << " < path\n";
-                _respond[fd].setBody(_respond[fd].fileToSring(path));
-                _respond[fd].setContentLenght(std::to_string(_respond[fd].fileToSring(path).size()));
-                _respond[fd].mergeRespondStrings();
-            }
-            return ;
+                }
+                else
+                {
+                    std::cout << path << " < path\n";
+                    _respond[fd].setBody(_respond[fd].fileToSring(path));
+                    _respond[fd].setContentLenght(std::to_string(_respond[fd].fileToSring(path).size()));
+                    _respond[fd].mergeRespondStrings();
+                }
+                return ;
+            // }
         }
         else if(isFOrD == "directory")
         {
@@ -344,11 +346,9 @@ void server::Get(int location_index , std::string path, int fd)
                     std::cout << location.getLocationRedirectionObject();
                     if(location.getLocationRedirectionObject().substr(0, 5) == "http:" || location.getLocationRedirectionObject().substr(0, 6) == "https:")
                     {
-                        
                         _respond[fd].setRespond(location.getLocationRedirectionObject(), _respond[fd].gethttpVersion(), "301");
                         _respond[fd].setLocation(location.getLocationRedirectionObject());
                         _respond[fd].mergeRespondStrings();
-                        std::cout << _respond[fd].getfinalString();
                         return ;
                     }
                     else if(index != -1)
@@ -369,7 +369,7 @@ void server::Get(int location_index , std::string path, int fd)
                     }
                 }
             }
-            if(path[path.size() - 1] != '/' && _respond[fd].getstatusCode() != "301")
+            if(path[path.size() - 1] != '/' && _respond[fd].getLocation().size() == 0)
             {
                 std::cout << "EEEEE\n";
                 _respond[fd].setRespond(_request[fd].get_start_line().path + '/', _respond[fd].gethttpVersion(), "301");
@@ -452,4 +452,4 @@ void    server::process(int fd)
         // _request[fd].clear();
         _request_map.erase(fd);
     }
-}
+

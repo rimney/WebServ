@@ -162,7 +162,7 @@ void Request::location_well(server_parser &serv)
     if(index != -1)
     {
         start_line.location_index = index;
-        if(!serv.getServerLocationsObject()[index].getLocationRedirectionObject().empty()) //301 Moved Permanently
+        if(!serv.getServerLocationsObject()[index].getLocationRedirectionObject().empty() && serv.getServerLocationsObject()[index].getLocationHas301Code()) //301 Moved Permanently
             r_error = "301";
         if(!serv.getServerLocationsObject()[index].getLocationMethodsObject().empty())//405 Method Not Allowed
         {
