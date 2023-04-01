@@ -35,13 +35,14 @@ class server
         struct sockaddr_in          _addr;
         server_parser               _server_config;
         int                         _error_flag;
+        std::map<int, int>          _fd_port_map;
         std::map<int, std::string>  _request_map;
         std::map<int, respond>      _respond;
         std::map<int, Request>      _request;
 
     public:
         server();
-        server(int port, unsigned int host);
+        server(std::vector<int> port, unsigned int host);
         server(server const & s);
         ~server();
 
@@ -52,6 +53,7 @@ class server
         int                 get_fd_socket() const;
         int                 get_fd_connection() const;
         int                 get_error_flag() const;
+        int                 get_fd_port(int fd);
         server  &           operator=(server const & s);
         void                accept();
         void                close();
@@ -68,7 +70,7 @@ class server
         void                post_method(server_parser &serv,Request &request, int fd);
     
     private:
-        void            set_addr();
+        void            set_addr(int i);
 };
 
 #endif

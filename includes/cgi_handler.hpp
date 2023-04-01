@@ -23,12 +23,12 @@ class cgi_handler
         
 
     public:
-        cgi_handler(server_parser server_config, Request request);
+        cgi_handler(server_parser server_config, Request request, int port);
         cgi_handler(cgi_handler const & c);
         ~cgi_handler();
 
         cgi_handler &   operator=(cgi_handler const & c);
-        void            init_env();
+        void            init_env(int port);
         void            exec(respond & response);
         void            generate_response(std::string & cgi_response, respond & response);
         char**          get_argv();

@@ -19,7 +19,6 @@ class servers
         std::map<int, server>   _servers;
         std::map<int, server>   _fds_cnx;
         std::vector<int>        _fds_ready;
-        
 
     public:
         servers();

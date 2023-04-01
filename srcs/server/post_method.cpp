@@ -164,7 +164,7 @@ void    server::post_method(server_parser &serv,Request & request, int fd)
                 else if(!serv.getServerLocationsObject()[request.get_start_line().location_index].getCgiPathObject(request.get_start_line().full_path).empty() && is_found)
                 {
                     request.get_start_line().full_path += "index.php";
-                    cgi_handler cgi(_server_config, request);
+                    cgi_handler cgi(_server_config, request, _fd_port_map[fd]);
                      cgi.exec(_respond[fd]);
                 }
                 else if(error == "")
@@ -175,7 +175,7 @@ void    server::post_method(server_parser &serv,Request & request, int fd)
            {
                 if(!serv.getServerLocationsObject()[request.get_start_line().location_index].getCgiPathObject(request.get_start_line().full_path).empty())
                 {
-                    cgi_handler cgi(_server_config, request);
+                    cgi_handler cgi(_server_config, request, fd);
                     cgi.exec(_respond[fd]);
                 }
                 else

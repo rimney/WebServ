@@ -4,11 +4,11 @@
 
 cgi_handler::cgi_handler() {}
 
-cgi_handler::cgi_handler(server_parser server_config, Request request)
+cgi_handler::cgi_handler(server_parser server_config, Request request, int i)
     : _server_config(server_config), _request(request),
     _location(_server_config.getServerLocationsObject()[_request.get_start_line().location_index])
 {
-    init_env();
+    init_env(i);
 }
 
 cgi_handler::cgi_handler(cgi_handler const & c)
@@ -31,7 +31,7 @@ std::string get_auth_type(std::string & auth_header)
     return auth_header.substr(0, pos);
 }
 
-void            cgi_handler::init_env()
+void            cgi_handler::init_env(int port)
 {
     struct Start_line   start_line = _request.get_start_line();
     std::map<std::string,std::string> headers = _request.get_header();
@@ -62,7 +62,7 @@ void            cgi_handler::init_env()
     else
         _env.push_back(std::string("SERVER_NAME=") + std::to_string(_server_config.getHostObject()));
     
-    _env.push_back(std::string("SERVER_PORT=") + std::to_string(_server_config.getPortObject()));
+    _env.push_back(std::string("SERVER_PORT=") + std::to_string(port));
     _env.push_back("SERVER_PROTOCOL=HTTP/1.1");
     _env.push_back("SERVER_SOFTWARE=WebServ/0.0");
     _env.push_back("REDIRECT_STATUS=200");

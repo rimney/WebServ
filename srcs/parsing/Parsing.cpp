@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Parsing.cpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: rimney <rimney@student.42.fr>              +#+  +:+       +#+        */
+/*   By: eel-ghan <eel-ghan@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/07 03:50:36 by rimney            #+#    #+#             */
-/*   Updated: 2023/04/01 02:11:22 by rimney           ###   ########.fr       */
+/*   Updated: 2023/04/01 04:23:38 by eel-ghan         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -623,13 +623,12 @@ int server_parser::ipToInt(std::string host)
 }
 void    server_parser::getPort(std::string *Port, size_t temp_size)
 {
-
     if(temp_size < 1)
     {
         std::cerr << "Error : Check The Port Arguments\n";
         exit(1);
     }
-    for(size_t i = 1; i < this->port.size(); i++)
+    for(size_t i = 1; i < temp_size; i++)
         this->port.push_back(atoi(Port[i].c_str()));
     delete [] Port;
 }
@@ -952,6 +951,11 @@ config_parser::config_parser(std::string filename)
     std::vector<server_parser> holder;
 
     std::ifstream file(filename);
+    if(!file.good())
+    {
+        std::cerr << "Error : Cannot Open File!\n";
+        exit(1);
+    }
     std::string line;
     int         opening_bracket;
     int         closing_bracket;

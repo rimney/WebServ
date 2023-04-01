@@ -17,8 +17,11 @@
 server::server()
     : _port(DEFAULT_PORT), _host(INADDR_ANY), _error_flag(1){}
 
-server::server(int port, unsigned int host)
-    : _host(host) ,_error_flag(1) { _port.push_back(port); _port.push_back(8081); _port.push_back(8082);}
+server::server(std::vector<int> port, unsigned int host)
+    : _host(host) ,_error_flag(1)
+{
+    _port = port;
+}
 
 server::server(server const & s)
     : _error_flag(1)
@@ -35,7 +38,7 @@ server::~server() {}
 
 std::vector<int>    server::get_port() const
 {
-    _port;
+   return _port;
 }
 
 int server::get_port(int i) const
@@ -68,6 +71,11 @@ int server::get_error_flag() const
     return _error_flag;
 }
 
+int  server::get_fd_port(int fd)
+{
+    return _fd_port_map[fd];
+}
+
 server  & server::operator=(server const & s)
 {
     _port = s._port;
@@ -98,7 +106,7 @@ void server::setup(server_parser & server_config, size_t i)
     if (setsockopt(_fd_socket, SOL_SOCKET, SO_REUSEADDR, &optval, sizeof(optval)) == -1)
         throw(std::string("ERROR: faild to set socket option (setsockopt()) for _fd_socket by the host: ")
             + std::to_string(_host) + std::string(" on port: ") + std::to_string(_port[i]));
-    set_addr();
+    set_addr(i);
     if (bind(_fd_socket, (struct sockaddr*)&_addr, sizeof(_addr)) == -1)
         throw(std::string("ERROR: failed to bind the socket by the host: ")
             + std::to_string(_host) + std::string(" on port: ") + std::to_string(_port[i]));
@@ -107,14 +115,15 @@ void server::setup(server_parser & server_config, size_t i)
             + std::to_string(_host) + std::string(" on port: ") + std::to_string(_port[i]));
     set_server_config(server_config);
     std::cout << "host: " << _host << " is listening on port " << _port[i] << "...\n\n";
+    _fd_port_map.insert(std::make_pair(_fd_socket, _port[i]));
 }
 
-void    server::set_addr()
+void    server::set_addr(int i)
 {
     memset((char *)&_addr, 0, sizeof(_addr)); // use ft_memset() of libft
     _addr.sin_family = AF_INET;
     _addr.sin_addr.s_addr = htonl(_host);
-    _addr.sin_port = htons(_port);
+    _addr.sin_port = htons(_port[i]);
 }
 
 void    server::set_error_flag(int error_flag)
@@ -362,7 +371,7 @@ void server::Get(int location_index , std::string path, int fd)
             if(location.getHasCgi() && location.isCgi(_request[fd].get_start_line().full_path)) // check if the extention of file compatible with extentions 
             {
                 std::cout << _request[fd].get_start_line().full_path << " << EE\n";
-                cgi_handler cgi(_server_config, _request[fd]);
+                cgi_handler cgi(_server_config, _request[fd], _fd_port_map[fd]);
                 cgi.exec(_respond[fd]);
                 return ;
             }    
