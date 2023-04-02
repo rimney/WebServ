@@ -156,7 +156,6 @@ void    server::receive(int fd)
         _request.insert(std::make_pair(fd, Request()));
         _respond.insert(std::make_pair(fd, respond(_server_config)));
     }
-    std::cout << _request_map[fd] << '\n';
 }
 
 void    server::send(int fd)
@@ -406,7 +405,7 @@ void    server::process(int fd)
         std::cout <<  _request[fd].get_start_line().vertion << std::endl;
         std::cout <<  _request[fd].get_start_line().full_path << std::endl;
         std::cout <<  _request[fd].get_start_line().query << std::endl;
-        std::cout <<"****" << _request[fd].get_body() << std::endl;
+        // std::cout <<"****" << _request[fd].get_body() << std::endl;
         
         // std::cout << _request[fd].get_error() << "\n";
 

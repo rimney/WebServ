@@ -200,7 +200,7 @@ void    server::post_method(server_parser &serv, int fd)
     }
     std::cout << error << std::endl;
     _respond[fd].setRespond(_request[fd].get_start_line().full_path, _request[fd].get_start_line().vertion,error);
-    std::cout << _respond[fd].getfinalString();
+    // std::cout << _respond[fd].getfinalString();
     // exit(0);
    
 }
