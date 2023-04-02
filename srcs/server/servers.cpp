@@ -6,7 +6,7 @@
 /*   By: eel-ghan <eel-ghan@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/10 00:38:14 by eel-ghan          #+#    #+#             */
-/*   Updated: 2023/04/02 03:00:16 by eel-ghan         ###   ########.fr       */
+/*   Updated: 2023/04/02 03:17:18 by eel-ghan         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -116,6 +116,7 @@ void    servers::run()
         }
         else if (r == 0)
             continue ;
+            
 
         // accept connections
         for (std::map<int, server>::iterator it = _servers.begin(); it != _servers.end(); it++)
