@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   respond.cpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: eel-ghan <eel-ghan@student.42.fr>          +#+  +:+       +#+        */
+/*   By: rimney <rimney@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/15 20:32:17 by rimney            #+#    #+#             */
-/*   Updated: 2023/04/01 20:32:02 by eel-ghan         ###   ########.fr       */
+/*   Updated: 2023/03/30 03:55:50 by rimney           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -80,7 +80,7 @@ void    respond::setContentLenght(std::string ContentLenght)
 void    respond::setBody(std::string Body)
 {
     this->Body = Body;
-    this->ContentLenght = std::to_string(Body.size());
+    this->ContentLenght = std::to_string(this->Body.size());
 }
 
 void    respond::setFinalString(std::string finalString)
@@ -192,7 +192,6 @@ void    respond::cleanAll(void)
     this->ContentLenght.clear();
     this->finalString.clear();
     this->content_type.clear();
-    this->location.clear();
 }
 
 std::string	respond::getAutoIndexPage(std::string path)
