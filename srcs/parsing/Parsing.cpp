@@ -6,7 +6,7 @@
 /*   By: rimney <rimney@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/07 03:50:36 by rimney            #+#    #+#             */
-/*   Updated: 2023/04/02 03:28:16 by rimney           ###   ########.fr       */
+/*   Updated: 2023/04/02 21:56:38 by rimney           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -835,7 +835,6 @@ void    server_parser::construct_server(std::vector<std::string>::iterator first
             server_location locationn;
             locationn.setLocationIndex(location_index);
             locationn.construct_location(serverVec.begin() + opening_bracket, serverVec.begin() + closing_bracket);   
-
             this->location.push_back(locationn);
             location_index++;          
         }
