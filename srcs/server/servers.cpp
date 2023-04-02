@@ -6,7 +6,7 @@
 /*   By: eel-ghan <eel-ghan@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/10 00:38:14 by eel-ghan          #+#    #+#             */
-/*   Updated: 2023/04/01 04:18:04 by eel-ghan         ###   ########.fr       */
+/*   Updated: 2023/04/02 03:00:16 by eel-ghan         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -129,7 +129,7 @@ void    servers::run()
                     _fds_cnx.insert(std::make_pair((*it).second.get_fd_connection(), (*it).second));
                     if (_max_fd < (*it).second.get_fd_connection())
                         _max_fd = (*it).second.get_fd_connection();
-                    std::cout << "host: " << (*it).second.get_host() << ", port: " << (*it).second.get_fd_port((*it).first) 
+                    std::cout << "host: " << (*it).second.get_host() << ", port: " << (*it).second.get_fd_port((*it).first)
                         << " accept a new connections\n\n";
                 }
                 catch(const std::string& msg)

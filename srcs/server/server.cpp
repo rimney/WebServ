@@ -71,7 +71,7 @@ int server::get_error_flag() const
     return _error_flag;
 }
 
-int  server::get_fd_port(int fd)
+int server::get_fd_port(int fd)
 {
     return _fd_port_map[fd];
 }
@@ -87,6 +87,7 @@ server  & server::operator=(server const & s)
     _request_map = s._request_map;
     _request = s._request;
     _respond = s._respond;
+    _fd_port_map = s._fd_port_map;
     // this->respond.setRespondServer(_server_config);
     return *this;
 }
