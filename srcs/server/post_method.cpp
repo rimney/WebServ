@@ -175,9 +175,9 @@ void    server::post_method(server_parser &serv, int fd)
                 {
                     std::cout << " ** "<< "<<<<<<<<< dir >>>>>>>>>" << "++"<< std::endl;
                     _request[fd].get_start_line().full_path += "index.php";
-                    cgi_handler cgi(_server_config, _request[fd]);
-                     cgi.exec(_respond[fd]);
-                     return;
+                    cgi_handler cgi(_server_config, _request[fd], _fd_port_map[fd]);
+                    cgi.exec(_respond[fd]);
+                    return;
                 }
                 else if(error == "")
                    error = "403";//location doesn’t have cgi : "403 Forbidden" 
@@ -189,7 +189,7 @@ void    server::post_method(server_parser &serv, int fd)
                 {
                     std::cout <<"<<<<< query"  <<_request[fd].get_start_line().query << ">>>>>"<< std::endl;
                     std::cout << " ** "<< "<<<<<<<<<file >>>>>>>>>" << "++"<< std::endl;
-                    cgi_handler cgi(_server_config, _request[fd]);
+                    cgi_handler cgi(_server_config, _request[fd], _fd_port_map[fd]);
                     cgi.exec(_respond[fd]);
                     return;
                 }

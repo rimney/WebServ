@@ -4,11 +4,11 @@
 
 cgi_handler::cgi_handler() {}
 
-cgi_handler::cgi_handler(server_parser & server_config, Request & request)
+cgi_handler::cgi_handler(server_parser server_config, Request request, int port)
     : _server_config(server_config), _request(request),
     _location(_server_config.getServerLocationsObject()[_request.get_start_line().location_index])
 {
-    init_env();
+    init_env(port);
 }
 
 cgi_handler::cgi_handler(cgi_handler const & c)
@@ -31,7 +31,7 @@ std::string get_auth_type(std::string & auth_header)
     return auth_header.substr(0, pos);
 }
 
-void            cgi_handler::init_env()
+void            cgi_handler::init_env(int port)
 {
     struct Start_line   start_line = _request.get_start_line();
     std::map<std::string,std::string> headers = _request.get_header();
@@ -52,23 +52,25 @@ void            cgi_handler::init_env()
     _env.push_back(std::string("PATH_INFO=") + start_line.path);
     _env.push_back(std::string("PATH_TRANSLATED=") + start_line.full_path);
     _env.push_back(std::string("REQUEST_METHOD=") + start_line.method);
+
     if (start_line.method == "GET")
         _env.push_back(std::string("QUERY_STRING=") + start_line.query);
+
+    _env.push_back(std::string("SCRIPT_NAME=") + _location.getCgiPathObject(start_line.full_path));
     
-    // _env.push_back(std::string("SCRIPT_NAME=") + _location.getCgiPathObject());
     if (headers.find("Hostname") != headers.end())
         _env.push_back(std::string("SERVER_NAME=") + headers["Hostname"]);
     else
         _env.push_back(std::string("SERVER_NAME=") + std::to_string(_server_config.getHostObject()));
     
-    _env.push_back(std::string("SERVER_PORT=") + std::to_string(_server_config.getPortObject()));
+    _env.push_back(std::string("SERVER_PORT=") + std::to_string(port));
     _env.push_back("SERVER_PROTOCOL=HTTP/1.1");
     _env.push_back("SERVER_SOFTWARE=WebServ/0.0");
     _env.push_back("REDIRECT_STATUS=200");
 
     // print all env variables
-    for  (std::vector<std::string>::iterator it = _env.begin(); it != _env.end(); it++)
-        std::cout << *it << '\n';
+    // for  (std::vector<std::string>::iterator it = _env.begin(); it != _env.end(); it++)
+    //     std::cout << *it << '\n';
 }
 
 char**  cgi_handler::vector_to_ptr()
@@ -88,7 +90,7 @@ char**  cgi_handler::vector_to_ptr()
 
 void cgi_handler::exec(respond & response)
 {
-    pid_t       cgi_pid;
+   pid_t       cgi_pid;
     int         fd_in, fd_out;
     char**      env;
     std::string cgi_response;
