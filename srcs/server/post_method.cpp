@@ -106,10 +106,6 @@ void    server::post_method(server_parser &serv, int fd)
     
     if(!_request[fd].get_body().empty())
     {
-        // if(!serv.getServerLocationsObject()[_request[fd].get_start_line().location_index].getHasRedirection())
-        // {
-
-        // }
         if(!serv.getServerLocationsObject()[_request[fd].get_start_line().location_index].getUploadObject().empty())
         {
             if(!_request[fd].get_header().find("Content-Type")->first.empty())
@@ -148,6 +144,7 @@ void    server::post_method(server_parser &serv, int fd)
                 if(_request[fd].get_start_line().full_path[_request[fd].get_start_line().full_path.length() - 1] != '/')
                 {
                     error = "301";
+                    std::cout << ">>>>>>>>>>>>>>>> 301 <<<<<<<<<<" << std::endl;
                     //add "/" to uri and return it
                 }
                 else
@@ -171,7 +168,7 @@ void    server::post_method(server_parser &serv, int fd)
                         error = "403";//dosent have index file : "403 Forbidden"
                         std::cout << " ** "<< "errror 403" << "++"<< std::endl;
                 }
-                else if(!serv.getServerLocationsObject()[_request[fd].get_start_line().location_index].getCgiPathObject(_request[fd].get_start_line().full_path + "" ).empty() && is_found)
+                else if(!serv.getServerLocationsObject()[_request[fd].get_start_line().location_index].getCgiPathObject(_request[fd].get_start_line().full_path + "" ).empty() && is_found && error == "")
                 {
                     std::cout << " ** "<< "<<<<<<<<< dir >>>>>>>>>" << "++"<< std::endl;
                     _request[fd].get_start_line().full_path += "index.php";
@@ -198,9 +195,9 @@ void    server::post_method(server_parser &serv, int fd)
            }
         }
     }
-    std::cout << error << std::endl;
+    std::cout << ">>>>>>>>>>>>>>>>" << error << "<<<<<<<<<<" << std::endl;
     _respond[fd].setRespond(_request[fd].get_start_line().full_path, _request[fd].get_start_line().vertion,error);
-    // std::cout << _respond[fd].getfinalString();
+    std::cout << _respond[fd].getfinalString();
     // exit(0);
    
 }
