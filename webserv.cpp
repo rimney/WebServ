@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   webserv.cpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: eel-ghan <eel-ghan@student.42.fr>          +#+  +:+       +#+        */
+/*   By: rimney <rimney@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/25 20:56:08 by eel-ghan          #+#    #+#             */
-/*   Updated: 2023/04/01 04:26:45 by eel-ghan         ###   ########.fr       */
+/*   Updated: 2023/04/02 03:29:11 by rimney           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,7 +21,6 @@ int main(int argc, char **argv)
         {
             config_parser config(argv[1]);
             servers     s;
-
             if (s.setup(config.getServersObject()))
             {
                 return 1;

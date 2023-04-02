@@ -6,7 +6,7 @@
 /*   By: rimney <rimney@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/07 03:50:36 by rimney            #+#    #+#             */
-/*   Updated: 2023/04/02 03:17:32 by rimney           ###   ########.fr       */
+/*   Updated: 2023/04/02 03:28:16 by rimney           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -190,6 +190,7 @@ void    server_location::getAutoIndex(std::string *keys, size_t size)
         std::cerr << "Error Wrong autoindex Argument";
         exit(0);
     }
+    delete [] keys;
 }
 void    server_location::getRoot(std::string *keys, size_t size)
 {
@@ -255,8 +256,7 @@ void    server_location::getCgiPath(std::string *Keys, size_t size)
     }
     for(size_t i = 1; i < size; i++)
         this->cgiPaths.push_back(Keys[i]);
-    for(size_t i = 0; i < this->cgiPaths.size() ; i++)
-       std::cout <<  this->cgiPaths[i] << '\n';
+
     delete [] Keys;
 }
 
@@ -454,6 +454,7 @@ void server_location::construct_location(std::vector<std::string>::iterator firs
             getUpload(stringSplit(locationVec[i], ' ', &temp_size), temp_size);
         }
     }
+            // exit(0);
 }
 std::string *stringSplit(std::string split, char c, size_t *index_save)
 {
@@ -834,6 +835,7 @@ void    server_parser::construct_server(std::vector<std::string>::iterator first
             server_location locationn;
             locationn.setLocationIndex(location_index);
             locationn.construct_location(serverVec.begin() + opening_bracket, serverVec.begin() + closing_bracket);   
+
             this->location.push_back(locationn);
             location_index++;          
         }
