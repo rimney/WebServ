@@ -6,7 +6,7 @@
 /*   By: rimney <rimney@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/07 03:50:36 by rimney            #+#    #+#             */
-/*   Updated: 2023/04/01 21:37:03 by rimney           ###   ########.fr       */
+/*   Updated: 2023/04/02 02:24:34 by rimney           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -144,7 +144,6 @@ server_location & server_location::operator=(server_location const & s)
 
 bool server_location::isCgi(std::string path)
 {
-    std::cout << path << " << \n";
     char  const *s = strrchr(path.c_str(), '.');
     if(!s)
         return (false);
@@ -779,7 +778,6 @@ void    server_parser::construct_server(std::vector<std::string>::iterator first
             getServerName(stringSplit(serverVec[i], ' ', &temp_size), temp_size);
             if(this->server_names.size() == 0)
                 this->server_names.push_back("localhost ");
-            // std::cout << getServerNamesObject();
         }
         else if(!strncmp(serverVec[i].c_str(), "error", 5))
         {
@@ -787,7 +785,6 @@ void    server_parser::construct_server(std::vector<std::string>::iterator first
             if(isFileOrDirectory(this->getServerErrorPageObject()) == "error")
             {
                 std::cerr << "Error : Check The Server Error Path\n";
-                // system("leaks webserv");
                 exit(0);
             }
         }
