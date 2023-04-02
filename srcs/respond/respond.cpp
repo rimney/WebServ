@@ -3,7 +3,7 @@
 /*                                                        :::      ::::::::   */
 /*   respond.cpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: eel-ghan <eel-ghan@student.42.fr>          +#+  +:+       +#+        */
+/*   By: rimney <rimney@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/15 20:32:17 by rimney            #+#    #+#             */
 /*   Updated: 2023/04/01 20:32:02 by eel-ghan         ###   ########.fr       */
@@ -222,7 +222,6 @@ std::string	respond::getAutoIndexPage(std::string path)
     temp = temp + "</body>\n";
     temp = temp + "</html>\n";
     
-    std::cout << temp << "\n";
     return (temp);
 }
 
@@ -421,18 +420,34 @@ void	respond::setRespond(std::string path, std::string httpVersion, std::string 
         }
         else if(error == "301") // << HERE
         {
-            this->bodyFlag = false;
-            this->sethttpVersion(httpVersion);
-            this->setstatusCode("301");
-            this->setstatusDescription("Moved Permanently");
-            this->setBody(this->setErrorBody(this->getstatusCode()));
-            this->setContentLenght(std::to_string(this->getBody().size()));
-			this->mergeRespondStrings();
-            return ;
-        }
-        else if(error == "201") // << HERE
-        {
-            this->bodyFlag = false;
+			server_location location = server.getOneLocationObject(this->location_index);
+	        int index;
+
+			this->bodyFlag = false;
+			this->sethttpVersion(httpVersion);
+			this->setstatusCode("301");
+			this->setstatusDescription("Moved Permanently");
+			this->setContentLenght(std::to_string(this->getBody().size()));
+	        
+			index = this->server.getLocationByName(location.getLocationRedirectionObject());
+	        if(location.getLocationRedirectionObject().substr(0, 5) == "http:" || location.getLocationRedirectionObject().substr(0, 6) == "https:")
+	        {
+	            this->setLocation(location.getLocationRedirectionObject());
+	           	this->mergeRespondStrings();
+	        }
+	        else if(index != -1)
+	        {
+	            if(path[path.size() - 1] == '/')
+	                path = path.substr(0, path.length() - 1);
+	            this->setLocation(location.getLocationRedirectionObject() + '/');
+	            this->mergeRespondStrings();
+	        }
+			std::cout << this->finalString << " <<\n";
+			return ;
+		}
+		else if(error == "201") // << HERE
+		{
+			this->bodyFlag = false;
             this->sethttpVersion(httpVersion);
             this->setstatusCode("201");
             this->setstatusDescription("Created");
