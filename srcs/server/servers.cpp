@@ -128,6 +128,7 @@ void    servers::run()
                     (*it).second.accept();
                     FD_SET((*it).second.get_fd_connection(), &_set_fds);
                     _fds_cnx.insert(std::make_pair((*it).second.get_fd_connection(), (*it).second));
+                    (*it).second.insert_to_fd_port(fd, (*it).first);
                     if (_max_fd < (*it).second.get_fd_connection())
                         _max_fd = (*it).second.get_fd_connection();
                     std::cout << "host: " << (*it).second.get_host() << ", port: " << (*it).second.get_fd_port((*it).first)
@@ -172,10 +173,7 @@ void    servers::run()
                 {
                     _fds_cnx[_fds_ready[i]].send(_fds_ready[i]);
                     if (_fds_cnx[_fds_ready[i]].getRespond(_fds_ready[i]).getBodyFlag() == false)
-                    {
                         _fds_ready.erase(_fds_ready.begin() + i);
-                        std::cout << "send\n";
-                    }
                 }
                 catch(const std::string& msg)
                 {

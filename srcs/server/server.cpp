@@ -132,6 +132,11 @@ void    server::set_error_flag(int error_flag)
     _error_flag = error_flag;
 }
 
+void    server::insert_to_fd_port(int fd, int port)
+{
+    _fd_port_map.insert(std::make_pair(fd, port));
+}
+
 void server::accept()
 {
     int optval = 1;
@@ -489,6 +494,7 @@ void    server::process(int fd)
         std::cout <<  _request[fd].get_start_line().vertion << std::endl;
         std::cout <<  _request[fd].get_start_line().full_path << std::endl;
         std::cout <<  _request[fd].get_start_line().query << std::endl;
+        // std::cout <<  "**"<<_request[fd].get_body() << "**"<< std::endl;
         std::cout << _request[fd].get_error() << "\n";
         std::cout << "//////////////// REQUEST ///////////////////\n\n";
         
@@ -502,7 +508,7 @@ void    server::process(int fd)
             }
             if(_request[fd].get_start_line().method == "POST")
             {
-                //
+                post_method(_server_config,fd);
             }
             if(_request[fd].get_start_line().method == "DELETE")
             {
@@ -510,7 +516,7 @@ void    server::process(int fd)
             }
         }
         //respond  
-        // _request[fd].clear();
+        _request[fd].clear();
         _request_map.erase(fd);
     }
 }
