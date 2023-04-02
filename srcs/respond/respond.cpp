@@ -6,7 +6,7 @@
 /*   By: rimney <rimney@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/15 20:32:17 by rimney            #+#    #+#             */
-/*   Updated: 2023/04/02 02:30:26 by rimney           ###   ########.fr       */
+/*   Updated: 2023/04/02 03:17:53 by rimney           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -442,12 +442,6 @@ void	respond::setRespond(std::string path, std::string httpVersion, std::string 
 	            this->setLocation(location.getLocationRedirectionObject() + '/');
 	            this->mergeRespondStrings();
 	        }
-	        // else
-	        // {
-            //     _respond[fd].setLocation(_request[fd].get_start_line().path + '/');
-            //     _respond[fd].mergeRespondStrings();
-			
-	        // }
 			std::cout << this->finalString << " <<\n";
 			return ;
 		}

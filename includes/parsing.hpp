@@ -6,7 +6,7 @@
 /*   By: rimney <rimney@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/24 21:53:42 by rimney            #+#    #+#             */
-/*   Updated: 2023/04/01 21:27:13 by rimney           ###   ########.fr       */
+/*   Updated: 2023/04/02 03:14:28 by rimney           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -189,6 +189,7 @@ class config_parser : public server_parser
         void			servers_index_init();
         int				getServersCount(std::vector<std::string> vec);
         bool            hasDuplicatePorts();
+        void            checkFileBrackets(std::string file);
 };
 
 std::ostream &	operator<<(std::ostream& os, config_parser& p);

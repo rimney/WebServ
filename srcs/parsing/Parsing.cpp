@@ -6,7 +6,7 @@
 /*   By: rimney <rimney@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/07 03:50:36 by rimney            #+#    #+#             */
-/*   Updated: 2023/04/02 02:24:34 by rimney           ###   ########.fr       */
+/*   Updated: 2023/04/02 03:17:32 by rimney           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -838,7 +838,7 @@ void    server_parser::construct_server(std::vector<std::string>::iterator first
             location_index++;          
         }
     }
-        this->getServerDataFromRootLocation();
+    this->getServerDataFromRootLocation();
 }
 
 void    server_parser::setLocationsIndex(std::vector<server_location> location)
@@ -951,6 +951,7 @@ config_parser::config_parser(std::string filename)
         std::cerr << "Error : Cannot Open File!\n";
         exit(1);
     }
+    checkFileBrackets(filename);
     std::string line;
     int         opening_bracket;
     int         closing_bracket;
@@ -1005,14 +1006,12 @@ bool    config_parser::hasDuplicatePorts()
             const server_parser & server2 = servers[j];
             for (size_t k = 0; k < server1.getPortObject().size(); k++)
             {
-
                 int port = server1.getPortObject()[k];
                 for (size_t l = 0; l < server2.getPortObject().size(); l++)
                 {
                     int port2 =  server2.getPortObject()[l];
                     if (port == port2)
                     {
-
                         std::cout << "DUPLICATE";
                         return true;
                     }
@@ -1023,6 +1022,35 @@ bool    config_parser::hasDuplicatePorts()
     return false;
 }
 
+void    config_parser::checkFileBrackets(std::string f)
+{
+    std::ifstream file(f);
+    std::stack<char> brackets;
+    char c;
+    int i = 0;
+    bool balanced = true;
+
+    while (file.get(c)) {
+        ++i;
+        if (c == '(' || c == '{' || c == '[') {
+            brackets.push(c);
+        } else if (c == ')' || c == '}' || c == ']') {
+            if (brackets.empty()) {
+                balanced = false;
+                std::cerr << "Unclosed Bracket !\n";
+                exit(1);
+            }
+            char top = brackets.top();
+            if ((c == ')' && top == '(') || (c == '}' && top == '{') || (c == ']' && top == '[')) {
+                brackets.pop();
+            } else {
+                balanced = false;
+                std::cerr << "Unclosed Bracket !\n";
+                exit(1);
+            }
+        }
+    }
+}
 
 void    config_parser::servers_index_init()
 {
