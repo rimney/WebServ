@@ -6,7 +6,7 @@
 /*   By: rimney <rimney@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/15 20:32:17 by rimney            #+#    #+#             */
-/*   Updated: 2023/04/02 03:17:53 by rimney           ###   ########.fr       */
+/*   Updated: 2023/04/02 21:14:55 by rimney           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -132,7 +132,7 @@ std::string respond::chunkedFileToString(std::string path)
         std::cout << "THE END !\n";
         bodyFlag = false;
         pathSave.clear();
-        // this->cleanAll();
+        this->cleanAll();
         this->chunkPosition = 0;
         return ("0\r\n\r\n");
     }
@@ -316,6 +316,12 @@ void    respond::recoverBody(int status_code)
         this->setContentLenght(std::to_string(this->getfinalString().size()));
         
     }
+    else if (status_code == 405)
+    {
+        this->setFinalString("HTTP/1.1 405 Error Forbidden\r\nContent-Type: text/html\r\nContent-Length: 31\r\n\r\n<h1>\n 405 Error Forbidden</h1>\r\n");
+        this->setContentLenght(std::to_string(this->getfinalString().size()));
+        
+    }
 }
 
 
@@ -429,21 +435,30 @@ void	respond::setRespond(std::string path, std::string httpVersion, std::string 
 			this->setstatusDescription("Moved Permanently");
 			this->setContentLenght(std::to_string(this->getBody().size()));
 	        
-			index = this->server.getLocationByName(location.getLocationRedirectionObject());
 	        if(location.getLocationRedirectionObject().substr(0, 5) == "http:" || location.getLocationRedirectionObject().substr(0, 6) == "https:")
 	        {
 	            this->setLocation(location.getLocationRedirectionObject());
 	           	this->mergeRespondStrings();
 	        }
-	        else if(index != -1)
+	        else
 	        {
-	            if(path[path.size() - 1] == '/')
-	                path = path.substr(0, path.length() - 1);
-	            this->setLocation(location.getLocationRedirectionObject() + '/');
-	            this->mergeRespondStrings();
-	        }
+				index = this->server.getLocationByName(location.getLocationRedirectionObject());
+				if(index != -1)
+				{
+					if(path[path.size() - 1] == '/')
+						path = path.substr(0, path.length() - 1);
+					this->setLocation(location.getLocationRedirectionObject() + '/');
+					this->mergeRespondStrings();
+					return ;
+				}
+				else
+				{
+					this->setRespond(path, this->httpVersion, "404");
+					return ;
+				}
 			std::cout << this->finalString << " <<\n";
 			return ;
+			}
 		}
 		else if(error == "201") // << HERE
 		{

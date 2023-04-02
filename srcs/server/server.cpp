@@ -194,6 +194,7 @@ void    server::send(int fd)
     
     if(_respond[fd].getBodyFlag() == true)
         _respond[fd].setFinalString(_respond[fd].chunkedFileToString(_respond[fd].getPathSave()));
+    // std::cout << _respond[fd].getfinalString() << " <<\n";
     // if(_respond[fd].getfinalString().size() > 0)
     // {
         if ((::send(fd, _respond[fd].getfinalString().c_str(), _respond[fd].getfinalString().size(), 0)) == -1)
@@ -391,8 +392,11 @@ void server::Get(int location_index , std::string path, int fd)
         {
             if(path[path.size() - 1] != '/')
             {
-                std::cout << path << " << EEEE\n"; 
-                _respond[fd].setRespond(_request[fd].get_start_line().path + '/', _respond[fd].gethttpVersion(), "301");
+                std::cout << path << " << EEEEEEEEEE\n";
+                _respond[fd].sethttpVersion(_respond[fd].gethttpVersion());
+			    _respond[fd].setstatusCode("301");
+			    _respond[fd].setstatusDescription("Moved Permanently");
+			    _respond[fd].setContentLenght(std::to_string(_respond[fd].getBody().size()));
                 _respond[fd].setLocation(_request[fd].get_start_line().path + '/');
                 _respond[fd].mergeRespondStrings();
                 std::cout << _respond[fd].getfinalString() << std::endl;
