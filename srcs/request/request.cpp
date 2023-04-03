@@ -134,6 +134,15 @@ void Request::body_handling(std::string buffer)
         if((unsigned long)body.length() >= body_size)
             wait_body = false;
     }
+    if(header.find("Content-Length")->first.empty() && header.find("Transfer-Encoding")->first.empty())
+    {
+       
+            wait_body = false;
+            return;
+            
+    }
+    if(start_line.method != "POST" && start_line.method != "DELET" && start_line.method != "GET" )
+        wait_body = false;
 }
 
 void Request::errors(server_parser &serv)

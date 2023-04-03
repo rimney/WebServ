@@ -194,7 +194,6 @@ void    server::send(int fd)
     // std::cout << _respond[fd].getBody();
     // std::cout << _respond[fd].getBodyFlag() << " <<\n";
 
-
     if(_respond[fd].getBody().empty())
         _respond[fd].recoverBody(atoi(_respond[fd].getstatusCode().c_str()));
     
@@ -441,7 +440,7 @@ void server::Get(int location_index , std::string path, int fd)
 
 void    server::process(int fd)
 {
-    std::cout <<  "*-"<< _request_map[fd] << "-*"<< std::endl;
+    // std::cout <<  "*-"<< _request_map[fd] << "-*"<< std::endl;
     if(!_request[fd].get_wait_body())
         _request[fd].parser(_request_map[fd]);
     else
@@ -451,7 +450,7 @@ void    server::process(int fd)
     if(!_request[fd].get_wait_body())
     {
         _request[fd].errors(_server_config);
-        
+
         // std::cout << "\nThe first line is : \n";
         std::cout << "//////////////// REQUEST ///////////////////\n";
         std::cout <<  _request[fd].get_start_line().vertion << std::endl;
@@ -464,8 +463,8 @@ void    server::process(int fd)
         std::cout << "ERROR : " <<_request[fd].get_error() << "\n";
         std::cout << "//////////////// REQUEST ///////////////////\n\n";
         _respond[fd].setRespondLocationIndex(_request[fd].get_start_line().location_index);
+        _respond[fd].setFd(fd);
         _respond[fd].setRespond(_request[fd].get_start_line().full_path, _request[fd].get_start_line().vertion, _request[fd].get_error());
-        
         if(_request[fd].get_error().empty() || _request[fd].get_error() == "301")
         {
             if(_request[fd].get_start_line().method == "GET")
@@ -484,4 +483,5 @@ void    server::process(int fd)
         _request[fd].clear();
         _request_map.erase(fd);
     }
+
 }

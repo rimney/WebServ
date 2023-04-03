@@ -6,7 +6,7 @@
 /*   By: rimney <rimney@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/07 03:50:36 by rimney            #+#    #+#             */
-/*   Updated: 2023/04/03 00:37:30 by rimney           ###   ########.fr       */
+/*   Updated: 2023/04/03 01:34:09 by rimney           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -415,6 +415,8 @@ void server_location::construct_location(std::vector<std::string>::iterator firs
         }
         else if(!strncmp(locationVec[i].c_str(), "root", 4))
         {
+            if(locationVec[i][locationVec[i].size() - 1] == '/')
+                locationVec[i].erase(locationVec[i].size() - 1);
             getRoot(stringSplit(locationVec[i], ' ', &temp_size), temp_size);
             if(isFileOrDirectory(this->getLocationRootObject()) == "error")
             {
@@ -804,6 +806,7 @@ void    server_parser::construct_server(std::vector<std::string>::iterator first
         }
         else if(!strncmp(serverVec[i].c_str(), "root", 4))
         {
+            std::cout << serverVec[i] << " << \n";
             getRoot(stringSplit(serverVec[i], ' ', &temp_size), temp_size);
             std::cout << getRootObject() << "<<\n";
             if(isFileOrDirectory(this->getRootObject()) == "error")
