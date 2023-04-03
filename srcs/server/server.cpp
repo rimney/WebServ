@@ -197,6 +197,7 @@ void    server::send(int fd)
     // std::cout << _respond[fd].getfinalString() << " <<\n";
     // if(_respond[fd].getfinalString().size() > 0)
     // {
+        std::cout << _respond[fd].getChunkPosition() % 1024 << " << \n";
         if ((::send(fd, _respond[fd].getfinalString().c_str(), _respond[fd].getfinalString().size(), 0)) == -1)
         {
             _respond[fd].cleanAll();
@@ -361,7 +362,6 @@ void server::Get(int location_index , std::string path, int fd)
 
     if((_respond[fd].getstatusCode() == "200" || _respond[fd].getstatusCode() == "301" ) && _respond[fd].getBodyFlag() == false)
     {
-        std::cout << isFOrD << " <<\n";
         if(isFOrD == "file")
         {
             if(location.getHasCgi() && location.isCgi(_request[fd].get_start_line().full_path)) // check if the extention of file compatible with extentions 
@@ -374,6 +374,7 @@ void server::Get(int location_index , std::string path, int fd)
             if(_respond[fd].fileToSring(path).size() > 50000)
             {
                 if(_respond[fd].getBodyFlag() == true)
+
                     return ;
                 _respond[fd].setBodyFlag(true);
                     return;
