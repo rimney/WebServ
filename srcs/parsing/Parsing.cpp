@@ -6,7 +6,7 @@
 /*   By: rimney <rimney@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/07 03:50:36 by rimney            #+#    #+#             */
-/*   Updated: 2023/04/03 21:40:31 by rimney           ###   ########.fr       */
+/*   Updated: 2023/04/03 21:48:51 by rimney           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -875,10 +875,12 @@ void    server_parser::setLocationsIndex(std::vector<server_location> location)
     for(size_t i = 0; i < location.size();i++)
         location[i].setLocationIndex(i);
 }
+
 void    server_parser::setServerIndex(int index)
 {
     this->server_index = index;
 }
+
 size_t server_parser::getLocationCount(std::vector<std::string> vec)
 {
     size_t count = 0;
@@ -958,11 +960,13 @@ config_parser & config_parser::operator=(config_parser const & c)
     this->servers = c.getServersObject();
     return (*this);
 }
+
 /////// GETTERS AND SETTERS //////////
 size_t config_parser::getServerCountObject(void) const
 {
     return (this->server_count);
 }
+
 std::vector<server_parser> config_parser::getServersObject(void) const
 {
     return (this->servers);
@@ -1013,6 +1017,11 @@ config_parser::config_parser(std::string filename)
             server.setServerIndex(server_index);
             this->servers.push_back(server);
             server_index += 1;
+        }
+		else if(!tempConf[i].empty())
+        {
+            std::cerr << "Error : Wrong Directive [" << tempConf[i] << "]\n";
+            exit(1);
         }
     }
     if(hasDuplicatePorts())
