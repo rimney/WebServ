@@ -6,7 +6,7 @@
 /*   By: rimney <rimney@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/07 03:50:36 by rimney            #+#    #+#             */
-/*   Updated: 2023/04/02 21:56:38 by rimney           ###   ########.fr       */
+/*   Updated: 2023/04/03 00:37:30 by rimney           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -370,7 +370,8 @@ void    server_location::checkCgiAllowed(void)
 
 std::string server_location::getCgiPathObject(std::string path)
 {
-
+    if(strrchr(path.c_str(), '.') == NULL)
+        return "";
     for(size_t i = 0; i < this->cgiPaths.size(); i++)
     {
         if((!strcmp(strrchr(this->cgiPaths[i].c_str(), '/') + 1, "php") || !strcmp(strrchr(this->cgiPaths[i].c_str(), '/') + 1, "php-cgi")) && !strcmp(strrchr(path.c_str(), '.') + 1, "php"))
