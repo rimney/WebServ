@@ -1,6 +1,6 @@
 #include "../../includes/request.hpp"
 
-void Request::parser(std::string value)
+void Request::parser(std::string &value)
 {
     token _token;
     lexer _lexer(value);
@@ -42,27 +42,21 @@ void Request::parser(std::string value)
         _token.value.clear();
     }
 
-    if(body.empty())
-        wait_body = false;
-    else
+    if(!header.find("Transfer-Encoding")->first.empty())
     {
-            
-        if(!header.find("Transfer-Encoding")->first.empty())
-        {
-            if(header.find("Transfer-Encoding")->second == "chunked" )
-            {
-                wait_body = true;
-                body_handling(body);
-            }
-        }
-        else if (!header.find("Content-Length")->first.empty())
+        if(header.find("Transfer-Encoding")->second == "chunked" )
         {
             wait_body = true;
-            body_size = atol(header.find("Content-Length")->second.c_str());
-            if((unsigned long)body.length() >= body_size)
-                wait_body = false;
-        }  
+            body_handling(body);
+        }
     }
+    else if (!header.find("Content-Length")->first.empty())
+    {
+        wait_body = true;
+        body_size = atol(header.find("Content-Length")->second.c_str());
+        if((unsigned long)body.length() >= body_size)
+            wait_body = false;
+    }  
 }
 
 void Request::body_handling(std::string buffer)
@@ -162,7 +156,7 @@ void Request::location_well(server_parser &serv)
     if(index != -1)
     {
         start_line.location_index = index;
-        if(!serv.getServerLocationsObject()[index].getLocationRedirectionObject().empty() && serv.getServerLocationsObject()[index].getLocationHas301Code()) //301 Moved Permanently
+        if(!serv.getServerLocationsObject()[index].getLocationRedirectionObject().empty()) //301 Moved Permanently
             r_error = "301";
         if(!serv.getServerLocationsObject()[index].getLocationMethodsObject().empty())//405 Method Not Allowed
         {
@@ -179,14 +173,6 @@ void Request::location_well(server_parser &serv)
             if(serv.getServerLocationsObject()[index].getLocationRootObject() [serv.getServerLocationsObject()[index].getLocationRootObject() .length() - 1] == '/' && start_line.path[0] == '/')
                  start_line.path.erase(0,1);
             start_line.full_path = serv.getServerLocationsObject()[index].getLocationRootObject() + start_line.path;
-            // for(int i = 0; i < (int)start_line.full_path.length();i++)
-            // {
-            //     if(start_line.full_path[i] == '/' && start_line.full_path[i + 1] == '/')
-            //     {
-            //         start_line.full_path.erase(i,1);
-            //         break;
-            //     }
-            // }
         }
         else if(!serv.getRootObject().empty())
         {
@@ -205,10 +191,11 @@ void Request::location_well(server_parser &serv)
                     start_line.query += start_line.full_path[i];
             }
         }
+        if(!header.find("Content-Type")->first.empty() && header["Content-Type"] == "application/x-www-form-urlencoded")//query from post
+            start_line.query = body;
     }
     else
         r_error = "404";
-   
 }
 
 void Request::request_well_formed(server_parser &serv)
@@ -218,6 +205,8 @@ void Request::request_well_formed(server_parser &serv)
     {
         if(header.find("Transfer-Encoding")->second != "chunked")
             r_error = "501 Not Implemented";
+        else if(serv.getCmbsObject() > 0 && body.size() < (size_t)serv.getCmbsObject())
+             r_error = "413 Request Entity Too Large";
     }
     else if((start_line.method == "POST" && header.find("Transfer-Encoding")->first.empty() && header.find("Content-Length")->first.empty())
         || (start_line.method == "POST" && !header.find("Transfer-Encoding")->first.empty() && !header.find("Content-Length")->first.empty()))
@@ -242,6 +231,10 @@ void Request::clear()
     start_line.method.clear();
     start_line.path.clear();
     start_line.vertion.clear();
+    start_line.full_path.clear();
+    start_line.location_index = -1;
+    start_line.query.clear();
+    wait_body = false;
     body.clear();
     header.clear();
     r_error.clear();

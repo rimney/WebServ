@@ -6,7 +6,7 @@
 /*   By: eel-ghan <eel-ghan@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/10 00:38:14 by eel-ghan          #+#    #+#             */
-/*   Updated: 2023/04/01 04:18:04 by eel-ghan         ###   ########.fr       */
+/*   Updated: 2023/04/02 03:17:18 by eel-ghan         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -116,6 +116,7 @@ void    servers::run()
         }
         else if (r == 0)
             continue ;
+            
 
         // accept connections
         for (std::map<int, server>::iterator it = _servers.begin(); it != _servers.end(); it++)
@@ -127,9 +128,10 @@ void    servers::run()
                     (*it).second.accept();
                     FD_SET((*it).second.get_fd_connection(), &_set_fds);
                     _fds_cnx.insert(std::make_pair((*it).second.get_fd_connection(), (*it).second));
+                    (*it).second.insert_to_fd_port(fd, (*it).first);
                     if (_max_fd < (*it).second.get_fd_connection())
                         _max_fd = (*it).second.get_fd_connection();
-                    std::cout << "host: " << (*it).second.get_host() << ", port: " << (*it).second.get_fd_port((*it).first) 
+                    std::cout << "host: " << (*it).second.get_host() << ", port: " << (*it).second.get_fd_port((*it).first)
                         << " accept a new connections\n\n";
                 }
                 catch(const std::string& msg)
@@ -171,10 +173,7 @@ void    servers::run()
                 {
                     _fds_cnx[_fds_ready[i]].send(_fds_ready[i]);
                     if (_fds_cnx[_fds_ready[i]].getRespond(_fds_ready[i]).getBodyFlag() == false)
-                    {
                         _fds_ready.erase(_fds_ready.begin() + i);
-                        std::cout << "send\n";
-                    }
                 }
                 catch(const std::string& msg)
                 {

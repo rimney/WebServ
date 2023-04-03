@@ -71,7 +71,7 @@ int server::get_error_flag() const
     return _error_flag;
 }
 
-int  server::get_fd_port(int fd)
+int server::get_fd_port(int fd)
 {
     return _fd_port_map[fd];
 }
@@ -87,6 +87,7 @@ server  & server::operator=(server const & s)
     _request_map = s._request_map;
     _request = s._request;
     _respond = s._respond;
+    _fd_port_map = s._fd_port_map;
     // this->respond.setRespondServer(_server_config);
     return *this;
 }
@@ -129,6 +130,11 @@ void    server::set_addr(int i)
 void    server::set_error_flag(int error_flag)
 {
     _error_flag = error_flag;
+}
+
+void    server::insert_to_fd_port(int fd, int port)
+{
+    _fd_port_map.insert(std::make_pair(fd, port));
 }
 
 void server::accept()
@@ -452,6 +458,7 @@ void    server::process(int fd)
         std::cout <<  _request[fd].get_start_line().vertion << std::endl;
         std::cout <<  _request[fd].get_start_line().full_path << std::endl;
         std::cout <<  _request[fd].get_start_line().query << std::endl;
+        // std::cout <<  "**"<<_request[fd].get_body() << "**"<< std::endl;
         std::cout << _request[fd].get_error() << "\n";
         std::cout << "//////////////// REQUEST ///////////////////\n\n";
         _respond[fd].setRespondLocationIndex(_request[fd].get_start_line().location_index);
@@ -465,12 +472,14 @@ void    server::process(int fd)
             }
             if(_request[fd].get_start_line().method == "POST")
             {
+                post_method(_server_config,fd);
             }
             if(_request[fd].get_start_line().method == "DELETE")
             {
                 delete_method(_request[fd].get_start_line().full_path, fd);
             }
         }
+        _request[fd].clear();
         _request_map.erase(fd);
     }
 }
