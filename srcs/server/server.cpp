@@ -76,6 +76,11 @@ int server::get_fd_port(int fd)
     return _fd_port_map[fd];
 }
 
+std::map<int, int>  server::get_fd_port()
+{
+    return _fd_port_map;
+}
+
 server  & server::operator=(server const & s)
 {
     _port = s._port;
@@ -132,12 +137,8 @@ void    server::set_error_flag(int error_flag)
     _error_flag = error_flag;
 }
 
-void    server::insert_to_fd_port(int fd, int port)
-{
-    _fd_port_map.insert(std::make_pair(fd, port));
-}
 
-void server::accept()
+void server::accept(int fd)
 {
     int optval = 1;
 
@@ -151,6 +152,7 @@ void server::accept()
         ::close(_fd_connection);
         throw(std::string("ERROR: fcntl() failed."));
     }
+    _fd_port_map.insert(std::make_pair(_fd_connection, _fd_port_map[fd]));
 }
 
 void    server::close()

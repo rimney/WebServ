@@ -6,7 +6,7 @@
 /*   By: eel-ghan <eel-ghan@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/10 00:38:14 by eel-ghan          #+#    #+#             */
-/*   Updated: 2023/04/02 03:17:18 by eel-ghan         ###   ########.fr       */
+/*   Updated: 2023/04/03 01:23:24 by eel-ghan         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -125,10 +125,9 @@ void    servers::run()
             {
                 try
                 {
-                    (*it).second.accept();
+                    (*it).second.accept((*it).first);
                     FD_SET((*it).second.get_fd_connection(), &_set_fds);
                     _fds_cnx.insert(std::make_pair((*it).second.get_fd_connection(), (*it).second));
-                    (*it).second.insert_to_fd_port(fd, (*it).first);
                     if (_max_fd < (*it).second.get_fd_connection())
                         _max_fd = (*it).second.get_fd_connection();
                     std::cout << "host: " << (*it).second.get_host() << ", port: " << (*it).second.get_fd_port((*it).first)
@@ -173,13 +172,17 @@ void    servers::run()
                 {
                     _fds_cnx[_fds_ready[i]].send(_fds_ready[i]);
                     if (_fds_cnx[_fds_ready[i]].getRespond(_fds_ready[i]).getBodyFlag() == false)
+                    {
                         _fds_ready.erase(_fds_ready.begin() + i);
+                        _fds_cnx[i].get_fd_port().erase(_fds_ready[i]);
+                    }
                 }
                 catch(const std::string& msg)
                 {
                     std::cerr << msg << "\n";
                     FD_CLR(_fds_ready[i], &_set_write_fds);
                     FD_CLR(_fds_ready[i], &_set_read_fds);
+                    _fds_cnx[i].get_fd_port().erase(_fds_ready[i]);
                     _fds_ready.erase(_fds_ready.begin() + i);
                     _fds_cnx.erase(i);
                     break ;
