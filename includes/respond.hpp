@@ -6,7 +6,7 @@
 /*   By: rimney <rimney@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/14 17:42:24 by rimney            #+#    #+#             */
-/*   Updated: 2023/04/03 01:58:08 by rimney           ###   ########.fr       */
+/*   Updated: 2023/04/03 02:09:06 by rimney           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,6 +40,8 @@ class respond
 		std::string		tempAutoIndexFile;// set a header flag << // set a path to the file
         int				location_index;
         int             fd;
+        std::string     cookies;
+        std::string     expireDate;
     
     public:
         respond() {};
@@ -62,6 +64,10 @@ class respond
         void        setContentLenght(std::string ContentLenght);
         void        setBody(std::string Body);
         void        setLocation(std::string  location);
+        void        setCookies(std::string Cookie);
+        std::string getCookies(void);
+        void        setExpires(std::string expires);
+        std::string getExpires(void);
         std::string getLocation(void);
         void        setFinalString(std::string finalString);
         void        setRespond(std::string path, std::string httpVersion, std::string error);
