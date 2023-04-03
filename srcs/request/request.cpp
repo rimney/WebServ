@@ -134,6 +134,7 @@ void Request::body_handling(std::string buffer)
 void Request::errors(server_parser &serv)
 {
     request_well_formed(serv);
+    std::cout << "ERROR : " << r_error << std::endl;
     location_well(serv);
 }
 
@@ -144,6 +145,7 @@ void Request::location_well(server_parser &serv)
     long index = start_line.location_index = -1;
     size_t index_of_charachter = 0;
     bool method_allowed = false;
+
     for(size_t i = 0 ; i < (size_t)serv.getServerLocationsObject().size(); i++)
     {
         found = start_line.path.find(serv.getServerLocationsObject()[i].getLocationNameObject());
@@ -181,7 +183,11 @@ void Request::location_well(server_parser &serv)
             start_line.full_path = serv.getRootObject() + start_line.path;
         }
         else
+        {
             r_error = "404";
+            std::cout << serv.getServerLocationsObject()[index].getLocationRootObject() << " >> 404 <<<<<<\n";
+
+        }
         if(!start_line.full_path.empty())//query
         {
             query_pos = start_line.full_path.find("?");
@@ -195,7 +201,23 @@ void Request::location_well(server_parser &serv)
             start_line.query = body;
     }
     else
+    {
         r_error = "404";
+        std::cout << "404 location : > " ;
+        for(size_t i = 0 ; i < (size_t)serv.getServerLocationsObject().size(); i++)
+        {
+             std::cout << serv.getServerLocationsObject()[i].getLocationNameObject() << std::endl;
+            found = start_line.path.find(serv.getServerLocationsObject()[i].getLocationNameObject());
+            if (found != (size_t) -1  && index_of_charachter <= serv.getServerLocationsObject()[i].getLocationNameObject().length())
+            {
+                index_of_charachter = serv.getServerLocationsObject()[i].getLocationNameObject().length();
+                index = (long)i;
+                // std::cout << serv.getServerLocationsObject()[i].getLocationNameObject() << std::endl;
+            }
+        }
+        std::cout << "* end *" << std::endl;
+    }
+        
 }
 
 void Request::request_well_formed(server_parser &serv)

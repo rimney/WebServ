@@ -15,6 +15,7 @@ class servers
         fd_set                  _set_fds;
         fd_set                  _set_read_fds;
         fd_set                  _set_write_fds;
+        fd_set                  _set_error_fds;
         int                     _max_fd;
         std::map<int, server>   _servers;
         std::map<int, server>   _fds_cnx;

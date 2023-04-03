@@ -71,7 +71,9 @@ class server
         respond             getRespond(int fd);
         void                post_method(server_parser &serv, int fd);
         void                multi_part(server_parser &serv,int fd);
-    
+
+    server_parser               get_server_config();
+
     private:
         void            set_addr(int i);
 };

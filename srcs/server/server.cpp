@@ -168,12 +168,10 @@ void    server::receive(int fd)
     r = recv(fd, buffer, RECV_SIZE, 0);
     if (r == -1)
     {
-        ::close(fd);
         throw(std::string("ERROR: failed to receive data, closing connection."));
     }
     else if (r == 0)
     {
-        ::close(fd);
         throw(std::string("NOTE: connection closed by client."));
     }
     if (_request_map.find(fd) != _request_map.end())
@@ -210,10 +208,13 @@ void    server::send(int fd)
             // ::close(fd);
             // _respond[fd].cleanAll();
             // _respond[fd].setBodyFlag(false);
+            _request[fd].clear();
+            _respond[fd].cleanAll();
             throw(std::string("ERROR: send() failed to send response / file: " + _respond[fd].getPathSave()));
         }
     // }
     _respond[fd].cleanAll();
+
 }
 
 void    server::set_server_config(server_parser  & server_config)
@@ -332,7 +333,6 @@ void    server::delete_method(std::string  & path, int fd)
             }
             else
             {
-                std::cout << _respond[fd].getfinalString() << "\n";
                 _respond[fd].setstatusCode("409");
                 _respond[fd].setstatusDescription("Conflict");
                 _respond[fd].setContentType("text/html");
@@ -360,14 +360,17 @@ void    server::delete_method(std::string  & path, int fd)
 
 void server::Get(int location_index , std::string path, int fd) 
 {
-    if(!strcmp(strrchr(path.c_str(), '/'), "/favicon.ico"))
+    if(strrchr(path.c_str(), '/'))
     {
-        std::cout << "bypassed !\n";
-        return ;
+        if(!strcmp(strrchr(path.c_str(), '/'), "/favicon.ico"))
+        {   
+            std::cout << "bypassed !\n";
+            return ;
+        }
     }
+    std::cout << location_index << " LOCATION_INDEX <<\n";
     server_location location = _server_config.getOneLocationObject(location_index);
     std::string isFOrD = isFileOrDirectory(path);
-    std::cout << _respond[fd].getstatusCode() << " code <<\n";
 
     if((_respond[fd].getstatusCode() == "200" || _respond[fd].getstatusCode() == "301" ) && _respond[fd].getBodyFlag() == false)
     {
@@ -451,6 +454,7 @@ void    server::process(int fd)
     }
     if(!_request[fd].get_wait_body())
     {
+
         _request[fd].errors(_server_config);
         
         // std::cout << "\nThe first line is : \n";
@@ -462,7 +466,7 @@ void    server::process(int fd)
         std::cout <<  _request[fd].get_start_line().full_path << std::endl;
         std::cout <<  _request[fd].get_start_line().query << std::endl;
         // std::cout <<  "**"<<_request[fd].get_body() << "**"<< std::endl;
-        std::cout << _request[fd].get_error() << "\n";
+        std::cout << _request[fd].get_error() << "  <<<<<<<<<<<\n";
         std::cout << "//////////////// REQUEST ///////////////////\n\n";
         _respond[fd].setRespondLocationIndex(_request[fd].get_start_line().location_index);
         _respond[fd].setRespond(_request[fd].get_start_line().full_path, _request[fd].get_start_line().vertion, _request[fd].get_error());
@@ -485,4 +489,9 @@ void    server::process(int fd)
         _request[fd].clear();
         _request_map.erase(fd);
     }
+}
+
+server_parser   server::get_server_config()
+{
+    return _server_config;
 }

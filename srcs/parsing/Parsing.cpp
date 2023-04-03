@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Parsing.cpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: rimney <rimney@student.42.fr>              +#+  +:+       +#+        */
+/*   By: eel-ghan <eel-ghan@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/07 03:50:36 by rimney            #+#    #+#             */
-/*   Updated: 2023/04/03 00:37:30 by rimney           ###   ########.fr       */
+/*   Updated: 2023/04/03 06:02:51 by eel-ghan         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -793,7 +793,6 @@ void    server_parser::construct_server(std::vector<std::string>::iterator first
         else if(!strncmp(serverVec[i].c_str(), "index", 5))
         {
             getIndexPage(stringSplit(serverVec[i], ' ', &temp_size), temp_size);
-            std::cout << serverVec[i] << " <<|\n"; 
             if(isFileOrDirectory(this->getRootObject() + this->getIndexObject()) == "error")
             {
                 std::cout << this->getRootObject() << "<<<<<\n";
@@ -805,7 +804,6 @@ void    server_parser::construct_server(std::vector<std::string>::iterator first
         else if(!strncmp(serverVec[i].c_str(), "root", 4))
         {
             getRoot(stringSplit(serverVec[i], ' ', &temp_size), temp_size);
-            std::cout << getRootObject() << "<<\n";
             if(isFileOrDirectory(this->getRootObject()) == "error")
             {
                 std::cerr << "Error : Check The Server Root Path\n";

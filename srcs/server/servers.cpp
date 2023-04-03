@@ -6,7 +6,7 @@
 /*   By: eel-ghan <eel-ghan@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/10 00:38:14 by eel-ghan          #+#    #+#             */
-/*   Updated: 2023/04/03 01:23:24 by eel-ghan         ###   ########.fr       */
+/*   Updated: 2023/04/03 05:59:39 by eel-ghan         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -80,19 +80,20 @@ int servers::setup(std::vector<server_parser> servers_config)
 void    servers::run()
 {
     int             r;
-    int             fd;
     struct timeval  time;
 
-    time.tv_sec = 1;
+    time.tv_sec = 10;
     time.tv_usec = 0;
-
+    
     while(1)
     {
+        // std::cout << this->_servers[fd].getServerData().getHostObject() << " << HOST SER\n";
         _set_read_fds = _set_fds;
+        _set_error_fds = _set_fds;
         FD_ZERO(&_set_write_fds);
         for (std::vector<int>::iterator it = _fds_ready.begin(); it != _fds_ready.end(); it++)
             FD_SET(*it, &_set_write_fds);
-        r = select(_max_fd + 1, &_set_read_fds, &_set_write_fds, NULL, &time);
+        r = select(_max_fd + 1, &_set_read_fds, &_set_write_fds, &_set_error_fds, &time);
 
         if (r == -1)
         {
@@ -105,12 +106,11 @@ void    servers::run()
             FD_ZERO(&_set_read_fds);
             FD_ZERO(&_set_write_fds);
             _max_fd = 0;
-            for (int i = 0; (size_t)i < _servers.size(); i++)
+            for (std::map<int, server>::iterator it = _servers.begin(); it != _servers.end(); it++)
             {
-                fd = _servers[i].get_fd_socket();
-                FD_SET(fd, &_set_fds);
-                if (_max_fd < _servers[i].get_fd_socket())
-                    _max_fd = _servers[i].get_fd_socket();
+                FD_SET((*it).first, &_set_fds);
+                if (_max_fd < (*it).first)
+                    _max_fd = (*it).first;
             }
             continue ;
         }
@@ -148,6 +148,11 @@ void    servers::run()
             {
                 try
                 {
+                    if((*it).second.get_server_config().getServerErrorPageObject().empty())
+                    {
+                        std::cout << "SERVER NOT FOUND\n";
+                        exit(0);
+                    }
                     (*it).second.receive((*it).first);
                     (*it).second.process((*it).first);
                     _fds_ready.push_back((*it).first);
@@ -155,8 +160,10 @@ void    servers::run()
                 catch(const std::string& msg)
                 {
                     std::cerr << msg << "\n";
+                    close((*it).first);
                     FD_CLR((*it).first, &_set_read_fds);
                     FD_CLR((*it).first, &_set_fds);
+                    FD_CLR((*it).first, &_set_write_fds);
                     _fds_cnx.erase((*it).first);
                     break ;
                 }
@@ -170,11 +177,25 @@ void    servers::run()
             {
                 try
                 {
-                    _fds_cnx[_fds_ready[i]].send(_fds_ready[i]);
-                    if (_fds_cnx[_fds_ready[i]].getRespond(_fds_ready[i]).getBodyFlag() == false)
+                    if (!FD_ISSET(_fds_ready[i], &_set_error_fds))
                     {
-                        _fds_ready.erase(_fds_ready.begin() + i);
+                        _fds_cnx[_fds_ready[i]].send(_fds_ready[i]);
+                        if (_fds_cnx[_fds_ready[i]].getRespond(_fds_ready[i]).getBodyFlag() == false)
+                        {
+                            std::cout << "SEND <<<\n";
+                            _fds_ready.erase(_fds_ready.begin() + i);
+                            // _fds_cnx[i].get_fd_port().erase(_fds_ready[i]);
+                        }
+                    }
+                    else
+                    {
+                        FD_CLR(_fds_ready[i], &_set_write_fds);
+                        FD_CLR(_fds_ready[i], &_set_read_fds);
+                        FD_CLR(_fds_ready[i], &_set_fds);
+                        close(_fds_ready[i]);
                         _fds_cnx[i].get_fd_port().erase(_fds_ready[i]);
+                        _fds_ready.erase(_fds_ready.begin() + i);
+                        _fds_cnx.erase(i);
                     }
                 }
                 catch(const std::string& msg)
