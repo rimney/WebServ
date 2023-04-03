@@ -20,6 +20,7 @@
 # include "request.hpp"
 # include "respond.hpp"
 # include "cgi_handler.hpp"
+# include <sys/time.h>
 
 // TO BE DELETED //
 #include <string.h>
@@ -54,6 +55,7 @@ class server
         int                 get_fd_connection() const;
         int                 get_error_flag() const;
         int                 get_fd_port(int fd);
+        void                insert_to_fd_port(int fd, int port);
         server  &           operator=(server const & s);
         void                accept();
         void                close();
@@ -67,7 +69,8 @@ class server
         void                process(int fd);
         void                Get(int location_index , std::string path, int fd);
         respond             getRespond(int fd);
-        void                post_method(server_parser &serv,Request &request, int fd);
+        void                post_method(server_parser &serv, int fd);
+        void                multi_part(server_parser &serv,int fd);
     
     private:
         void            set_addr(int i);

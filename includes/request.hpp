@@ -39,6 +39,7 @@ class Request
             this->start_line.full_path = r.start_line.full_path;
             this->start_line.vertion = r.start_line.vertion;
             this->start_line.location_index = r.start_line.location_index;
+            this->start_line.query = r.start_line.query;
             this->body = r.body;
             this->header = r.header;
             this->r_error = r.r_error;
@@ -48,7 +49,7 @@ class Request
         }
         ~Request(){}
 
-        void parser(std::string value);
+        void parser(std::string &value);
         void body_handling(std::string buffer);
         void errors(server_parser &serv);
         void request_well_formed(server_parser &serv);
