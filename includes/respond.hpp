@@ -6,7 +6,7 @@
 /*   By: rimney <rimney@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/14 17:42:24 by rimney            #+#    #+#             */
-/*   Updated: 2023/04/02 01:55:17 by rimney           ###   ########.fr       */
+/*   Updated: 2023/04/03 01:58:08 by rimney           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,6 +39,7 @@ class respond
         server_parser	server;
 		std::string		tempAutoIndexFile;// set a header flag << // set a path to the file
         int				location_index;
+        int             fd;
     
     public:
         respond() {};
@@ -53,6 +54,8 @@ class respond
         std::string getContentLenght(void);
         std::string getBody(void);
         std::string getfinalString(void);
+        int         getFd(void);
+        void        setFd(int fd) {this->fd = fd;}
         void        sethttpVersion(std::string httpVersion);
         void        setstatusCode(std::string statusCode);
         void        setstatusDescription(std::string statusDescription);
