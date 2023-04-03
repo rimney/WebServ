@@ -247,4 +247,5 @@ void    cgi_handler::generate_response(std::string & cgi_response, respond & res
         response.setContentLenght(std::to_string(response.getBody().size()));
 
     response.mergeRespondStrings();
+    std::cout << "\n\n" << response.getfinalString() << std::endl;
 }
