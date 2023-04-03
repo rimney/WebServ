@@ -194,13 +194,13 @@ void    server::send(int fd)
     // std::cout << _respond[fd].getBody();
     // std::cout << _respond[fd].getBodyFlag() << " <<\n";
 
-    std::cout << _respond[fd].getfinalString() << '\n';
 
     if(_respond[fd].getBody().empty())
         _respond[fd].recoverBody(atoi(_respond[fd].getstatusCode().c_str()));
     
     if(_respond[fd].getBodyFlag() == true)
         _respond[fd].setFinalString(_respond[fd].chunkedFileToString(_respond[fd].getPathSave()));
+    // std::cout << _respond[fd].getfinalString() << " <<\n";
     // if(_respond[fd].getfinalString().size() > 0)
     // {
         if ((::send(fd, _respond[fd].getfinalString().c_str(), _respond[fd].getfinalString().size(), 0)) == -1)
@@ -365,8 +365,6 @@ void server::Get(int location_index , std::string path, int fd)
     }
     server_location location = _server_config.getOneLocationObject(location_index);
     std::string isFOrD = isFileOrDirectory(path);
-    std::cout << path << " << path\n";
-    std::cout << isFOrD << " << type\n";
     std::cout << _respond[fd].getstatusCode() << " code <<\n";
 
     if((_respond[fd].getstatusCode() == "200" || _respond[fd].getstatusCode() == "301" ) && _respond[fd].getBodyFlag() == false)
@@ -390,7 +388,6 @@ void server::Get(int location_index , std::string path, int fd)
             }
             else
             {
-                std::cout << path << " < path\n";
                 _respond[fd].setBody(_respond[fd].fileToSring(path));
                 _respond[fd].setContentLenght(std::to_string(_respond[fd].fileToSring(path).size()));
                 _respond[fd].mergeRespondStrings();
@@ -399,49 +396,17 @@ void server::Get(int location_index , std::string path, int fd)
         }
         else if(isFOrD == "directory")
         {
-            std::cout << "PASED\n";
-            std::cout << location.getHasRedirection() << " << \n";
-            if(location.getHasRedirection())
+            if(path[path.size() - 1] != '/')
             {
-                if(location.getLocationHas301Code() && isFOrD == "directory")
-                {
-                    int index;
-                    index = _server_config.getLocationByName(location.getLocationRedirectionObject());
-                    std::cout << location.getLocationRedirectionObject();
-                    if(location.getLocationRedirectionObject().substr(0, 5) == "http:" || location.getLocationRedirectionObject().substr(0, 6) == "https:")
-                    {
-                        
-                        _respond[fd].setRespond(location.getLocationRedirectionObject(), _respond[fd].gethttpVersion(), "301");
-                        _respond[fd].setLocation(location.getLocationRedirectionObject());
-                        _respond[fd].mergeRespondStrings();
-                        std::cout << _respond[fd].getfinalString();
-                        return ;
-                    }
-                    else if(index != -1)
-                    {
-                        if(path[path.size() - 1] == '/')
-                            path = path.substr(0, path.length() - 1);
-                        _respond[fd].setRespond( location.getLocationRedirectionObject() + '/', _respond[fd].gethttpVersion(), "301");
-                        _respond[fd].setLocation(location.getLocationRedirectionObject() + '/');
-                        _respond[fd].mergeRespondStrings();
-                        std::cout << _respond[fd].getfinalString() << std::endl;
-                        Get(index, path + location.getLocationRedirectionObject() + '/', fd);
-                        return ;
-                    }
-                    else
-                    {
-                        _respond[fd].setRespond(path, _respond[fd].gethttpVersion(), "404");
-                        return ;
-                    }
-                }
-            }
-            if(path[path.size() - 1] != '/' && _respond[fd].getstatusCode() != "301")
-            {
-                std::cout << "EEEEE\n";
-                _respond[fd].setRespond(_request[fd].get_start_line().path + '/', _respond[fd].gethttpVersion(), "301");
+                std::cout << path << " << EEEEEEEEEE\n";
+                _respond[fd].sethttpVersion(_respond[fd].gethttpVersion());
+			    _respond[fd].setstatusCode("301");
+			    _respond[fd].setstatusDescription("Moved Permanently");
+			    _respond[fd].setContentLenght(std::to_string(_respond[fd].getBody().size()));
                 _respond[fd].setLocation(_request[fd].get_start_line().path + '/');
                 _respond[fd].mergeRespondStrings();
                 std::cout << _respond[fd].getfinalString() << std::endl;
+                return ;
             }
             if(isFileOrDirectory(path + location.getLocationIndexObject()) == "file")
             {
@@ -498,10 +463,10 @@ void    server::process(int fd)
         // std::cout <<  "**"<<_request[fd].get_body() << "**"<< std::endl;
         std::cout << "ERROR : " <<_request[fd].get_error() << "\n";
         std::cout << "//////////////// REQUEST ///////////////////\n\n";
-        
+        _respond[fd].setRespondLocationIndex(_request[fd].get_start_line().location_index);
         _respond[fd].setRespond(_request[fd].get_start_line().full_path, _request[fd].get_start_line().vertion, _request[fd].get_error());
         
-        if(_request[fd].get_error().empty() || _respond[fd].getstatusCode() == "301")
+        if(_request[fd].get_error().empty() || _request[fd].get_error() == "301")
         {
             if(_request[fd].get_start_line().method == "GET")
             {
@@ -516,7 +481,6 @@ void    server::process(int fd)
                 delete_method(_request[fd].get_start_line().full_path, fd);
             }
         }
-        //respond  
         _request[fd].clear();
         _request_map.erase(fd);
     }

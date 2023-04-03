@@ -102,8 +102,6 @@ void    server::post_method(server_parser &serv, int fd)
         
     // }
     // std::cout <<" *end* " << "\n";
-
-    
     if(!_request[fd].get_body().empty())
     {
         if(!serv.getServerLocationsObject()[_request[fd].get_start_line().location_index].getUploadObject().empty())
@@ -144,7 +142,6 @@ void    server::post_method(server_parser &serv, int fd)
                 if(_request[fd].get_start_line().full_path[_request[fd].get_start_line().full_path.length() - 1] != '/')
                 {
                     error = "301";
-                    std::cout << ">>>>>>>>>>>>>>>> 301 <<<<<<<<<<" << std::endl;
                     //add "/" to uri and return it
                 }
                 else

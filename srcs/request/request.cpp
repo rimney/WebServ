@@ -42,13 +42,18 @@ void Request::parser(std::string &value)
         _token.value.clear();
     }
 
-    if(!header.find("Transfer-Encoding")->first.empty() && header.find("Transfer-Encoding")->second == "chunked")
+    if(!header.find("Transfer-Encoding")->first.empty())
     {
+        if(header["Transfer-Encoding"] == "chunked")
+        {
             wait_body = true;
             body_handling(body);
+        }
+
     }
     else if (!header.find("Content-Length")->first.empty())
     {
+        std::cout << header.find("Content-Length")->first  << "<<<<< " << std::endl;
         wait_body = true;
         body_size = atol(header.find("Content-Length")->second.c_str());
         if((unsigned long)body.length() >= body_size)
@@ -157,7 +162,7 @@ void Request::location_well(server_parser &serv)
     if(index != -1)
     {
         start_line.location_index = index;
-        if(!serv.getServerLocationsObject()[index].getLocationRedirectionObject().empty()) //301 Moved Permanently
+        if(serv.getServerLocationsObject()[index].getHasRedirection()) //301 Moved Permanently
         {
             r_error = "301";
         }
@@ -185,6 +190,7 @@ void Request::location_well(server_parser &serv)
         }
         else
             r_error = "404";
+        std::cout << r_error << "<<<<< 3" <<std::endl;
         if(!start_line.full_path.empty())//query
         { 
             //localhost:8080/website?jnjnjnjnjnjubnj
@@ -194,10 +200,10 @@ void Request::location_well(server_parser &serv)
             {
                 for(int i = query_pos +1 ; i < (int)start_line.full_path.length() && start_line.full_path[i] != '#'   ; i++)
                     start_line.query += start_line.full_path[i];
+                start_line.full_path.erase(query_pos);
+                query_pos = start_line.path.find("?");
+                start_line.path.erase(query_pos);
             }
-            start_line.full_path.erase(query_pos);
-            query_pos = start_line.path.find("?");
-            start_line.path.erase(query_pos);
         }
         if(!header.find("Content-Type")->first.empty() && header["Content-Type"] == "application/x-www-form-urlencoded")//query from post
             start_line.query = body;

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   respond.cpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: eel-ghan <eel-ghan@student.42.fr>          +#+  +:+       +#+        */
+/*   By: rimney <rimney@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/15 20:32:17 by rimney            #+#    #+#             */
-/*   Updated: 2023/04/01 20:32:02 by eel-ghan         ###   ########.fr       */
+/*   Updated: 2023/04/03 00:33:48 by rimney           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -132,7 +132,7 @@ std::string respond::chunkedFileToString(std::string path)
         std::cout << "THE END !\n";
         bodyFlag = false;
         pathSave.clear();
-        // this->cleanAll();
+        this->cleanAll();
         this->chunkPosition = 0;
         return ("0\r\n\r\n");
     }
@@ -222,7 +222,6 @@ std::string	respond::getAutoIndexPage(std::string path)
     temp = temp + "</body>\n";
     temp = temp + "</html>\n";
     
-    std::cout << temp << "\n";
     return (temp);
 }
 
@@ -247,24 +246,6 @@ std::string     respond::fileToSring(std::string path)
     return (content);
 }
 
-std::string     respond::errorStringToString(int error)
-{
-    if(error == 501)
-        return ("<h1>\n501 Not Implemented\n</h1>\n");
-    else if(error == 400)
-        return ("<h1>\n400 Bad Request\n</h1>\n");
-    else if(error == 413)
-        return ("h1>\n413 Request Entity Too Large\n</h1>\n");
-    else if(error == 414)
-        return ("<h1>\n414 Request-URI Too Long\n</h1>\n");
-    else if(error == 400)
-        return ("<h1>\n400 Bad Request\n</h1>\n");
-    else if(error == 404)
-        return ("");
-    else if(error == 403)
-        return ("<h1>\n 403 Error Forbidden</h1>");
-    return ("OK");
-}
 
 std::string		respond::setErrorBody(std::string status_code)
 {
@@ -317,10 +298,13 @@ void    respond::recoverBody(int status_code)
         this->setContentLenght(std::to_string(this->getfinalString().size()));
         
     }
+    else if (status_code == 405)
+    {
+        this->setFinalString("HTTP/1.1 405 Error Forbidden\r\nContent-Type: text/html\r\nContent-Length: 31\r\n\r\n<h1>\n 405 Error Forbidden</h1>\r\n");
+        this->setContentLenght(std::to_string(this->getfinalString().size()));
+        
+    }
 }
-
-
-
 
 void    respond::setContentType(std::string const & content_type)
 {
@@ -395,6 +379,7 @@ void	respond::setRespond(std::string path, std::string httpVersion, std::string 
             this->setBody(this->setErrorBody(this->getstatusCode()));
             this->setContentLenght(std::to_string(this->getBody().size()));
 			this->mergeRespondStrings();
+            close(fd);
             return ;
         }
         else if(error == "404")
@@ -421,18 +406,58 @@ void	respond::setRespond(std::string path, std::string httpVersion, std::string 
         }
         else if(error == "301") // << HERE
         {
-            this->bodyFlag = false;
-            this->sethttpVersion(httpVersion);
-            this->setstatusCode("301");
-            this->setstatusDescription("Moved Permanently");
-            this->setBody(this->setErrorBody(this->getstatusCode()));
-            this->setContentLenght(std::to_string(this->getBody().size()));
-			this->mergeRespondStrings();
-            return ;
-        }
-        else if(error == "201") // << HERE
-        {
-            this->bodyFlag = false;
+            std::cout << path << " << path\n";
+			server_location location = server.getOneLocationObject(this->location_index);
+	        int index;
+
+			this->bodyFlag = false;
+			this->sethttpVersion(httpVersion);
+			this->setstatusCode("301");
+			this->setstatusDescription("Moved Permanently");
+			this->setContentLenght(std::to_string(this->getBody().size()));
+	        
+	        if(location.getLocationRedirectionObject().substr(0, 5) == "http:" || location.getLocationRedirectionObject().substr(0, 6) == "https:")
+	        {
+	            this->setLocation(location.getLocationRedirectionObject());
+	           	this->mergeRespondStrings();
+	        }
+	        else
+	        {
+				index = this->server.getLocationByName(location.getLocationRedirectionObject());
+				if(index != -1 || path.size() > 0)
+				{
+					if(path[path.size() - 1] == '/')
+						path = path.substr(0, path.length() - 1);
+                    {
+                        if(location.getLocationRedirectionObject().size())
+					    {
+                            this->setLocation(location.getLocationRedirectionObject() + '/');
+					        this->mergeRespondStrings();
+					        return ;
+                        }
+                        else
+                        {
+                            this->setLocation(path + '/');
+					        this->mergeRespondStrings();
+					        return ;
+                        }
+                    }
+				}
+				else
+				{
+                    std::cout << index << " << index\n";
+                    std::cout << path << " <<<< EEEEEEE\n";
+                    exit(0);
+					this->setRespond(path, this->httpVersion, "404");
+					return ;
+				}
+			std::cout << this->finalString << " <<\n";
+			return ;
+			}
+		}
+		else if(error == "201") // << HERE
+		{
+			this->bodyFlag = false;
             this->sethttpVersion(httpVersion);
             this->setstatusCode("201");
             this->setstatusDescription("Created");
