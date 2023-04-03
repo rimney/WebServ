@@ -199,9 +199,7 @@ void    server::send(int fd)
     // {
         if ((::send(fd, _respond[fd].getfinalString().c_str(), _respond[fd].getfinalString().size(), 0)) == -1)
         {
-            // ::close(fd);
-            // _respond[fd].cleanAll();
-            // _respond[fd].setBodyFlag(false);
+            _respond[fd].cleanAll();
             throw(std::string("ERROR: send() failed to send response / file: " + _respond[fd].getPathSave()));
         }
     // }

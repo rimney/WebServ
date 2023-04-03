@@ -6,7 +6,7 @@
 /*   By: rimney <rimney@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/15 20:32:17 by rimney            #+#    #+#             */
-/*   Updated: 2023/04/03 02:18:58 by rimney           ###   ########.fr       */
+/*   Updated: 2023/04/03 04:27:28 by rimney           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -115,11 +115,12 @@ bool respond::isAmongErrorCodes(int error_code)
 
 std::string respond::chunkedFileToString(std::string path)
 {
+    std::cout << path << " << path\n";
     int fd = open(path.c_str(), O_RDONLY);
     if (fd == -1) 
     {
         std::cerr << "Error opening file " << path << std::endl;
-        return "";
+        return "Error";
     }
     
     // Move file pointer to current chunk position
@@ -139,7 +140,7 @@ std::string respond::chunkedFileToString(std::string path)
     else if (bytes_read == -1)
     {
         std::cerr << "Error while chunking";
-        return "";
+        return "Error";
     }
     
     std::string content(buffer, bytes_read);
