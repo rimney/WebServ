@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   respond.cpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: rimney <rimney@student.42.fr>              +#+  +:+       +#+        */
+/*   By: eel-ghan <eel-ghan@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/15 20:32:17 by rimney            #+#    #+#             */
-/*   Updated: 2023/04/01 20:32:02 by eel-ghan         ###   ########.fr       */
+/*   Updated: 2023/04/03 00:52:59 by eel-ghan         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -119,7 +119,7 @@ std::string respond::chunkedFileToString(std::string path)
     if (fd == -1) 
     {
         std::cerr << "Error opening file " << path << std::endl;
-        return "";
+        return "Error";
     }
     
     // Move file pointer to current chunk position
@@ -474,7 +474,6 @@ void	respond::setRespond(std::string path, std::string httpVersion, std::string 
         cleanAll();
         if(this->getBodyFlag() == false)
         {
-            std::cout << "Header Set !\n"; 
             this->setChunkPosition(0);
             this->setContentType(getFileType(path));
             this->sethttpVersion(httpVersion);

@@ -103,10 +103,13 @@ void cgi_handler::exec(respond & response)
             fclose(file_in);
         if (file_out != NULL)
             fclose(file_out);
+
         std::cerr << "ERROR: CGI failed to create tmp file\n";
+    
         response.setstatusCode("500");
         response.setstatusDescription("Internal Server Error");
-        // add page error
+        response.setContentType("text/html");
+        response.setBody("<h1>Internal Server Error</h1>"); // set error page
         response.mergeRespondStrings();
         return ;
     }
@@ -125,7 +128,8 @@ void cgi_handler::exec(respond & response)
         std::cerr << "ERROR: fork() failed\n";
         response.setstatusCode("500");
         response.setstatusDescription("Internal Server Error");
-        // add page error
+        response.setContentType("text/html");
+        response.setBody("<h1>Internal Server Error</h1>"); // set error page
         response.mergeRespondStrings();
         return ;
     }
@@ -134,12 +138,12 @@ void cgi_handler::exec(respond & response)
         if (dup2(fd_out, STDOUT_FILENO) == -1)
         {
             std::cerr << "ERROR: dup2() failed\n";
-            write(fd_out, "500", 3);
+            write(fd_out, "500 Internal Server Error\r\n", 29);
         }
         if (dup2(fd_in, STDIN_FILENO) == -1)
         {
             std::cerr << "ERROR: dup2() failed\n";
-            write(fd_out, "500", 3);
+            write(fd_out, "500Internal Server Error\r\n", 29);
         }
 
         char * const argv[3] = {
@@ -151,7 +155,7 @@ void cgi_handler::exec(respond & response)
         execve(_location.getCgiPathObject(_request.get_start_line().full_path).c_str(), argv, env);
 
         std::cerr << "ERROR: execve() failed\n";
-        write(fd_out, "500", 3);
+        write(fd_out, "500 Internal Server Error\r\n", 29);
     }
     else
     {
@@ -190,15 +194,15 @@ void    cgi_handler::generate_response(std::string & cgi_response, respond & res
     std::string header, element;
     size_t      content_length;
 
-    std::cout << "cgi_response: " << cgi_response << '\n';
+    std::cout << "cgi_response: \n" << cgi_response << '\n';
 
-    if (cgi_response.find("500") != std::string::npos || cgi_response.empty())
+    if (cgi_response.find("500 Internal Server Error\r\n") != std::string::npos || cgi_response.empty())
     {
         response.setstatusCode("500");
         response.setstatusDescription("Internal Server Error");
-        // add page error
+        response.setContentType("text/html");
+        response.setBody("<h1>Internal Server Error</h1>"); // set error page
         response.mergeRespondStrings();
-        std::cout << "500 from here \n";
         return ;
     }
 
@@ -206,7 +210,6 @@ void    cgi_handler::generate_response(std::string & cgi_response, respond & res
     {
         if (pos == i)
             break ;
-        
         header = cgi_response.substr(i, pos - i);
 
         if ((j = header.find(':')) != std::string::npos)
@@ -220,6 +223,10 @@ void    cgi_handler::generate_response(std::string & cgi_response, respond & res
                 response.setLocation(header.substr(j));
             else if (element == "Status:")
                 response.setstatusCode(header.substr(j));
+            // else if (element == "Set-Cookie:")
+                // response.setCookie(header.substr(j));
+            // else if (element == "Expires:")
+                // response.setExpires(header.substr(j));
         }
         i += header.size() + 2;
         element.clear();

@@ -71,6 +71,11 @@ int server::get_error_flag() const
     return _error_flag;
 }
 
+std::map<int, int>  server::get_fd_port()
+{
+    return _fd_port_map;
+}
+
 int server::get_fd_port(int fd)
 {
     return _fd_port_map[fd];
@@ -132,12 +137,7 @@ void    server::set_error_flag(int error_flag)
     _error_flag = error_flag;
 }
 
-void    server::insert_to_fd_port(int fd, int port)
-{
-    _fd_port_map.insert(std::make_pair(fd, port));
-}
-
-void server::accept()
+void server::accept(int fd)
 {
     int optval = 1;
 
@@ -151,6 +151,7 @@ void server::accept()
         ::close(_fd_connection);
         throw(std::string("ERROR: fcntl() failed."));
     }
+    _fd_port_map.insert(std::make_pair(_fd_connection, _fd_port_map[fd]));
 }
 
 void    server::close()
@@ -162,7 +163,7 @@ void    server::receive(int fd)
 {
     int     r;
     char    buffer[RECV_SIZE] = {0};
-    
+
     r = recv(fd, buffer, RECV_SIZE, 0);
     if (r == -1)
     {
@@ -185,23 +186,18 @@ void    server::receive(int fd)
         _request.insert(std::make_pair(fd, Request()));
         _respond.insert(std::make_pair(fd, respond(_server_config)));
     }
+    std::cout << _request_map[fd] << '\n';
 }
 
 void    server::send(int fd)
 {
-    // ssize_t sent;
 
-    // std::cout << _respond[fd].getBody();
-    // std::cout << _respond[fd].getBodyFlag() << " <<\n";
-
-
+    std::cout << _respond[fd].getfinalString() << " <<<<<<<<\n";
     if(_respond[fd].getBody().empty())
         _respond[fd].recoverBody(atoi(_respond[fd].getstatusCode().c_str()));
-    
     if(_respond[fd].getBodyFlag() == true)
         _respond[fd].setFinalString(_respond[fd].chunkedFileToString(_respond[fd].getPathSave()));
     // if(_respond[fd].getfinalString().size() > 0)
-    // {
         if ((::send(fd, _respond[fd].getfinalString().c_str(), _respond[fd].getfinalString().size(), 0)) == -1)
         {
             // ::close(fd);
@@ -211,6 +207,7 @@ void    server::send(int fd)
         }
     // }
     _respond[fd].cleanAll();
+    std::cout << "send <<<\n";
 }
 
 void    server::set_server_config(server_parser  & server_config)
@@ -279,7 +276,6 @@ void    server::delete_method(std::string  & path, int fd)
         int r = is_file_or_dir(path);
         if (r == 1) // handle file cases
         {
-            std::cout << "file <<\n";
             if (remove(path.c_str()) == 0)
             {
                 _respond[fd].setstatusCode("204");
@@ -364,7 +360,6 @@ void server::Get(int location_index , std::string path, int fd)
     }
     server_location location = _server_config.getOneLocationObject(location_index);
     std::string isFOrD = isFileOrDirectory(path);
-    std::cout << _respond[fd].getstatusCode() << " code <<\n";
 
     if((_respond[fd].getstatusCode() == "200" || _respond[fd].getstatusCode() == "301" ) && _respond[fd].getBodyFlag() == false)
     {
@@ -373,7 +368,7 @@ void server::Get(int location_index , std::string path, int fd)
         {
             if(location.getHasCgi() && location.isCgi(_request[fd].get_start_line().full_path)) // check if the extention of file compatible with extentions 
             {
-                std::cout << _request[fd].get_start_line().full_path << " << EE\n";
+                std::cout << "port: " << _fd_port_map[fd] << '\n';
                 cgi_handler cgi(_server_config, _request[fd], _fd_port_map[fd]);
                 cgi.exec(_respond[fd]);
                 return ;
@@ -397,7 +392,6 @@ void server::Get(int location_index , std::string path, int fd)
         {
             if(path[path.size() - 1] != '/')
             {
-                std::cout << path << " << EEEE\n"; 
                 _respond[fd].setRespond(_request[fd].get_start_line().path + '/', _respond[fd].gethttpVersion(), "301");
                 _respond[fd].setLocation(_request[fd].get_start_line().path + '/');
                 _respond[fd].mergeRespondStrings();
@@ -437,6 +431,7 @@ void server::Get(int location_index , std::string path, int fd)
 
 void    server::process(int fd)
 {
+    std::cout << "fd: " << fd << ", port: " << _fd_port_map[fd] << "\n";
     if(!_request[fd].get_wait_body())
         _request[fd].parser(_request_map[fd]);
     else
