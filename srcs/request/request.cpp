@@ -233,7 +233,7 @@ void Request::request_well_formed(server_parser &serv)
     }
     if((start_line.method == "POST" && header.find("Transfer-Encoding")->first.empty() && header.find("Content-Length")->first.empty() && r_error == "")
         || (start_line.method == "POST" && !header.find("Transfer-Encoding")->first.empty() && !header.find("Content-Length")->first.empty()))
-        r_error = "400 Bad Request";
+        r_error = "400";
     // std::cout << header["Content-Length"] << " <<<  " << serv.getServerLocationsObject()[start_line.location_index].getLocationCmbsObject() << std::endl;
     if(tmp_path.length() > 2048 && r_error == "")
         r_error = "414 Request-URI Too Long";
@@ -241,7 +241,7 @@ void Request::request_well_formed(server_parser &serv)
     {
         if(((tmp_path[i] < 95 || tmp_path[i] > 'z') && (tmp_path[i] < 33 || tmp_path[i] > 90))
             || tmp_path[i] == 34 || tmp_path[i] == 60 || tmp_path[i] == 62 || tmp_path[i] == 96 )
-                r_error = "400 Bad Request";
+                r_error = "400";
     }
     if(serv.getCmbsObject()  > 0 && (size_t)serv.getCmbsObject()  <  body.size() && r_error == "")//??
             r_error = "413 Request Entity Too Large";

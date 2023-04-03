@@ -394,7 +394,7 @@ void	respond::setRespond(std::string path, std::string httpVersion, std::string 
             this->mergeRespondStrings();
             return ;
         }
-        else if(error == "400 Bad Request")
+        else if(error == "400")
         {
             this->bodyFlag = false;
             this->sethttpVersion(httpVersion);

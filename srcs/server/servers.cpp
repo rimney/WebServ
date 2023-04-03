@@ -105,8 +105,16 @@ void    servers::run()
             FD_ZERO(&_set_read_fds);
             FD_ZERO(&_set_write_fds);
             _max_fd = 0;
+
+            for (std::map<int, server>::iterator it = _servers.begin(); it != _servers.end(); it++)
+            {
+                FD_SET((*it).first, &_set_fds);
+                if (_max_fd < (*it).first)
+                    _max_fd = (*it).first;
+            }
             for (int i = 0; (size_t)i < _servers.size(); i++)
             {
+                std::cout << "here <<<<<<<\n";
                 fd = _servers[i].get_fd_socket();
                 FD_SET(fd, &_set_fds);
                 if (_max_fd < _servers[i].get_fd_socket())
@@ -174,6 +182,17 @@ void    servers::run()
                     _fds_cnx[_fds_ready[i]].send(_fds_ready[i]);
                     if (_fds_cnx[_fds_ready[i]].getRespond(_fds_ready[i]).getBodyFlag() == false)
                         _fds_ready.erase(_fds_ready.begin() + i);
+                    
+                    // if (_fds_cnx[_fds_ready[i]].get_close() == true)
+                    // {
+                    //     FD_CLR(_fds_ready[i], &_set_write_fds);
+                    //     FD_CLR(_fds_ready[i], &_set_read_fds);
+                    //     FD_CLR(_fds_ready[i], &_set_fds);
+                    //     close(_fds_ready[i]);
+                    //     _fds_ready.erase(_fds_ready.begin() + i);
+                    //     _fds_cnx.erase(i);
+                    //     _fds_cnx[_fds_ready[i]].set_close(false);
+                    // }
                 }
                 catch(const std::string& msg)
                 {

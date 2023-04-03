@@ -40,6 +40,7 @@ class server
         std::map<int, std::string>  _request_map;
         std::map<int, respond>      _respond;
         std::map<int, Request>      _request;
+        bool                        _close;
 
     public:
         server();
@@ -55,6 +56,7 @@ class server
         int                 get_fd_connection() const;
         int                 get_error_flag() const;
         int                 get_fd_port(int fd);
+        bool                get_close();
         void                insert_to_fd_port(int fd, int port);
         server  &           operator=(server const & s);
         void                accept();
@@ -63,6 +65,7 @@ class server
         void                send(int fd);
         void                set_server_config(server_parser & server_config);
         void                set_error_flag(int error_flag);
+        void                set_close(bool close);
         void                setup(server_parser & server_config, size_t i);
         void                delete_method(std::string & path, int fd);
         server_parser       getServerData(void) {return this->_server_config;}

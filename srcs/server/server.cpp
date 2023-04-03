@@ -18,7 +18,7 @@ server::server()
     : _port(DEFAULT_PORT), _host(INADDR_ANY), _error_flag(1){}
 
 server::server(std::vector<int> port, unsigned int host)
-    : _host(host) ,_error_flag(1)
+    : _host(host) ,_error_flag(1), _close(false)
 {
     _port = port;
 }
@@ -32,6 +32,11 @@ server::server(server const & s)
 respond server::getRespond(int fd)
 {
     return _respond[fd];
+}
+
+bool    server::get_close()
+{
+    return _close;
 }
 
 server::~server() {}
@@ -132,6 +137,11 @@ void    server::set_error_flag(int error_flag)
     _error_flag = error_flag;
 }
 
+void    server::set_close(bool close)
+{
+    _close = close;
+}
+
 void    server::insert_to_fd_port(int fd, int port)
 {
     _fd_port_map.insert(std::make_pair(fd, port));
@@ -210,7 +220,12 @@ void    server::send(int fd)
             throw(std::string("ERROR: send() failed to send response / file: " + _respond[fd].getPathSave()));
         }
     // }
+    if (_request[fd].get_error() == "400")
+        _close = true;
+
     _respond[fd].cleanAll();
+    _request[fd].clear();
+    _request_map.erase(fd);
 }
 
 void    server::set_server_config(server_parser  & server_config)
@@ -480,8 +495,6 @@ void    server::process(int fd)
                 delete_method(_request[fd].get_start_line().full_path, fd);
             }
         }
-        _request[fd].clear();
-        _request_map.erase(fd);
     }
 
 }
