@@ -6,7 +6,7 @@
 /*   By: rimney <rimney@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/24 21:53:42 by rimney            #+#    #+#             */
-/*   Updated: 2023/04/02 03:14:28 by rimney           ###   ########.fr       */
+/*   Updated: 2023/04/03 20:32:06 by rimney           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -162,6 +162,7 @@ class server_parser : public server_location
         void            restoreAutoIndex(int i);
         void restoreServerMethods(int i);
         int getLocationByName(std::string name) const;
+        void    checkServerData(void);
 
 
 

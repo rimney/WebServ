@@ -6,7 +6,7 @@
 /*   By: rimney <rimney@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/15 20:32:17 by rimney            #+#    #+#             */
-/*   Updated: 2023/04/03 04:27:28 by rimney           ###   ########.fr       */
+/*   Updated: 2023/04/03 20:51:29 by rimney           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -115,7 +115,6 @@ bool respond::isAmongErrorCodes(int error_code)
 
 std::string respond::chunkedFileToString(std::string path)
 {
-    std::cout << path << " << path\n";
     int fd = open(path.c_str(), O_RDONLY);
     if (fd == -1) 
     {
@@ -151,6 +150,7 @@ std::string respond::chunkedFileToString(std::string path)
     close(fd);
     
     if (getfinalString().size() > 0) {
+        std::cout << "EEEE\n";
         return getfinalString() + content;
     }
     else
@@ -194,6 +194,8 @@ void    respond::cleanAll(void)
     this->finalString.clear();
     this->content_type.clear();
     this->location.clear();
+    this->cookies.clear();
+    this->expireDate.clear();
 }
 
 std::string	respond::getAutoIndexPage(std::string path)
