@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   parsing.hpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: eel-ghan <eel-ghan@student.42.fr>          +#+  +:+       +#+        */
+/*   By: rimney <rimney@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/24 21:53:42 by rimney            #+#    #+#             */
-/*   Updated: 2023/03/26 01:42:17 by eel-ghan         ###   ########.fr       */
+/*   Updated: 2023/04/02 03:14:28 by rimney           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,16 +28,17 @@ class server_location
         bool						is_auto_index; // is autoindex
         bool                        has_cgi;
         bool                        has_redirection;
+        bool                        has_301_code;
         std::string					location_name; // /location/example
         std::string					root; // root key
         std::string					index; // index 
         std::string					redirection; // return aaa/aaaa/html
-        std::string					cgiPath; // location of the interpreter 
         std::string					error_page; // same as the previous class
-        std::vector<int>			error_codes; // // // // 
+        std::vector<int>			error_codes; // // // //
         std::vector<std::string>	cgiExt; // cgi extension
-        std::vector<std::string>	HttpMethods; // GET, POST, DELETE
         std::string                 upload;
+        std::vector<std::string>	cgiPaths; // location of the interpreter 
+        std::vector<std::string>	HttpMethods; // GET, POST, DELETE
         
     public :
 		////////////// Constructors and Overloads //////////////
@@ -59,8 +60,9 @@ class server_location
         std::string					getLocationNameObject(void) const {return this->location_name;}
         std::vector<int>			getLocationErrorCodesObject(void) {return (this->error_codes);}
         std::vector<std::string>	getLocationMethodsObject(void){return (this->HttpMethods);}
+        bool                        getLocationHas301Code(void) {return (this->has_301_code);}
 
-        std::string                 getCgiPathObject(void) {return (this->cgiPath);}
+        std::string                 getCgiPathObject(std::string path);
         std::string                 getUploadObject(void) {return (this->upload);}
         bool                        getHasCgi(void) {return (has_cgi);}
         bool                        getHasRedirection(void) {return (this->has_redirection);}
@@ -80,14 +82,16 @@ class server_location
         void    getCgiExec(std::string *Keys, size_t size);
         void    getUpload(std::string *Keys, size_t size);
         void    getLocationName(std::string *Keys, size_t size);
+        void    checkCgiAllowed(void);
         void    construct_location(std::vector<std::string>::iterator first, std::vector<std::string>::iterator last);
-		////////////// Parsing Fucntions //////////////
+		bool    isCgi(std::string path);
+        ////////////// Parsing Fucntions //////////////
 };
 
 class server_parser : public server_location
 {
     protected :
-        int							port; // 8080
+        std::vector<int>							port; // 8080
         int							host; // 0.0.0.1 --> into in int
         int							server_index; // server index in parsing
         int							client_max_body_size; // i mean that obvious
@@ -117,7 +121,7 @@ class server_parser : public server_location
 		////////////// Constructors and Overloads //////////////
 
 		////////////// Getters and Setters //////////////
-        int							getPortObject(void)	const;
+        std::vector<int>							getPortObject(void)	const;
         int							getServer_IndexLocationObject(void) const;
         int							getHostObject(void) const;
         int							getCmbsObject(void) const;
@@ -140,6 +144,7 @@ class server_parser : public server_location
         void			getCmds(std::string *keys, size_t size);
         void			getRoot(std::string *keys, size_t size);
         void    		getErrorPage(std::string *keys, size_t size);
+        void            getHost(std::string *keys, size_t size);
         void	  		getPort(std::string *Port, size_t temp_size);
         void			getIndexPage(std::string *keys, size_t size);
         void			getAutoIndex(std::string *keys, size_t size);
@@ -156,6 +161,8 @@ class server_parser : public server_location
         void            restoreIndexObject(int i);
         void            restoreAutoIndex(int i);
         void restoreServerMethods(int i);
+        int getLocationByName(std::string name) const;
+
 
 
 		////////////// Parsing Fucntions //////////////		
@@ -181,6 +188,8 @@ class config_parser : public server_parser
         void			getServerName(std::string *keys, size_t size);
         void			servers_index_init();
         int				getServersCount(std::vector<std::string> vec);
+        bool            hasDuplicatePorts();
+        void            checkFileBrackets(std::string file);
 };
 
 std::ostream &	operator<<(std::ostream& os, config_parser& p);

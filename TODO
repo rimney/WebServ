@@ -1,0 +1,5 @@
+check for '/' location in server and it exists
+check if server has host , port , error and / methods
+check if there aginst the config directives
+	host 127.0.0.1; && localhost
+check if there's ; at the end of every line

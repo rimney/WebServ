@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Parsing.cpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: eel-ghan <eel-ghan@student.42.fr>          +#+  +:+       +#+        */
+/*   By: rimney <rimney@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/07 03:50:36 by rimney            #+#    #+#             */
-/*   Updated: 2023/03/26 01:42:00 by eel-ghan         ###   ########.fr       */
+/*   Updated: 2023/04/03 00:37:30 by rimney           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -63,7 +63,7 @@ std::ostream & operator<<(std::ostream & os, server_location & s)
         os << "     | Location Methods : "<< locationMethods[i] << '\n';
     os << "     | Location AutoIndex : " << s.getLocationIsAutoIndexObject() << '\n'; 
     os << "     |------------->>\n";
-        return (os);
+    return (os);
 }
 
 std::ostream & operator<<(std::ostream & os, server_parser & s)
@@ -73,7 +73,8 @@ std::ostream & operator<<(std::ostream & os, server_parser & s)
     std::vector<server_location> serverLocations = s.getServerLocationsObject();
     os << "|------------->>\n";
     os << "| Server index : " << s.getServerIndexObject() << '\n';
-    os << "| Server Port : " << s.getPortObject() << '\n';
+
+    // os << "| Server Port : " << s.getPortObject() << '\n';
     os << "| Server Host : " << s.getHostObject() << " ( " << toIp(s.getHostObject())<<  " )" <<'\n';
     os << "| Server Location Count: " << s.getServerLocationCountObject() << '\n';
     os << "| Server CMBS : " << s.getCmbsObject() << '\n';
@@ -108,7 +109,7 @@ server_location::server_location(server_location const  & s)
     this->root = s.root;
     this->HttpMethods = s.HttpMethods;
     this->index = s.index;
-    this->cgiPath = s.cgiPath;
+    this->cgiPaths = s.cgiPaths;
     this->cgiExt = s.cgiExt;
     this->error_codes = s.error_codes;
     this->error_page = s.error_page;
@@ -117,6 +118,8 @@ server_location::server_location(server_location const  & s)
     this->has_cgi = s.has_cgi;
     this->has_redirection = s.has_redirection;
     this->redirection = s.redirection;
+    this->upload = s.upload;
+    this->has_301_code = s.has_301_code;
 }
 server_location & server_location::operator=(server_location const & s)
 {
@@ -125,7 +128,7 @@ server_location & server_location::operator=(server_location const & s)
     this->root = s.root;
     this->HttpMethods = s.HttpMethods;
     this->index = s.index;
-    this->cgiPath = s.cgiPath;
+    this->cgiPaths = s.cgiPaths;
     this->cgiExt = s.cgiExt;
     this->error_codes = s.error_codes;
     this->error_page = s.error_page;
@@ -134,13 +137,26 @@ server_location & server_location::operator=(server_location const & s)
     this->is_auto_index = s.is_auto_index;
     this->has_redirection = s.has_redirection;
     this->redirection = s.redirection;
+    this->upload = s.upload;
+    this->has_301_code = s.has_301_code;
     return (*this);
 }
+
+bool server_location::isCgi(std::string path)
+{
+    char  const *s = strrchr(path.c_str(), '.');
+    if(!s)
+        return (false);
+    if(!strcmp(strrchr(path.c_str(), '.'), ".php") || !strcmp(strrchr(path.c_str(), '.'), ".rb") || !strcmp(strrchr(path.c_str(), '.'), ".py"))
+        return (true);
+    return (false);
+}
+
 void    server_location::getErrorPage(std::string *keys, size_t size)
 {
     if (size <= 1)
     {
-        std::cout << "Error Error Page Not Found\n";
+        std::cerr << "Error Error Page Not Found\n";
         exit(0);
     }
     this->error_page = keys[size - 1];
@@ -152,7 +168,7 @@ void    server_location::getIndexPage(std::string *keys, size_t size)
 {
     if(size <= 1 || size > 2)
     {
-        std::cout << "Error Missing index page !";
+        std::cerr << "Error Missing index page !";
         exit(0);
     }
     this->index = keys[size - 1];
@@ -162,7 +178,7 @@ void    server_location::getAutoIndex(std::string *keys, size_t size)
 {
     if(size <= 1 || size > 2)
     {
-        std::cout << "Error Autoindex Bad Argument\n";
+        std::cerr << "Error Autoindex Bad Argument\n";
         exit(0);
     }
     if(keys[size - 1] == "on")
@@ -171,35 +187,46 @@ void    server_location::getAutoIndex(std::string *keys, size_t size)
         this->is_auto_index = false;
     else
     {
-        std::cout << "Error Wrong autoindex Argument";
+        std::cerr << "Error Wrong autoindex Argument";
         exit(0);
     }
+    delete [] keys;
 }
 void    server_location::getRoot(std::string *keys, size_t size)
 {
     if(size <= 1 || size > 2)
     {
-        std::cout << "Error Missing Root Page\n";
+        std::cerr << "Error Missing Root Page\n";
         exit(0);
     }
     this->root = keys[size - 1];
     delete [] keys;
 }
+
 void    server_location::getRedirection(std::string *keys, size_t size)
 {
-    if(size <= 1 || size > 2)
+    if(size != 3)
     {
-        std::cout << "Error Redirection Arguments !\n";
+        std::cerr << "Error Redirection Arguments !\n";
         exit(0);
     }
+    if(size == 3 && keys[1] == "301")
+        this->has_301_code = true;
+    else if (size == 3 && keys[1] != "301")
+    {
+        std::cerr << "Error : Check Redirection Code Value\n";
+        exit(1);
+    }
     this->redirection = keys[size - 1];
+
     delete [] keys;
 }
+
 void    server_location::getCmds(std::string *keys, size_t size)
 {
     if(size <= 1 || size > 2)
     {
-        std::cout << "Error Cmbs Arguments";
+        std::cerr << "Error Cmbs Arguments";
         exit(0);
     }
     this->client_max_body_size = stoi(keys[size - 1]);
@@ -209,7 +236,7 @@ void    server_location::getMethods(std::string *Keys, size_t size)
 {
     if(size <= 1 || size > 4)
     {
-        std::cout << "Error Methods Assignemt\n";
+        std::cerr << "Error Methods Assignemt\n";
         exit(0);
     }
     for(size_t i = 1;i < size; i++)
@@ -222,20 +249,23 @@ void    server_location::getMethods(std::string *Keys, size_t size)
 
 void    server_location::getCgiPath(std::string *Keys, size_t size)
 {
-    if(size <= 1 || size > 2)
+    if(size <= 1)
     {
-        std::cout << "Error Cgi Path Assignemt\n";
+        std::cerr << "Error Cgi Path Assignemt\n";
         exit(0);
     }
-    this->cgiPath = Keys[size - 1];
+    for(size_t i = 1; i < size; i++)
+        this->cgiPaths.push_back(Keys[i]);
+
     delete [] Keys;
 }
+
 
 void    server_location::getCgiExec(std::string *Keys, size_t size)
 {
     if(size <= 1)
     {
-        std::cout << "Error Cgi Exec Assinment\n";
+        std::cerr << "Error Cgi Exec Assinment\n";
         exit(0);
     }
     for(size_t i = 1; i < size; i++)
@@ -247,10 +277,14 @@ void    server_location::getLocationName(std::string *Keys, size_t size)
 {
     if(size <= 1 || size > 3)
     {
-        std::cout << "Error Location Name Arguments\n";
+        std::cerr << "Error Location Name Arguments\n";
         exit(0);
     }
-    this->location_name = Keys[size - 2];
+    if(Keys[size - 1] != "{")
+        this->location_name = Keys[size - 1];
+    else
+        this->location_name = Keys[size - 2];
+    
     delete [] Keys;
 }
 
@@ -258,11 +292,96 @@ void    server_location::getUpload(std::string *Keys, size_t size)
 {
     if(size <= 1 || size > 2)
     {
-        std::cout << "Error Upload Arguments\n";
+        std::cerr << "Error Upload Arguments\n";
         exit(0);
     }
     this->upload = Keys[size - 1];
     delete [] Keys; 
+}
+
+void    server_location::checkCgiAllowed(void)
+{
+    bool f = false;
+    std::string path_holder;
+    std::string ext_holder;
+
+    for(size_t i = 0; i < this->cgiExt.size(); i++)
+    {
+        if(this->cgiExt[i] != ".php" && this->cgiExt[i] != ".rb" && this->cgiExt[i] != ".py")
+        {
+            std::cerr << "Error : CGI Extention Not Allowed\n";
+            exit(1);
+        }
+    }
+    for(size_t i = 0; i < this->cgiPaths.size(); i++)
+    {
+        f = false;
+        if(isFileOrDirectory(this->cgiPaths[i]) != "file")
+        {
+            std::cerr << "Error : " << this->cgiPaths[i] << " Check This Path\n";
+            exit(0);
+        }
+        if(!strcmp(strrchr(this->cgiPaths[i].c_str(), '/') + 1, "php") || !strcmp(strrchr(this->cgiPaths[i].c_str(), '/') + 1, "php-cgi"))
+        {
+            for(size_t i = 0; i < this->cgiExt.size(); i++)
+            {
+                if(this->cgiExt[i] == ".php")
+                    f = true;
+            }
+            if(f == false)
+            {
+                std::cerr << "Error : There's No Extention Of : " << this->cgiPaths[i] << std::endl;
+                exit(1);
+            }
+        }
+        else if(!strcmp(strrchr(this->cgiPaths[i].c_str(), '/') + 1, "python") || !strcmp(strrchr(this->cgiPaths[i].c_str(), '/') + 1, "python3"))
+        {
+            for(size_t i = 0; i < this->cgiExt.size(); i++)
+            {
+                if(this->cgiExt[i] == ".py")
+                    f = true;
+            }
+            if(f == false)
+            {
+                std::cerr << "Error : There's No Extention Of : " << this->cgiPaths[i] << std::endl;
+                exit(1);
+            }
+        }
+        else if(!strcmp(strrchr(this->cgiPaths[i].c_str(), '/') + 1, "ruby"))
+        {
+            for(size_t i = 0; i < this->cgiExt.size(); i++)
+            {
+                if(this->cgiExt[i] == ".rb")
+                    f = true;
+            }
+            if(f == false)
+            {
+                std::cerr << "Error : There's No Extention Of : " << this->cgiPaths[i] << std::endl;
+                exit(1);
+            }
+        }
+        else
+        {
+            std::cerr << "Error : Cgi Not Supported\n";
+            exit(1);
+        }
+    }
+}
+
+std::string server_location::getCgiPathObject(std::string path)
+{
+    if(strrchr(path.c_str(), '.') == NULL)
+        return "";
+    for(size_t i = 0; i < this->cgiPaths.size(); i++)
+    {
+        if((!strcmp(strrchr(this->cgiPaths[i].c_str(), '/') + 1, "php") || !strcmp(strrchr(this->cgiPaths[i].c_str(), '/') + 1, "php-cgi")) && !strcmp(strrchr(path.c_str(), '.') + 1, "php"))
+            return (this->cgiPaths[i]);
+        if((!strcmp(strrchr(this->cgiPaths[i].c_str(), '/') + 1, "python") || !strcmp(strrchr(this->cgiPaths[i].c_str(), '/') + 1, "python3")) && !strcmp(strrchr(path.c_str(), '.') + 1, "py"))
+            return (this->cgiPaths[i]);
+        if(!strcmp(strrchr(this->cgiPaths[i].c_str(), '/') + 1, "ruby") && !strcmp(strrchr(path.c_str(), '.') + 1, "py"))
+            return (this->cgiPaths[i]);
+    }
+    return "";
 }
 void server_location::construct_location(std::vector<std::string>::iterator first, std::vector<std::string>::iterator last)
 {
@@ -275,7 +394,7 @@ void server_location::construct_location(std::vector<std::string>::iterator firs
     for(size_t i = 0; i < locationVec.size(); i++)
     {
         this->client_max_body_size = 0;
-        if(!strncmp(locationVec[i].c_str(), "location", 8) && locationVec[i].back() == '{')
+        if ((!strncmp(locationVec[i].c_str(), "location", 8) && locationVec[i].back() == '{') || (!strncmp(locationVec[i].c_str(), "location", 8) && locationVec[i + 1] == "{"))
         {
             getLocationName(stringSplit(locationVec[i], ' ', &temp_size), temp_size);
         }
@@ -307,11 +426,10 @@ void server_location::construct_location(std::vector<std::string>::iterator firs
         {
             getAutoIndex(stringSplit(locationVec[i], ' ', &temp_size), temp_size);
         }
-        else if (!strncmp(locationVec[i].c_str(), "return", 6))
+        else if (!strncmp(locationVec[i].c_str(), "return ", 7))
         {
             getRedirection(stringSplit(locationVec[i], ' ', &temp_size), temp_size);
             this->has_redirection = true;
-            std::cout << this->redirection << " redirection\n";
         }
         else if (!strncmp(locationVec[i].c_str(), "client_max_body_size", 19))
         {
@@ -325,6 +443,8 @@ void server_location::construct_location(std::vector<std::string>::iterator firs
         {
             this->has_cgi = true;
             getCgiPath(stringSplit(locationVec[i], ' ', &temp_size), temp_size);
+ 
+            checkCgiAllowed();
         }
         else if (!strncmp(locationVec[i].c_str(), "cgi_exec ", 9))
         {
@@ -335,6 +455,7 @@ void server_location::construct_location(std::vector<std::string>::iterator firs
             getUpload(stringSplit(locationVec[i], ' ', &temp_size), temp_size);
         }
     }
+            // exit(0);
 }
 std::string *stringSplit(std::string split, char c, size_t *index_save)
 {
@@ -406,7 +527,7 @@ std::vector<std::string> server_parser::getServerNamesObject(void) const
 {
     return (this->server_names);
 }
-int server_parser::getPortObject(void) const
+std::vector<int> server_parser::getPortObject(void) const
 {
     return (this->port);
 }
@@ -484,13 +605,13 @@ int server_parser::ipToInt(std::string host)
         Array.push_back(stoi(keys[i]));
         if(!is_digits(keys[i]) || Array[i] > 256 || Array[i] < 0)
         {
-            std::cout << "Error Wrong IP Value\n";
+            std::cerr << "Error Wrong IP Value\n";
             exit(0);
         }
     }
     if(size != 4)
     {
-        std::cout << "Wrong ip Address";
+        std::cerr << "Wrong ip Address";
         exit(0);
     }
     for (int i = 0; i < 4; i++) {
@@ -501,45 +622,25 @@ int server_parser::ipToInt(std::string host)
 }
 void    server_parser::getPort(std::string *Port, size_t temp_size)
 {
-    std::string *temparray;
-    size_t temp_sizee;
-    size_t pos;
-
-    if(temp_size > 2)
+    if(temp_size < 1)
     {
-        std::cout << "Error listen has more than one argument !\n";
-        exit(0);
+        std::cerr << "Error : Check The Port Arguments\n";
+        exit(1);
     }
-    pos = Port[1].find('.');
-    if(!strncmp(Port[1].c_str(), "localhost:", 10) || pos != Port[1].npos)
-    {
-        temparray = stringSplit(Port[1], ':', &temp_sizee);
-        if (temp_sizee > 2)
-        {
-            std::cout << "Error port has more than one location\n";
-            exit(0);
-        }
-        this->port = stoi(temparray[1]);
-        if(strncmp(Port[1].c_str(), "localhost:", 10)) 
-            this->host = ipToInt(temparray[0]);
-        delete [] temparray;
-    }
-    else if (temp_size == 2 && is_digits(Port[1]))
-    {
-        this->port = stoi(Port[1]);
-    }
+    for(size_t i = 1; i < temp_size; i++)
+        this->port.push_back(atoi(Port[i].c_str()));
     delete [] Port;
 }
 void    server_parser::getServerName(std::string *keys, size_t size)
 {
     if (size <= 1)
     {
-        std::cout << "Error Missing Server Name !";
+        std::cerr << "Error Missing Server Name !";
         exit(0);
     }
     if(this->server_names.size() > 0)
     {
-        std::cout << "Error Duplicate Server_name !";
+        std::cerr << "Error Duplicate Server_name !";
         exit(0);
     }
     for(size_t i = 1; i < size; i++)
@@ -551,7 +652,7 @@ void    server_parser::getErrorPage(std::string *keys, size_t size)
 {
     if (size <= 1)
     {
-        std::cout << "Error Error Page Not Found\n";
+        std::cerr << "Error Error Page Not Found\n";
         exit(0);
     }
     this->error_page = keys[size - 1];
@@ -563,17 +664,18 @@ void    server_parser::getIndexPage(std::string *keys, size_t size)
 {
     if(size <= 1 || size > 2)
     {
-        std::cout << "Error Missing index page !";
+        std::cerr << "Error Missing index page !";
         exit(0);
     }
     this->index = keys[size - 1];
     delete [] keys;
 }
+
 void    server_parser::getAutoIndex(std::string *keys, size_t size)
 {
     if(size <= 1 || size > 2)
     {
-        std::cout << "Error Autoindex Bad Argument\n";
+        std::cerr << "Error Autoindex Bad Argument\n";
         exit(0);
     }
     if(keys[size - 1] == "on")
@@ -582,44 +684,69 @@ void    server_parser::getAutoIndex(std::string *keys, size_t size)
         this->is_auto_index = false;
     else
     {
-        std::cout << "Error Wrong autoindex Argument";
+        std::cerr << "Error Wrong autoindex Argument";
         exit(0);
     }
     delete [] keys;
 }
+
 void    server_parser::getRoot(std::string *keys, size_t size)
 {
     if(size <= 1 || size > 2)
     {
-        std::cout << "Error Missing Root Page\n";
+        std::cerr << "Error Missing Root Page\n";
         exit(0);
     }
     this->root = keys[size - 1];
     delete [] keys;
 }
+
 void    server_parser::getRedirection(std::string *keys, size_t size)
 {
     if(size <= 1 || size > 2)
     {
-        std::cout << "Error Redirection Arguments !\n";
+        std::cerr << "Error Redirection Arguments !\n";
         exit(0);
     }
     this->redirection = keys[size - 1];
     delete [] keys;
 }
+
 void    server_parser::getCmds(std::string *keys, size_t size)
 {
     if(size <= 1 || size > 2)
     {
-        std::cout << "Error Cmbs Arguments";
+        std::cerr << "Error Cmbs Arguments";
         exit(0);
     }
     this->client_max_body_size = stoi(keys[size - 1]);
     delete [] keys;
 }
+
+int server_parser::getLocationByName(std::string name) const
+{
+    for(size_t i = 0; i < location.size(); i++)
+    {
+        if(location[i].getLocationNameObject() == name)
+            return (i);
+    }
+    return (-1);
+}
+
+void    server_parser::getHost(std::string *keys, size_t size)
+{
+    // this->host = ipToInt(temparray[0]);
+    if(size < 1 || size > 2)
+    {
+        std::cerr << "Error : Check The Host Argumets";
+        exit(1);
+    }
+    this->host = ipToInt(keys[1]);
+    delete [] keys;
+}
+
 void    server_parser::construct_server(std::vector<std::string>::iterator first, std::vector<std::string>::iterator last)
 {
-    this->port = 8080;
     this->is_auto_index = false;
     this->server_had_delete_method = true;
     this->server_has_get_method = true;
@@ -634,9 +761,17 @@ void    server_parser::construct_server(std::vector<std::string>::iterator first
 
     for(size_t i = 1; i < serverVec.size(); i++)
     {
-        if(!strncmp(serverVec[i].c_str(), "listen ", 7))
+        if(!strncmp(serverVec[i].c_str(), "host ", 5))
         {
-            getPort(stringSplit(serverVec[i], ' ', &temp_size), temp_size); // host and port parsing;
+            getHost(stringSplit(serverVec[i], ' ', &temp_size), temp_size);
+            // getPort(stringSplit(serverVec[i], ' ', &temp_size), temp_size); // host and port parsing;
+            if(this->host == 0)
+                host = 2130706433;
+        }
+        else if(!strncmp(serverVec[i].c_str(), "port ", 5))
+        {
+            getPort(stringSplit(serverVec[i], ' ', &temp_size), temp_size);
+            // getPort(stringSplit(serverVec[i], ' ', &temp_size), temp_size); // host and port parsing;
             if(this->host == 0)
                 host = 2130706433;
         }
@@ -652,15 +787,17 @@ void    server_parser::construct_server(std::vector<std::string>::iterator first
             if(isFileOrDirectory(this->getServerErrorPageObject()) == "error")
             {
                 std::cerr << "Error : Check The Server Error Path\n";
-                // system("leaks webserv");
                 exit(0);
             }
         }
         else if(!strncmp(serverVec[i].c_str(), "index", 5))
         {
             getIndexPage(stringSplit(serverVec[i], ' ', &temp_size), temp_size);
-            if(isFileOrDirectory(this->getIndexObject()) == "error")
+            std::cout << serverVec[i] << " <<|\n"; 
+            if(isFileOrDirectory(this->getRootObject() + this->getIndexObject()) == "error")
             {
+                std::cout << this->getRootObject() << "<<<<<\n";
+                std::cout << this->getRootObject() + this->getIndexObject() << " <<\n";
                 std::cerr << "Error : Check The Server Index Path\n";
                 exit(0);
             }
@@ -668,6 +805,7 @@ void    server_parser::construct_server(std::vector<std::string>::iterator first
         else if(!strncmp(serverVec[i].c_str(), "root", 4))
         {
             getRoot(stringSplit(serverVec[i], ' ', &temp_size), temp_size);
+            std::cout << getRootObject() << "<<\n";
             if(isFileOrDirectory(this->getRootObject()) == "error")
             {
                 std::cerr << "Error : Check The Server Root Path\n";
@@ -686,7 +824,7 @@ void    server_parser::construct_server(std::vector<std::string>::iterator first
         {
             getCmds(stringSplit(serverVec[i], ' ', &temp_size), temp_size);
         }
-        else if (!strncmp(serverVec[i].c_str(), "location ", 9) && serverVec[i].back() == '{')
+        else if ((!strncmp(serverVec[i].c_str(), "location", 8) && serverVec[i].back() == '{') || (!strncmp(serverVec[i].c_str(), "location", 8) && serverVec[i + 1] == "{"))
         {
             opening_bracket = i;
             i++;
@@ -702,7 +840,7 @@ void    server_parser::construct_server(std::vector<std::string>::iterator first
             location_index++;          
         }
     }
-        this->getServerDataFromRootLocation();
+    this->getServerDataFromRootLocation();
 }
 
 void    server_parser::setLocationsIndex(std::vector<server_location> location)
@@ -712,7 +850,7 @@ void    server_parser::setLocationsIndex(std::vector<server_location> location)
 }
 void    server_parser::setServerIndex(int index)
 {
-    // std::cout << "CALLED\n";
+    // std::cerr << "CALLED\n";
     this->server_index = index;
 }
 size_t server_parser::getLocationCount(std::vector<std::string> vec)
@@ -754,11 +892,6 @@ void    server_parser::restoreIndexObject(int i)
     {
         std::cerr << "Error : Duplicate Index Path\n";
         exit(0);
-    }
-    else if(this->index.size() == 0 && this->location[i].getLocationIndexObject().size() == 0)
-    {
-        std::cerr << "Error : There's No Index In Server\n";
-        exit(0);   
     }
 }
 
@@ -815,6 +948,12 @@ config_parser::config_parser(std::string filename)
     std::vector<server_parser> holder;
 
     std::ifstream file(filename);
+    if(!file.good())
+    {
+        std::cerr << "Error : Cannot Open File!\n";
+        exit(1);
+    }
+    checkFileBrackets(filename);
     std::string line;
     int         opening_bracket;
     int         closing_bracket;
@@ -836,8 +975,8 @@ config_parser::config_parser(std::string filename)
             opening_bracket = i;
             while(tempConf[i] != "}")
             {
-                if (!strncmp(tempConf[i].c_str(), "location", 8) && tempConf[i].back() == '{')
-                {
+            if ((!strncmp(tempConf[i].c_str(), "location", 8) && tempConf[i].back() == '{') || (!strncmp(tempConf[i].c_str(), "location", 8) && tempConf[i + 1] == "{"))
+            {
                     while(tempConf[i] != "}")
                         i++;
                 }
@@ -851,7 +990,68 @@ config_parser::config_parser(std::string filename)
             server_index += 1;
         }
         
-    }  
+    }
+    if(hasDuplicatePorts())
+    {
+        std::cerr << "Error : Server Has Duplicate Ports\n";
+        exit(1);
+    }
+}
+
+bool    config_parser::hasDuplicatePorts()
+{
+    for (size_t i = 0; i < servers.size(); i++)
+    {
+        const server_parser & server1 = servers[i];
+        for (size_t j = i + 1; j < servers.size(); j++)
+        {
+            const server_parser & server2 = servers[j];
+            for (size_t k = 0; k < server1.getPortObject().size(); k++)
+            {
+                int port = server1.getPortObject()[k];
+                for (size_t l = 0; l < server2.getPortObject().size(); l++)
+                {
+                    int port2 =  server2.getPortObject()[l];
+                    if (port == port2)
+                    {
+                        std::cout << "DUPLICATE";
+                        return true;
+                    }
+                }
+            }
+        }
+    }
+    return false;
+}
+
+void    config_parser::checkFileBrackets(std::string f)
+{
+    std::ifstream file(f);
+    std::stack<char> brackets;
+    char c;
+    int i = 0;
+    bool balanced = true;
+
+    while (file.get(c)) {
+        ++i;
+        if (c == '(' || c == '{' || c == '[') {
+            brackets.push(c);
+        } else if (c == ')' || c == '}' || c == ']') {
+            if (brackets.empty()) {
+                balanced = false;
+                std::cerr << "Unclosed Bracket !\n";
+                exit(1);
+            }
+            char top = brackets.top();
+            if ((c == ')' && top == '(') || (c == '}' && top == '{') || (c == ']' && top == '[')) {
+                brackets.pop();
+            } else {
+                balanced = false;
+                std::cerr << "Unclosed Bracket !\n";
+                exit(1);
+            }
+        }
+    }
 }
 
 void    config_parser::servers_index_init()

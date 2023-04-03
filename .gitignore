@@ -2,4 +2,7 @@
 webserv
 a.out
 webserv.dSYM
-.dist
+.DS_Store
+.dest
+.mp3
+.mp4
