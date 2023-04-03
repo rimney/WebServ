@@ -6,7 +6,7 @@
 /*   By: rimney <rimney@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/15 20:32:17 by rimney            #+#    #+#             */
-/*   Updated: 2023/04/02 21:59:01 by rimney           ###   ########.fr       */
+/*   Updated: 2023/04/03 00:31:51 by rimney           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -246,24 +246,6 @@ std::string     respond::fileToSring(std::string path)
     return (content);
 }
 
-std::string     respond::errorStringToString(int error)
-{
-    if(error == 501)
-        return ("<h1>\n501 Not Implemented\n</h1>\n");
-    else if(error == 400)
-        return ("<h1>\n400 Bad Request\n</h1>\n");
-    else if(error == 413)
-        return ("h1>\n413 Request Entity Too Large\n</h1>\n");
-    else if(error == 414)
-        return ("<h1>\n414 Request-URI Too Long\n</h1>\n");
-    else if(error == 400)
-        return ("<h1>\n400 Bad Request\n</h1>\n");
-    else if(error == 404)
-        return ("");
-    else if(error == 403)
-        return ("<h1>\n 403 Error Forbidden</h1>");
-    return ("OK");
-}
 
 std::string		respond::setErrorBody(std::string status_code)
 {
@@ -323,9 +305,6 @@ void    respond::recoverBody(int status_code)
         
     }
 }
-
-
-
 
 void    respond::setContentType(std::string const & content_type)
 {
