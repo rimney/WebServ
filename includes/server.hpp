@@ -57,9 +57,9 @@ class server
         int                 get_error_flag() const;
         int                 get_fd_port(int fd);
         bool                get_close();
-        void                insert_to_fd_port(int fd, int port);
+        std::map<int, int>  get_fd_port();
         server  &           operator=(server const & s);
-        void                accept();
+        void                accept(int fd);
         void                close();
         void                receive(int fd);
         void                send(int fd);

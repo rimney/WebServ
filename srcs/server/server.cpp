@@ -39,6 +39,11 @@ bool    server::get_close()
     return _close;
 }
 
+void    server::set_close(bool close)
+{
+    _close = close;
+}
+
 server::~server() {}
 
 std::vector<int>    server::get_port() const
@@ -79,6 +84,11 @@ int server::get_error_flag() const
 int server::get_fd_port(int fd)
 {
     return _fd_port_map[fd];
+}
+
+std::map<int, int>  server::get_fd_port()
+{
+    return _fd_port_map;
 }
 
 server  & server::operator=(server const & s)
@@ -137,17 +147,8 @@ void    server::set_error_flag(int error_flag)
     _error_flag = error_flag;
 }
 
-void    server::set_close(bool close)
-{
-    _close = close;
-}
 
-void    server::insert_to_fd_port(int fd, int port)
-{
-    _fd_port_map.insert(std::make_pair(fd, port));
-}
-
-void server::accept()
+void server::accept(int fd)
 {
     int optval = 1;
 
@@ -161,6 +162,7 @@ void server::accept()
         ::close(_fd_connection);
         throw(std::string("ERROR: fcntl() failed."));
     }
+    _fd_port_map.insert(std::make_pair(_fd_connection, _fd_port_map[fd]));
 }
 
 void    server::close()
@@ -203,29 +205,29 @@ void    server::send(int fd)
 
     // std::cout << _respond[fd].getBody();
     // std::cout << _respond[fd].getBodyFlag() << " <<\n";
-
     if(_respond[fd].getBody().empty())
         _respond[fd].recoverBody(atoi(_respond[fd].getstatusCode().c_str()));
     
     if(_respond[fd].getBodyFlag() == true)
         _respond[fd].setFinalString(_respond[fd].chunkedFileToString(_respond[fd].getPathSave()));
+    std::cout << _respond[fd].getfinalString() << '\n';
     // std::cout << _respond[fd].getfinalString() << " <<\n";
     // if(_respond[fd].getfinalString().size() > 0)
     // {
+        // while (1);
         if ((::send(fd, _respond[fd].getfinalString().c_str(), _respond[fd].getfinalString().size(), 0)) == -1)
         {
             // ::close(fd);
             // _respond[fd].cleanAll();
             // _respond[fd].setBodyFlag(false);
+            _request[fd].clear();
+            _respond[fd].cleanAll();
             throw(std::string("ERROR: send() failed to send response / file: " + _respond[fd].getPathSave()));
         }
     // }
-    if (_request[fd].get_error() == "400")
-        _close = true;
-
+    // if (_request[fd].get_error() == "400")
+    //     _close = true;
     _respond[fd].cleanAll();
-    _request[fd].clear();
-    _request_map.erase(fd);
 }
 
 void    server::set_server_config(server_parser  & server_config)
@@ -495,6 +497,8 @@ void    server::process(int fd)
                 delete_method(_request[fd].get_start_line().full_path, fd);
             }
         }
+        _request[fd].clear();
+        _request_map.erase(fd);
     }
 
 }
