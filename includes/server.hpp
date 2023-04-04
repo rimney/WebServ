@@ -50,7 +50,8 @@ class server
         std::vector<int>    get_port() const;
         int                 get_port(int i) const;
         unsigned int        get_host() const;
-        std::string         get_request() const;
+        std::map<int, respond>  get_respond() const;
+        std::map<int, Request>  get_request() const;
         int                 get_fd_socket() const;
         int                 get_fd_connection() const;
         int                 get_error_flag() const;

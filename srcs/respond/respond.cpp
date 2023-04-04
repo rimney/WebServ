@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   respond.cpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: rimney <rimney@student.42.fr>              +#+  +:+       +#+        */
+/*   By: eel-ghan <eel-ghan@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/15 20:32:17 by rimney            #+#    #+#             */
-/*   Updated: 2023/04/03 00:33:48 by rimney           ###   ########.fr       */
+/*   Updated: 2023/04/04 02:37:50 by eel-ghan         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -121,11 +121,12 @@ std::string respond::chunkedFileToString(std::string path)
         std::cerr << "Error opening file " << path << std::endl;
         return "";
     }
-    
     // Move file pointer to current chunk position
     lseek(fd, this->chunkPosition, SEEK_SET);
-    
+
     char buffer[CHUNK_SIZE];
+    if (getfinalString().size() > 0)
+        return this->finalString;
     int bytes_read = read(fd, buffer, CHUNK_SIZE);
     if (bytes_read == 0)
     {
@@ -134,11 +135,13 @@ std::string respond::chunkedFileToString(std::string path)
         pathSave.clear();
         this->cleanAll();
         this->chunkPosition = 0;
+        close(fd);
         return ("0\r\n\r\n");
     }
     else if (bytes_read == -1)
     {
-        std::cerr << "Error while chunking";
+        std::cerr << "Error: while chunking";
+        close(fd);
         return "";
     }
     
@@ -148,12 +151,7 @@ std::string respond::chunkedFileToString(std::string path)
     this->chunkPosition += bytes_read;
     
     close(fd);
-    
-    if (getfinalString().size() > 0) {
-        return getfinalString() + content;
-    }
-    else
-        finalString.clear();
+    finalString.clear();
     return content;
 }
 
@@ -468,7 +466,7 @@ void	respond::setRespond(std::string path, std::string httpVersion, std::string 
         cleanAll();
         if(this->getBodyFlag() == false)
         {
-            std::cout << "Header Set !\n"; 
+            std::cout << "Header Set ! 1 <<<<<<\n"; 
             this->setChunkPosition(0);
             this->setContentType(getFileType(path));
             this->sethttpVersion(httpVersion);
@@ -478,6 +476,7 @@ void	respond::setRespond(std::string path, std::string httpVersion, std::string 
             this->Body.clear();
             if(getfinalString().size() == 0)
 		        this->mergeRespondStrings();
+            std::cout << "Header Set ! 2 <<<<<<\n";
         }
         return ;
     }

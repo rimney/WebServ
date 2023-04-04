@@ -81,6 +81,16 @@ std::map<int, int>  server::get_fd_port()
     return _fd_port_map;
 }
 
+std::map<int, respond>  server::get_respond() const
+{
+    return _respond;
+}
+
+std::map<int, Request>  server::get_request() const
+{
+    return  _request;
+}
+
 server  & server::operator=(server const & s)
 {
     _port = s._port;
@@ -148,10 +158,7 @@ void server::accept(int fd)
     if (_fd_connection == -1)
         throw(std::string("ERROR: connection faild."));
     if (fcntl(_fd_connection, F_SETFL, O_NONBLOCK) == -1)
-    {
-        ::close(_fd_connection);
         throw(std::string("ERROR: fcntl() failed."));
-    }
     _fd_port_map.insert(std::make_pair(_fd_connection, _fd_port_map[fd]));
 }
 
@@ -164,55 +171,51 @@ void    server::receive(int fd)
 {
     int     r;
     char    buffer[RECV_SIZE] = {0};
-    
+
     r = recv(fd, buffer, RECV_SIZE, 0);
+    std::cout << "r: " << r << '\n';
     if (r == -1)
-    {
-        ::close(fd);
-        throw(std::string("ERROR: failed to receive data, closing connection."));
-    }
-    else if (r == 0)
-    {
-        ::close(fd);
         throw(std::string("NOTE: connection closed by client."));
-    }
-    if (_request_map.find(fd) != _request_map.end())
-    {
-        _request_map[fd].clear();
-        _request_map[fd] = std::string(buffer, r);
-    }
-    else
-    {
+    else if (r == 0)
+        throw(std::string("ERROR: failed to receive data, closing connection."));
+    // if (_request_map.find(fd) != _request_map.end())
+    // {
+    //     _request_map[fd].clear();
+    //     _request_map[fd] = std::string(buffer, r);
+    // }
+    // else
+    // {
         _request_map.insert(std::make_pair(fd, std::string(buffer, r)));
         _request.insert(std::make_pair(fd, Request()));
         _respond.insert(std::make_pair(fd, respond(_server_config)));
-    }
+    // }
+
+    // std::cout << ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n";
+    // std::cout << buffer << "\n";
+    // std::cout << ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n";
 }
 
 void    server::send(int fd)
 {
-    // ssize_t sent;
-
-    // std::cout << _respond[fd].getBody();
-    // std::cout << _respond[fd].getBodyFlag() << " <<\n";
-
-
+    // std::cout << " >>>>>>>>>>>> size: " << _respond[fd].getfinalString().size() << '\n';
+    // std::cout << _respond[fd].getfinalString() << '\n';
+    // if (_respond[fd].getfinalString().size() == 0)
+    //     exit(0);
     if(_respond[fd].getBody().empty())
         _respond[fd].recoverBody(atoi(_respond[fd].getstatusCode().c_str()));
     
     if(_respond[fd].getBodyFlag() == true)
         _respond[fd].setFinalString(_respond[fd].chunkedFileToString(_respond[fd].getPathSave()));
-    // std::cout << _respond[fd].getfinalString() << " <<\n";
-    // if(_respond[fd].getfinalString().size() > 0)
-    // {
-        if ((::send(fd, _respond[fd].getfinalString().c_str(), _respond[fd].getfinalString().size(), 0)) == -1)
-        {
-            // ::close(fd);
-            // _respond[fd].cleanAll();
-            // _respond[fd].setBodyFlag(false);
-            throw(std::string("ERROR: send() failed to send response / file: " + _respond[fd].getPathSave()));
-        }
-    // }
+    std::cout << "size: " << _respond[fd].getfinalString().size() << '\n';
+    if ((::send(fd, _respond[fd].getfinalString().c_str(), _respond[fd].getfinalString().size(), 0)) == -1)
+    {
+        // _respond[fd].cleanAll();
+        // _request[fd].clear();
+        // _respond[fd].setBodyFlag(false); // here
+        _respond.erase(fd);
+        _request.erase(fd);
+        throw(std::string("ERROR: send() failed to send response / file: " + _respond[fd].getPathSave()));
+    }
     _respond[fd].cleanAll();
 }
 
@@ -360,6 +363,7 @@ void    server::delete_method(std::string  & path, int fd)
 
 void server::Get(int location_index , std::string path, int fd) 
 {
+    std::cout << "get method <<<\n";
     if(!strcmp(strrchr(path.c_str(), '/'), "/favicon.ico"))
     {
         std::cout << "bypassed !\n";
@@ -367,22 +371,22 @@ void server::Get(int location_index , std::string path, int fd)
     }
     server_location location = _server_config.getOneLocationObject(location_index);
     std::string isFOrD = isFileOrDirectory(path);
-    std::cout << _respond[fd].getstatusCode() << " code <<\n";
 
     if((_respond[fd].getstatusCode() == "200" || _respond[fd].getstatusCode() == "301" ) && _respond[fd].getBodyFlag() == false)
     {
         std::cout << isFOrD << " <<\n";
         if(isFOrD == "file")
         {
+            std::cout << "get 1 <<< \n";
             if(location.getHasCgi() && location.isCgi(_request[fd].get_start_line().full_path)) // check if the extention of file compatible with extentions 
             {
-                std::cout << _request[fd].get_start_line().full_path << " << EE\n";
                 cgi_handler cgi(_server_config, _request[fd], _fd_port_map[fd]);
                 cgi.exec(_respond[fd]);
                 return ;
             }    
-            if(_respond[fd].fileToSring(path).size() > 50000)
+            if(_respond[fd].fileToSring(path).size() > 1024)
             {
+                std::cout << "get 2 <<< \n";
                 if(_respond[fd].getBodyFlag() == true)
                     return ;
                 _respond[fd].setBodyFlag(true);
