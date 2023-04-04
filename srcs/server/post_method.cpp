@@ -30,7 +30,6 @@ size_t remove_header(std::string & request, size_t i,std::string &buffer,std::st
     {
         
         pos =request.find("filename=" , i);
-        std::cout <<"****==== pos " << pos << std::endl;
         if(pos != -1)
         {
             for(size_t t = pos + 10; request[t] != '"' ;t++)
@@ -144,7 +143,6 @@ void    server::post_method(server_parser &serv, int fd)
            else if(is_dir_or_not == 2 ) //dir
            {
                 bool is_found = false;
-                std::cout << " ** "<< _request[fd].get_start_line().location_index << "++"<< std::endl;
                 if(_request[fd].get_start_line().full_path[_request[fd].get_start_line().full_path.length() - 1] != '/')
                 {
                     error = "301";

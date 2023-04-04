@@ -6,7 +6,7 @@
 /*   By: eel-ghan <eel-ghan@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/10 00:38:14 by eel-ghan          #+#    #+#             */
-/*   Updated: 2023/04/04 03:26:38 by eel-ghan         ###   ########.fr       */
+/*   Updated: 2023/04/04 04:51:56 by eel-ghan         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -83,9 +83,9 @@ void    servers::run()
     // int             fd;
     struct timeval  time;
 
-    time.tv_sec = 1;
+    time.tv_sec = 10;
     time.tv_usec = 0;
-
+    
     while(1)
     {
         memcpy(&_set_read_fds, &_set_fds, sizeof(_set_fds));
@@ -142,6 +142,11 @@ void    servers::run()
             {
                 try
                 {
+                    if((*it).second.get_server_config().getServerErrorPageObject().empty())
+                    {
+                        std::cout << "SERVER NOT FOUND\n";
+                        exit(0);
+                    }
                     (*it).second.receive((*it).first);
                     std::cout << "receive <<<\n";
                     (*it).second.process((*it).first);

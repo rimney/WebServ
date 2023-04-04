@@ -6,7 +6,7 @@
 /*   By: eel-ghan <eel-ghan@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/15 20:32:17 by rimney            #+#    #+#             */
-/*   Updated: 2023/04/04 02:37:50 by eel-ghan         ###   ########.fr       */
+/*   Updated: 2023/04/04 04:51:29 by eel-ghan         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -132,7 +132,8 @@ std::string respond::chunkedFileToString(std::string path)
     {
         std::cout << "THE END !\n";
         bodyFlag = false;
-        pathSave.clear();
+        this->pathSave.clear();
+        std::cout << this->pathSave << " << PATH SAVE\n";
         this->cleanAll();
         this->chunkPosition = 0;
         close(fd);
@@ -462,11 +463,12 @@ void	respond::setRespond(std::string path, std::string httpVersion, std::string 
     }
     else
     { 
-        this->pathSave = path;
         cleanAll();
+        this->pathSave = path;
         if(this->getBodyFlag() == false)
         {
-            std::cout << "Header Set ! 1 <<<<<<\n"; 
+            std::cout << "Header Set !\n"; 
+            this->pathSave = path;
             this->setChunkPosition(0);
             this->setContentType(getFileType(path));
             this->sethttpVersion(httpVersion);
