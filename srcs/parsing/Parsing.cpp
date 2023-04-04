@@ -6,7 +6,7 @@
 /*   By: rimney <rimney@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/07 03:50:36 by rimney            #+#    #+#             */
-/*   Updated: 2023/04/03 21:48:51 by rimney           ###   ########.fr       */
+/*   Updated: 2023/04/03 22:59:18 by rimney           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -420,6 +420,7 @@ void server_location::construct_location(std::vector<std::string>::iterator firs
             getRoot(stringSplit(locationVec[i], ' ', &temp_size), temp_size);
             if(isFileOrDirectory(this->getLocationRootObject()) == "error")
             {
+				std::cout << this->getLocationRootObject() << "\n";
                 std::cerr << "Error : Check The Location Root Path\n";
                 exit(0);
             }
