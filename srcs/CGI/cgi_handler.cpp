@@ -217,10 +217,10 @@ void    cgi_handler::generate_response(std::string & cgi_response, respond & res
                 response.setLocation(header.substr(j));
             else if (element == "Status:")
                 response.setstatusCode(header.substr(j));
-            // else if (element == "Set-cookie:")
-            //     response.setCookie(header.substr(j));
-            // else if (element == "Expires:")
-            //     response.setExpires(header.substr(j));
+            else if (element == "Set-cookie:")
+                response.setCookies(header.substr(j));
+            else if (element == "Expires:")
+                response.setExpires(header.substr(j));
         }
         i += header.size() + 2;
         element.clear();

@@ -6,7 +6,7 @@
 /*   By: rimney <rimney@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/15 20:32:17 by rimney            #+#    #+#             */
-/*   Updated: 2023/04/06 04:21:50 by rimney           ###   ########.fr       */
+/*   Updated: 2023/04/06 06:18:03 by rimney           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -447,6 +447,8 @@ void	respond::setRespond(std::string path, std::string httpVersion, std::string 
 	        {
 	            this->setLocation(location.getLocationRedirectionObject());
 	           	this->mergeRespondStrings();
+                return ;
+                std::cout << "HERE\n";
 	        }
 	        else
 	        {
@@ -475,7 +477,7 @@ void	respond::setRespond(std::string path, std::string httpVersion, std::string 
             this->setstatusCode("201");
             this->setstatusDescription("Created");
             setContentType("text/plain");
-            this->setBody("Crated");
+            this->setBody("Created");
             this->setContentLenght(std::to_string(this->getBody().size()));
 			this->mergeRespondStrings();
             return ;
