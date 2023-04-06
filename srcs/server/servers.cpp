@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   servers.cpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: eel-ghan <eel-ghan@student.42.fr>          +#+  +:+       +#+        */
+/*   By: rimney <rimney@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/10 00:38:14 by eel-ghan          #+#    #+#             */
-/*   Updated: 2023/04/06 03:32:19 by eel-ghan         ###   ########.fr       */
+/*   Updated: 2023/04/06 04:01:38 by rimney           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -97,18 +97,21 @@ void    servers::run()
 
         if (r == -1)
         {
-            std::cout << "ERROR: failed to select sockets.\n";
-            
-            std::cout << "errno: " << errno << '\n';
-            perror("select");
-            std::cout << '\n';
-            
+            std::cout << "ERROR: failed to select sockets.\n";            
             for (std::map<int, server>::iterator it = _fds_cnx.begin(); it != _fds_cnx.end(); it++)
                 ::close((*it).first);
             _fds_ready.clear();
             _fds_cnx.clear();
             FD_ZERO(&_set_read_fds);
             FD_ZERO(&_set_write_fds);
+            FD_ZERO(&_set_fds);
+            _max_fd = 0;
+            for (std::map<int, server>::iterator it = _servers.begin(); it != _servers.end(); it++)
+            {
+                FD_SET((*it).first, &_set_fds);
+                if (_max_fd < (*it).first)
+                    _max_fd = (*it).first;
+            }
             continue ;
         }
         else if (r == 0)
@@ -174,6 +177,7 @@ void    servers::run()
                         _fds_cnx[_fds_ready[i]].send(_fds_ready[i]);
                         if (_fds_cnx[_fds_ready[i]].getRespond(_fds_ready[i]).getBodyFlag() == false)
                         {
+                            FD_CLR(_fds_ready[i], &_set_fds);
                             _fds_ready.erase(_fds_ready.begin() + i);
                             std::cout << "send <<<<<\n";
                         }
