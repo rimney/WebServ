@@ -5,7 +5,7 @@
 
 # include <sys/select.h>
 # include <map>
-# include "webserv.hpp"
+// # include "webserv.hpp"
 # include "server.hpp"
 # include "parsing.hpp"
 
@@ -15,12 +15,10 @@ class servers
         fd_set                  _set_fds;
         fd_set                  _set_read_fds;
         fd_set                  _set_write_fds;
-        fd_set                  _set_error_fds;
         int                     _max_fd;
         std::map<int, server>   _servers;
         std::map<int, server>   _fds_cnx;
-        // std::vector<int>        _fds_ready;
-        std::map<int, server>   _fds_ready;
+        std::vector<int>        _fds_ready;
 
     public:
         servers();

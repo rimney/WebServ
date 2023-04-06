@@ -6,7 +6,7 @@
 /*   By: eel-ghan <eel-ghan@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/15 20:32:17 by rimney            #+#    #+#             */
-/*   Updated: 2023/04/04 04:51:29 by eel-ghan         ###   ########.fr       */
+/*   Updated: 2023/04/06 02:53:36 by eel-ghan         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -119,11 +119,11 @@ std::string respond::chunkedFileToString(std::string path)
     if (fd == -1) 
     {
         std::cerr << "Error opening file " << path << std::endl;
-        return "";
+        return "error";
     }
     // Move file pointer to current chunk position
     lseek(fd, this->chunkPosition, SEEK_SET);
-
+    fcntl(fd, F_SETFL, O_NONBLOCK);
     char buffer[CHUNK_SIZE];
     if (getfinalString().size() > 0)
         return this->finalString;
@@ -141,9 +141,10 @@ std::string respond::chunkedFileToString(std::string path)
     }
     else if (bytes_read == -1)
     {
+        this->bodyFlag = false;
         std::cerr << "Error: while chunking";
         close(fd);
-        return "";
+        return "error";
     }
     
     std::string content(buffer, bytes_read);
@@ -158,9 +159,8 @@ std::string respond::chunkedFileToString(std::string path)
 
 std::string respond::getFileType(const std::string& fileName)
 {
-    // Get the file extension
     std::string ext = fileName.substr(fileName.find_last_of(".") + 1);
-    // Check the file extension and return the content-type
+
     if (ext == "txt")
         return "text/plain";
     else if (ext == "jpg" || ext == "jpeg")
@@ -177,6 +177,10 @@ std::string respond::getFileType(const std::string& fileName)
         return "video/mp4";
     else if (ext == "mp3")
         return ("audio/mp3");
+    else if (ext == "xml")
+        return ("application/xml");
+    else if (ext == "json")
+        return ("application/json");
     else
         return "text/html";
 }

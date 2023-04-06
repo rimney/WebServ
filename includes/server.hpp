@@ -1,10 +1,9 @@
 #ifndef SERVER_HPP
 # define SERVER_HPP
 
-# define DEFAULT_PORT 8080
 # define DEFAULT_PROTOCOL 0
 # define RECV_SIZE 1024
-# define CHUNK_SIZE 1024
+# define CHUNK_SIZE 1024 * 2
 
 # include <netinet/in.h>
 # include <string>
@@ -21,10 +20,7 @@
 # include "respond.hpp"
 # include "cgi_handler.hpp"
 # include <sys/time.h>
-
-// TO BE DELETED //
 #include <string.h>
-//______________//
 
 class server
 {
@@ -72,8 +68,7 @@ class server
         respond             getRespond(int fd);
         void                post_method(server_parser &serv, int fd);
         void                multi_part(server_parser &serv,int fd);
-
-    server_parser               get_server_config();
+        server_parser       get_server_config();
 
     private:
         void            set_addr(int i);

@@ -14,8 +14,7 @@
 
 #include "../../includes/server.hpp"
 
-server::server()
-    : _port(DEFAULT_PORT), _host(INADDR_ANY), _error_flag(1){}
+server::server(){}
 
 server::server(std::vector<int> port, unsigned int host)
     : _host(host) ,_error_flag(1)
@@ -50,11 +49,6 @@ unsigned int    server::get_host() const
 {
     return _host;
 }
-
-// std::string   server::get_request() const
-// {
-//     return _request;
-// }
 
 int server::get_fd_socket() const
 {
@@ -103,7 +97,6 @@ server  & server::operator=(server const & s)
     _request = s._request;
     _respond = s._respond;
     _fd_port_map = s._fd_port_map;
-    // this->respond.setRespondServer(_server_config);
     return *this;
 }
 
@@ -173,51 +166,41 @@ void    server::receive(int fd)
     char    buffer[RECV_SIZE] = {0};
 
     r = recv(fd, buffer, RECV_SIZE, 0);
-    std::cout << "r: " << r << '\n';
+
     if (r == -1)
         throw(std::string("NOTE: connection closed by client."));
     else if (r == 0)
         throw(std::string("ERROR: failed to receive data, closing connection."));
-    // if (_request_map.find(fd) != _request_map.end())
-    // {
-    //     _request_map[fd].clear();
-    //     _request_map[fd] = std::string(buffer, r);
-    // }
-    // else
-    // {
+    if (_request_map.find(fd) != _request_map.end())
+    {
+        _request_map[fd].clear();
+        _request_map[fd] = std::string(buffer, r);
+    }
+    else
+    {
         _request_map.insert(std::make_pair(fd, std::string(buffer, r)));
         _request.insert(std::make_pair(fd, Request()));
         _respond.insert(std::make_pair(fd, respond(_server_config)));
-    // }
-
-    // std::cout << ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n";
-    // std::cout << buffer << "\n";
-    // std::cout << ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n";
+    }
 }
 
 void    server::send(int fd)
 {
-    // std::cout << " >>>>>>>>>>>> size: " << _respond[fd].getfinalString().size() << '\n';
-    // std::cout << _respond[fd].getfinalString() << '\n';
-    // if (_respond[fd].getfinalString().size() == 0)
-    //     exit(0);
     if(_respond[fd].getBody().empty())
         _respond[fd].recoverBody(atoi(_respond[fd].getstatusCode().c_str()));
     
     if(_respond[fd].getBodyFlag() == true)
         _respond[fd].setFinalString(_respond[fd].chunkedFileToString(_respond[fd].getPathSave()));
-    std::cout << "size: " << _respond[fd].getfinalString().size() << '\n';
+
     if ((::send(fd, _respond[fd].getfinalString().c_str(), _respond[fd].getfinalString().size(), 0)) == -1)
     {
-        // _respond[fd].cleanAll();
-        // _request[fd].clear();
-        // _respond[fd].setBodyFlag(false); // here
+        _respond[fd].cleanAll();
+        _request[fd].clear();
         _respond.erase(fd);
         _request.erase(fd);
         throw(std::string("ERROR: send() failed to send response / file: " + _respond[fd].getPathSave()));
     }
     _respond[fd].cleanAll();
-
 }
 
 void    server::set_server_config(server_parser  & server_config)
@@ -388,7 +371,7 @@ void server::Get(int location_index , std::string path, int fd)
                 cgi.exec(_respond[fd]);
                 return ;
             }    
-            if(_respond[fd].fileToSring(path).size() > 1024)
+            if(_respond[fd].fileToSring(path).size() >= 50000)
             {
                 std::cout << "get 2 <<< \n";
                 if(_respond[fd].getBodyFlag() == true)

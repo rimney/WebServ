@@ -67,10 +67,7 @@ void            cgi_handler::init_env(int port)
     _env.push_back("SERVER_PROTOCOL=HTTP/1.1");
     _env.push_back("SERVER_SOFTWARE=WebServ/0.0");
     _env.push_back("REDIRECT_STATUS=200");
-
-    // print all env variables
-    // for  (std::vector<std::string>::iterator it = _env.begin(); it != _env.end(); it++)
-    //     std::cout << *it << '\n';
+    // _env.pop_back("HTTP_COOKIE=");
 }
 
 char**  cgi_handler::vector_to_ptr()
@@ -107,7 +104,7 @@ void cgi_handler::exec(respond & response)
         response.setstatusCode("500");
         response.setstatusDescription("Internal Server Error");
         response.setContentType("text/html");
-        response.setBody("<h1>Internal Server Error</h1>"); // set error page
+        response.setBody("<h1>Internal Server Error</h1>");
         response.mergeRespondStrings();
         return ;
     }
@@ -127,7 +124,7 @@ void cgi_handler::exec(respond & response)
         response.setstatusCode("500");
         response.setstatusDescription("Internal Server Error");
         response.setContentType("text/html");
-        response.setBody("<h1>Internal Server Error</h1>"); // set error page
+        response.setBody("<h1>Internal Server Error</h1>");
         response.mergeRespondStrings();
         return ;
     }
@@ -192,14 +189,12 @@ void    cgi_handler::generate_response(std::string & cgi_response, respond & res
     std::string header, element;
     size_t      content_length;
 
-    std::cout << "cgi_response: " << cgi_response << '\n';
-
     if (cgi_response.find("500\r\n") != std::string::npos || cgi_response.empty())
     {
         response.setstatusCode("500");
         response.setstatusDescription("Internal Server Error");
         response.setContentType("text/html");
-        response.setBody("<h1>Internal Server Error</h1>"); // set error page
+        response.setBody("<h1>Internal Server Error</h1>");
         response.mergeRespondStrings();
         return ;
     }
