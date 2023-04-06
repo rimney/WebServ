@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Parsing.cpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: eel-ghan <eel-ghan@student.42.fr>          +#+  +:+       +#+        */
+/*   By: rimney <rimney@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/07 03:50:36 by rimney            #+#    #+#             */
-/*   Updated: 2023/04/06 02:38:01 by eel-ghan         ###   ########.fr       */
+/*   Updated: 2023/04/06 04:21:23 by rimney           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -415,9 +415,12 @@ void server_location::construct_location(std::vector<std::string>::iterator firs
         }
         else if(!strncmp(locationVec[i].c_str(), "root", 4))
         {
+            if(locationVec[i][locationVec[i].size() - 1] == '/')
+                locationVec[i].erase(locationVec[i].size() - 1);
             getRoot(stringSplit(locationVec[i], ' ', &temp_size), temp_size);
             if(isFileOrDirectory(this->getLocationRootObject()) == "error")
             {
+				std::cout << this->getLocationRootObject() << "\n";
                 std::cerr << "Error : Check The Location Root Path\n";
                 exit(0);
             }
@@ -454,8 +457,12 @@ void server_location::construct_location(std::vector<std::string>::iterator firs
         {
             getUpload(stringSplit(locationVec[i], ' ', &temp_size), temp_size);
         }
+        else if(locationVec[i] != "{" && locationVec[i] != "}" && locationVec[i][0] != '#' && !locationVec[i].empty())
+        {
+            std::cerr << "Error : Wrong Directive [" << locationVec[i] << "]\n";
+            exit(1);
+        }
     }
-            // exit(0);
 }
 std::string *stringSplit(std::string split, char c, size_t *index_save)
 {
@@ -745,6 +752,25 @@ void    server_parser::getHost(std::string *keys, size_t size)
     delete [] keys;
 }
 
+void    server_parser::checkServerData(void)
+{
+    if(this->port.size() == 0)
+    {
+        std::cerr << "Error : Server Missing Port\n";
+        exit(1);
+    }
+    else if(this->getServerErrorPageObject().empty())
+    {
+        std::cerr << "Error : Server Missing Error Page\n";
+        exit(1);
+    }
+    else if(this->getLocationByName("/") == -1)
+    {
+        std::cerr << "Error : Server Missing \\ Location\n";
+        exit(1);
+    }
+}
+
 void    server_parser::construct_server(std::vector<std::string>::iterator first, std::vector<std::string>::iterator last)
 {
     this->is_auto_index = false;
@@ -752,7 +778,7 @@ void    server_parser::construct_server(std::vector<std::string>::iterator first
     this->server_has_get_method = true;
     this->server_has_post_method = true;
     this->client_max_body_size = 0;
-    this->host = 0;
+    this->host = -1;
     int location_index = 0;
     std::vector<std::string> serverVec(first, last);
     size_t opening_bracket = 0;
@@ -765,15 +791,12 @@ void    server_parser::construct_server(std::vector<std::string>::iterator first
         {
             getHost(stringSplit(serverVec[i], ' ', &temp_size), temp_size);
             // getPort(stringSplit(serverVec[i], ' ', &temp_size), temp_size); // host and port parsing;
-            if(this->host == 0)
+            if(this->host == -1 || this->host == 0)
                 host = 2130706433;
         }
         else if(!strncmp(serverVec[i].c_str(), "port ", 5))
         {
             getPort(stringSplit(serverVec[i], ' ', &temp_size), temp_size);
-            // getPort(stringSplit(serverVec[i], ' ', &temp_size), temp_size); // host and port parsing;
-            if(this->host == 0)
-                host = 2130706433;
         }
         else if(!strncmp(serverVec[i].c_str(), "server_name", 11))
         {
@@ -803,6 +826,7 @@ void    server_parser::construct_server(std::vector<std::string>::iterator first
         }
         else if(!strncmp(serverVec[i].c_str(), "root", 4))
         {
+            std::cout << serverVec[i] << " << \n";
             getRoot(stringSplit(serverVec[i], ' ', &temp_size), temp_size);
             if(isFileOrDirectory(this->getRootObject()) == "error")
             {
@@ -827,9 +851,7 @@ void    server_parser::construct_server(std::vector<std::string>::iterator first
             opening_bracket = i;
             i++;
             while(serverVec[i] != "}")
-            {
                 i++;
-            }
             closing_bracket = i;
             server_location locationn;
             locationn.setLocationIndex(location_index);
@@ -837,8 +859,14 @@ void    server_parser::construct_server(std::vector<std::string>::iterator first
             this->location.push_back(locationn);
             location_index++;          
         }
+        else if(serverVec[i] != "{" && serverVec[i] != "}" && serverVec[i][0] != '#' && !serverVec[i].empty())
+        {
+            std::cerr << "Error : Wrong Directive [ " << serverVec[i] << " ]\n";
+            exit(1);
+        }
     }
     this->getServerDataFromRootLocation();
+    this->checkServerData();
 }
 
 void    server_parser::setLocationsIndex(std::vector<server_location> location)
@@ -846,11 +874,12 @@ void    server_parser::setLocationsIndex(std::vector<server_location> location)
     for(size_t i = 0; i < location.size();i++)
         location[i].setLocationIndex(i);
 }
+
 void    server_parser::setServerIndex(int index)
 {
-    // std::cerr << "CALLED\n";
     this->server_index = index;
 }
+
 size_t server_parser::getLocationCount(std::vector<std::string> vec)
 {
     size_t count = 0;
@@ -930,11 +959,13 @@ config_parser & config_parser::operator=(config_parser const & c)
     this->servers = c.getServersObject();
     return (*this);
 }
+
 /////// GETTERS AND SETTERS //////////
 size_t config_parser::getServerCountObject(void) const
 {
     return (this->server_count);
 }
+
 std::vector<server_parser> config_parser::getServersObject(void) const
 {
     return (this->servers);
@@ -965,19 +996,18 @@ config_parser::config_parser(std::string filename)
         tempConf.push_back(line);
     }
     file.close();
-    
-    for(std::vector<std::string>::size_type i = 0; i < tempConf.size(); i++)
-    {
-        if ((!strncmp(tempConf[i].c_str(), "server", 6) && tempConf[i].back() == '{') || (!strncmp(tempConf[i].c_str(), "server", 6) && tempConf[i + 1] == "{"))
-        {
-            opening_bracket = i;
-            while(tempConf[i] != "}")
-            {
-            if ((!strncmp(tempConf[i].c_str(), "location", 8) && tempConf[i].back() == '{') || (!strncmp(tempConf[i].c_str(), "location", 8) && tempConf[i + 1] == "{"))
-            {
-                    while(tempConf[i] != "}")
-                        i++;
-                }
+	for(std::vector<std::string>::size_type i = 0; i < tempConf.size(); i++)
+	{
+		if ((!strncmp(tempConf[i].c_str(), "server", 6) && tempConf[i].back() == '{') || (!strncmp(tempConf[i].c_str(), "server", 6) && tempConf[i + 1] == "{"))
+		{
+			opening_bracket = i;
+			while(tempConf[i] != "}")
+			{
+				if ((!strncmp(tempConf[i].c_str(), "location", 8) && tempConf[i].back() == '{') || (!strncmp(tempConf[i].c_str(), "location", 8) && tempConf[i + 1] == "{"))
+    			{
+                	while(tempConf[i] != "}")
+                    	i++;
+            	}
                 i++;
             }
             closing_bracket = i;
@@ -987,12 +1017,16 @@ config_parser::config_parser(std::string filename)
             this->servers.push_back(server);
             server_index += 1;
         }
-        
+		else if(!tempConf[i].empty())
+        {
+            std::cerr << "Error : Wrong Directive [" << tempConf[i] << "]\n";
+            exit(1);
+        }
     }
     if(hasDuplicatePorts())
     {
-        std::cerr << "Error : Server Has Duplicate Ports\n";
-        exit(1);
+    	std::cerr << "Error : Server Has Duplicate Ports\n";
+    	exit(1);
     }
 }
 
@@ -1012,7 +1046,6 @@ bool    config_parser::hasDuplicatePorts()
                     int port2 =  server2.getPortObject()[l];
                     if (port == port2)
                     {
-                        std::cout << "DUPLICATE";
                         return true;
                     }
                 }
@@ -1030,20 +1063,24 @@ void    config_parser::checkFileBrackets(std::string f)
     int i = 0;
     bool balanced = true;
 
-    while (file.get(c)) {
+    while (file.get(c))
+	{
         ++i;
-        if (c == '(' || c == '{' || c == '[') {
+        if (c == '(' || c == '{' || c == '[')
             brackets.push(c);
-        } else if (c == ')' || c == '}' || c == ']') {
-            if (brackets.empty()) {
+		else if (c == ')' || c == '}' || c == ']')
+		{
+            if (brackets.empty())
+			{
                 balanced = false;
                 std::cerr << "Unclosed Bracket !\n";
                 exit(1);
             }
             char top = brackets.top();
-            if ((c == ')' && top == '(') || (c == '}' && top == '{') || (c == ']' && top == '[')) {
+            if ((c == ')' && top == '(') || (c == '}' && top == '{') || (c == ']' && top == '['))
                 brackets.pop();
-            } else {
+			else
+			{
                 balanced = false;
                 std::cerr << "Unclosed Bracket !\n";
                 exit(1);

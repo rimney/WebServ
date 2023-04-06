@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   respond.cpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: eel-ghan <eel-ghan@student.42.fr>          +#+  +:+       +#+        */
+/*   By: rimney <rimney@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/15 20:32:17 by rimney            #+#    #+#             */
-/*   Updated: 2023/04/06 02:53:36 by eel-ghan         ###   ########.fr       */
+/*   Updated: 2023/04/06 04:21:50 by rimney           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -196,6 +196,8 @@ void    respond::cleanAll(void)
     this->finalString.clear();
     this->content_type.clear();
     this->location.clear();
+    this->cookies.clear();
+    this->expireDate.clear();
 }
 
 std::string	respond::getAutoIndexPage(std::string path)
@@ -233,6 +235,27 @@ std::string respond::getLocation(void)
     return ("Location: " + this->location);
 }
 
+void	respond::setExpires(std::string expires)
+{
+	this->expireDate = expires;
+}
+
+std::string respond::getExpires(void)
+{
+	return ("Expires: " + this->expireDate);
+}
+
+std::string respond::getCookies(void)
+{
+	return ("Set-cookie: " + this->cookies);
+}
+
+void	respond::setCookies(std::string Cookie)
+{
+	this->cookies = Cookie;
+}
+
+
 void    respond::setLocation(std::string location)
 {
     this->location = location;
@@ -261,11 +284,14 @@ std::string		respond::setErrorBody(std::string status_code)
 
 std::string		respond::mergeRespondStrings(void)
 {
-    if (this->location.empty())
+    if (this->location.empty() && this->cookies.empty() && this->expireDate.empty())
 	    this->finalString =  this->gethttpVersion() + " " + this->getstatusCode() + " " + this->getstatusDescription() + "\r\nContent-Length: " + this->getContentLenght() + "\r\n" + this->content_type + "\r\n\r\n" + this->getBody();
-    else
+    else if(this->cookies.empty() && this->location.size() > 0)
 	    this->finalString = this->gethttpVersion() + " " + this->getstatusCode() + " " + this->getstatusDescription() + "\r\nContent-Length: " + this->getContentLenght() + "\r\n" + this->getLocation() + "\r\n" +  this->content_type + "\r\n\r\n" + this->getBody();
-    return (this->finalString);
+	else 
+	    this->finalString = this->gethttpVersion() + " " + this->getstatusCode() + " " + this->getstatusDescription() + "\r\nContent-Length: " + this->getContentLenght() + "\r\n" + this->getCookies() + "\r\n" + getExpires() + "\r\n" + this->getLocation() + "\r\n" +  this->content_type + "\r\n\r\n" + this->getBody();
+	
+	return (this->finalString);
 }
 
 void    respond::recoverBody(int status_code)

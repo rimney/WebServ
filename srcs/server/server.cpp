@@ -361,7 +361,6 @@ void server::Get(int location_index , std::string path, int fd)
 
     if((_respond[fd].getstatusCode() == "200" || _respond[fd].getstatusCode() == "301" ) && _respond[fd].getBodyFlag() == false)
     {
-        std::cout << isFOrD << " <<\n";
         if(isFOrD == "file")
         {
             std::cout << "get 1 <<< \n";
@@ -375,6 +374,7 @@ void server::Get(int location_index , std::string path, int fd)
             {
                 std::cout << "get 2 <<< \n";
                 if(_respond[fd].getBodyFlag() == true)
+
                     return ;
                 _respond[fd].setBodyFlag(true);
                     return;
@@ -457,8 +457,8 @@ void    server::process(int fd)
         std::cout << _request[fd].get_error() << "  <<<<<<<<<<<\n";
         std::cout << "//////////////// REQUEST ///////////////////\n\n";
         _respond[fd].setRespondLocationIndex(_request[fd].get_start_line().location_index);
+        _respond[fd].setFd(fd);
         _respond[fd].setRespond(_request[fd].get_start_line().full_path, _request[fd].get_start_line().vertion, _request[fd].get_error());
-        
         if(_request[fd].get_error().empty() || _request[fd].get_error() == "301")
         {
             if(_request[fd].get_start_line().method == "GET")

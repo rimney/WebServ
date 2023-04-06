@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   respond.hpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: eel-ghan <eel-ghan@student.42.fr>          +#+  +:+       +#+        */
+/*   By: rimney <rimney@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/14 17:42:24 by rimney            #+#    #+#             */
-/*   Updated: 2023/04/06 02:38:54 by eel-ghan         ###   ########.fr       */
+/*   Updated: 2023/04/06 04:20:10 by rimney           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,7 +39,9 @@ class respond
         server_parser	server;
 		std::string		tempAutoIndexFile;// set a header flag << // set a path to the file
         int				location_index;
-        int             saveFd;
+        int             fd;
+        std::string     cookies;
+        std::string     expireDate;
     
     public:
         respond() {};
@@ -54,12 +56,18 @@ class respond
         std::string getContentLenght(void);
         std::string getBody(void);
         std::string getfinalString(void);
+        int         getFd(void);
+        void        setFd(int fd) {this->fd = fd;}
         void        sethttpVersion(std::string httpVersion);
         void        setstatusCode(std::string statusCode);
         void        setstatusDescription(std::string statusDescription);
         void        setContentLenght(std::string ContentLenght);
         void        setBody(std::string Body);
         void        setLocation(std::string  location);
+        void        setCookies(std::string Cookie);
+        std::string getCookies(void);
+        void        setExpires(std::string expires);
+        std::string getExpires(void);
         std::string getLocation(void);
         void        setFinalString(std::string finalString);
         void        setRespond(std::string path, std::string httpVersion, std::string error);
