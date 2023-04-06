@@ -1,0 +1,15 @@
+>>> fix cgi, file.php
+
+>>> add HTTP_COOKIE env
+
+>>> fix brackets issue in config file
+
+>>> if (open == -1) return 500 error; /read/ write
+
+>>> make error page dynamic
+
+>>> test client max body size
+
+>>> checki is the allo methods work
+
+>>> memory leaks
