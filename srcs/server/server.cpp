@@ -345,16 +345,13 @@ void    server::delete_method(std::string  & path, int fd)
 
 void server::Get(int location_index , std::string path, int fd) 
 {
-    std::cout << "get method <<<\n";
     if(!strcmp(strrchr(path.c_str(), '/'), "/favicon.ico"))
     {
         if(!strcmp(strrchr(path.c_str(), '/'), "/favicon.ico"))
         {   
-            std::cout << "bypassed !\n";
             return ;
         }
     }
-    std::cout << location_index << " LOCATION_INDEX <<\n";
     server_location location = _server_config.getOneLocationObject(location_index);
     std::string isFOrD = isFileOrDirectory(path);
 
@@ -362,7 +359,6 @@ void server::Get(int location_index , std::string path, int fd)
     {
         if(isFOrD == "file")
         {
-            std::cout << "get 1 <<< \n";
             if(location.getHasCgi() && location.isCgi(_request[fd].get_start_line().full_path)) // check if the extention of file compatible with extentions 
             {
                 cgi_handler cgi(_server_config, _request[fd], _fd_port_map[fd]);
@@ -371,10 +367,8 @@ void server::Get(int location_index , std::string path, int fd)
             }    
             if(_respond[fd].fileToSring(path).size() >= 50000)
             {
-                std::cout << "get 2 <<< \n";
-                if(_respond[fd].getBodyFlag() == true)
-
-                    return ;
+                // if(_respond[fd].getBodyFlag() == true)
+                //     return ;
                 _respond[fd].setBodyFlag(true);
                     return;
             }
@@ -445,16 +439,16 @@ void    server::process(int fd)
         _request[fd].errors(_server_config);
         
         // std::cout << "\nThe first line is : \n";
-        std::cout << "//////////////// REQUEST ///////////////////\n";
-        std::cout <<  _request[fd].get_start_line().vertion << std::endl;
-        std::cout <<  _request[fd].get_start_line().method << std::endl;
-        std::cout <<  _request[fd].get_start_line().path << std::endl;
-        std::cout <<  _request[fd].get_start_line().vertion << std::endl;
-        std::cout <<  _request[fd].get_start_line().full_path << std::endl;
-        std::cout <<  _request[fd].get_start_line().query << std::endl;
-        // std::cout <<  "**"<<_request[fd].get_body() << "**"<< std::endl;
-        std::cout << _request[fd].get_error() << "  <<<<<<<<<<<\n";
-        std::cout << "//////////////// REQUEST ///////////////////\n\n";
+        // std::cout << "//////////////// REQUEST ///////////////////\n";
+        // std::cout <<  _request[fd].get_start_line().vertion << std::endl;
+        // std::cout <<  _request[fd].get_start_line().method << std::endl;
+        // std::cout <<  _request[fd].get_start_line().path << std::endl;
+        // std::cout <<  _request[fd].get_start_line().vertion << std::endl;
+        // std::cout <<  _request[fd].get_start_line().full_path << std::endl;
+        // std::cout <<  _request[fd].get_start_line().query << std::endl;
+        // // std::cout <<  "**"<<_request[fd].get_body() << "**"<< std::endl;
+        // std::cout << _request[fd].get_error() << "  <<<<<<<<<<<\n";
+        // std::cout << "//////////////// REQUEST ///////////////////\n\n";
         _respond[fd].setRespondLocationIndex(_request[fd].get_start_line().location_index);
         _respond[fd].setFd(fd);
         _respond[fd].setRespond(_request[fd].get_start_line().full_path, _request[fd].get_start_line().vertion, _request[fd].get_error());

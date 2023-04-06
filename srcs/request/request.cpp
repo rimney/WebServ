@@ -134,7 +134,7 @@ void Request::body_handling(std::string buffer)
 void Request::errors(server_parser &serv)
 {
     request_well_formed(serv);
-    std::cout << "ERROR : " << r_error << std::endl;
+    // std::cout << "ERROR : " << r_error << std::endl;
     location_well(serv);
 }
 

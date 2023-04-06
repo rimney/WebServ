@@ -6,7 +6,7 @@
 /*   By: rimney <rimney@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/15 20:32:17 by rimney            #+#    #+#             */
-/*   Updated: 2023/04/06 06:18:03 by rimney           ###   ########.fr       */
+/*   Updated: 2023/04/06 22:38:48 by rimney           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -121,7 +121,6 @@ std::string respond::chunkedFileToString(std::string path)
         std::cerr << "Error opening file " << path << std::endl;
         return "error";
     }
-    // Move file pointer to current chunk position
     lseek(fd, this->chunkPosition, SEEK_SET);
     fcntl(fd, F_SETFL, O_NONBLOCK);
     char buffer[CHUNK_SIZE];
@@ -130,10 +129,8 @@ std::string respond::chunkedFileToString(std::string path)
     int bytes_read = read(fd, buffer, CHUNK_SIZE);
     if (bytes_read == 0)
     {
-        std::cout << "THE END !\n";
         bodyFlag = false;
         this->pathSave.clear();
-        std::cout << this->pathSave << " << PATH SAVE\n";
         this->cleanAll();
         this->chunkPosition = 0;
         close(fd);
@@ -143,13 +140,11 @@ std::string respond::chunkedFileToString(std::string path)
     {
         this->bodyFlag = false;
         std::cerr << "Error: while chunking";
+        this->setRespond(this->pathSave, this->httpVersion, "500");
         close(fd);
-        return "error";
+        return this->finalString;
     }
-    
     std::string content(buffer, bytes_read);
-    
-    // Update current chunk position
     this->chunkPosition += bytes_read;
     
     close(fd);
@@ -276,7 +271,22 @@ std::string     respond::fileToSring(std::string path)
 std::string		respond::setErrorBody(std::string status_code)
 {
     if(theFileExists(this->server.getServerErrorPageObject()) && this->isAmongErrorCodes(atoi(status_code.c_str())))
-        return (fileToSring(this->server.getServerErrorPageObject()));
+    {
+        std::cout << this->server.getServerErrorPageObject() << " << \n";
+        std::string ret;
+        if(this->server.getServerErrorPageObject().back() == '/')
+        {
+            ret = fileToSring(this->server.getServerErrorPageObject() + status_code + ".html");
+            std::cout << this->server.getServerErrorPageObject() + status_code + ".html" << " <<<<<\n";
+            return (ret);
+        }
+        else
+        {
+            ret = fileToSring(this->server.getServerErrorPageObject() + "/" + status_code + ".html");
+            std::cout << this->server.getServerErrorPageObject() + status_code + ".html" << " <<<<<\n";
+            return (ret);
+        }
+    }
     else if(this->isAmongErrorCodes(atoi(status_code.c_str())))
         return (fileToSring(this->server.getServerErrorPageObject()));    
     return ("");   
@@ -325,13 +335,6 @@ void    respond::recoverBody(int status_code)
     {
         this->setFinalString("HTTP/1.1 403 Error Forbidden\r\nContent-Type: text/html\r\nContent-Length: 31\r\n\r\n<h1>\n 403 Error Forbidden</h1>\r\n");
         this->setContentLenght(std::to_string(this->getfinalString().size()));
-        
-    }
-    else if (status_code == 405)
-    {
-        this->setFinalString("HTTP/1.1 405 Error Forbidden\r\nContent-Type: text/html\r\nContent-Length: 31\r\n\r\n<h1>\n 405 Error Forbidden</h1>\r\n");
-        this->setContentLenght(std::to_string(this->getfinalString().size()));
-        
     }
 }
 
@@ -448,7 +451,6 @@ void	respond::setRespond(std::string path, std::string httpVersion, std::string 
 	            this->setLocation(location.getLocationRedirectionObject());
 	           	this->mergeRespondStrings();
                 return ;
-                std::cout << "HERE\n";
 	        }
 	        else
 	        {
@@ -466,7 +468,6 @@ void	respond::setRespond(std::string path, std::string httpVersion, std::string 
 					this->setRespond(path, this->httpVersion, "404");
 					return ;
 				}
-			std::cout << this->finalString << " <<\n";
 			return ;
 			}
 		}
@@ -499,7 +500,6 @@ void	respond::setRespond(std::string path, std::string httpVersion, std::string 
         this->pathSave = path;
         if(this->getBodyFlag() == false)
         {
-            std::cout << "Header Set !\n"; 
             this->pathSave = path;
             this->setChunkPosition(0);
             this->setContentType(getFileType(path));
@@ -510,7 +510,6 @@ void	respond::setRespond(std::string path, std::string httpVersion, std::string 
             this->Body.clear();
             if(getfinalString().size() == 0)
 		        this->mergeRespondStrings();
-            std::cout << "Header Set ! 2 <<<<<<\n";
         }
         return ;
     }

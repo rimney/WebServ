@@ -67,7 +67,7 @@ void            cgi_handler::init_env(int port)
     _env.push_back("SERVER_PROTOCOL=HTTP/1.1");
     _env.push_back("SERVER_SOFTWARE=WebServ/0.0");
     _env.push_back("REDIRECT_STATUS=200");
-    // _env.pop_back("HTTP_COOKIE=");
+    _env.push_back(std::string("HTTP_COOKIE=") + headers["Cookie"]);
 }
 
 char**  cgi_handler::vector_to_ptr()
