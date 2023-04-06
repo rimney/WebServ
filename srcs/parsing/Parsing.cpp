@@ -6,7 +6,7 @@
 /*   By: rimney <rimney@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/07 03:50:36 by rimney            #+#    #+#             */
-/*   Updated: 2023/04/06 04:21:23 by rimney           ###   ########.fr       */
+/*   Updated: 2023/04/06 04:37:37 by rimney           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -635,7 +635,15 @@ void    server_parser::getPort(std::string *Port, size_t temp_size)
         exit(1);
     }
     for(size_t i = 1; i < temp_size; i++)
+    {
+        if(atoi(Port[i].c_str()) < 1)
+        {
+            delete [] Port;
+            std::cerr << "Error : Wrong Port Value\n";
+            exit(1);
+        }
         this->port.push_back(atoi(Port[i].c_str()));
+    }
     delete [] Port;
 }
 void    server_parser::getServerName(std::string *keys, size_t size)
@@ -664,7 +672,15 @@ void    server_parser::getErrorPage(std::string *keys, size_t size)
     }
     this->error_page = keys[size - 1];
     for(size_t i = 1; i < size - 1;i++)
+    {
+        if(!(stoi(keys[i]) >= 400 && stoi(keys[i]) <= 499))
+        {
+            std::cerr << "Error : Wrong Error Code Range !\n";
+            delete [] keys;
+            exit(1);
+        }
         this->error_codes.push_back(stoi(keys[i]));
+    }
     delete [] keys;
 }
 void    server_parser::getIndexPage(std::string *keys, size_t size)
@@ -769,6 +785,11 @@ void    server_parser::checkServerData(void)
         std::cerr << "Error : Server Missing \\ Location\n";
         exit(1);
     }
+    else if(this->host == -1)
+    {
+        std::cerr << "Error : Host Not Found\n";
+        exit(1);
+    }
 }
 
 void    server_parser::construct_server(std::vector<std::string>::iterator first, std::vector<std::string>::iterator last)
@@ -789,10 +810,13 @@ void    server_parser::construct_server(std::vector<std::string>::iterator first
     {
         if(!strncmp(serverVec[i].c_str(), "host ", 5))
         {
+            if(this->host != -1)
+            {
+                std::cerr << "Error : Duplicate Host !\n";
+                exit(1);
+            }
             getHost(stringSplit(serverVec[i], ' ', &temp_size), temp_size);
             // getPort(stringSplit(serverVec[i], ' ', &temp_size), temp_size); // host and port parsing;
-            if(this->host == -1 || this->host == 0)
-                host = 2130706433;
         }
         else if(!strncmp(serverVec[i].c_str(), "port ", 5))
         {
