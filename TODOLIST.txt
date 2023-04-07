@@ -2,14 +2,14 @@
 
 >>> add HTTP_COOKIE env
 
->>> fix brackets issue in config file
+>>> fix brackets issue in config file | DONE
 
->>> if (open == -1) return 500 error; /read/ write
+>>> if (open == -1) return 500 error; /read/ write | DONE 
 
->>> make error page dynamic
+>>> make error page dynamic | DONE
 
 >>> test client max body size
 
->>> checki is the allo methods work
+>>> checki is the allo methods work | WORKS
 
->>> memory leaks
+>>> memory leaks | NO LEAKS IN PARSING
