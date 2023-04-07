@@ -195,6 +195,9 @@ void Request::location_well(server_parser &serv)
             {
                 for(int i = query_pos +1 ; i < (int)start_line.full_path.length() && start_line.full_path[i] != '#'   ; i++)
                     start_line.query += start_line.full_path[i];
+                start_line.full_path.erase(query_pos);
+                query_pos = start_line.path.find("?");
+                start_line.path.erase(query_pos);
             }
         }
         if(!header.find("Content-Type")->first.empty() && header["Content-Type"] == "application/x-www-form-urlencoded")//query from post

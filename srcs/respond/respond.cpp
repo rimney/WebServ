@@ -284,13 +284,14 @@ std::string		respond::setErrorBody(std::string status_code)
 
 std::string		respond::mergeRespondStrings(void)
 {
-    if (this->location.empty() && this->cookies.empty() && this->expireDate.empty())
-	    this->finalString =  this->gethttpVersion() + " " + this->getstatusCode() + " " + this->getstatusDescription() + "\r\nContent-Length: " + this->getContentLenght() + "\r\n" + this->content_type + "\r\n\r\n" + this->getBody();
-    else if(this->cookies.empty() && this->location.size() > 0)
-	    this->finalString = this->gethttpVersion() + " " + this->getstatusCode() + " " + this->getstatusDescription() + "\r\nContent-Length: " + this->getContentLenght() + "\r\n" + this->getLocation() + "\r\n" +  this->content_type + "\r\n\r\n" + this->getBody();
-	else 
-	    this->finalString = this->gethttpVersion() + " " + this->getstatusCode() + " " + this->getstatusDescription() + "\r\nContent-Length: " + this->getContentLenght() + "\r\n" + this->getCookies() + "\r\n" + getExpires() + "\r\n" + this->getLocation() + "\r\n" +  this->content_type + "\r\n\r\n" + this->getBody();
-	
+	this->finalString =  this->gethttpVersion() + " " + this->getstatusCode() + " " + this->getstatusDescription() + "\r\nContent-Length: " + this->getContentLenght() + "\r\n" + this->content_type + "\r\n";
+    if(!this->cookies.empty())
+	    this->finalString = this->finalString + this->getCookies() + "\r\n";
+	if(!this->location.empty()) 
+	    this->finalString = this->finalString + this->getLocation() + "\r\n";
+    if(!this->expireDate.empty())
+	    this->finalString = this->finalString + this->getExpires() + "\r\n";
+    this->finalString = this->finalString +  "\r\n" + this->getBody();
 	return (this->finalString);
 }
 

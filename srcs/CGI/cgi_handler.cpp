@@ -67,7 +67,8 @@ void            cgi_handler::init_env(int port)
     _env.push_back("SERVER_PROTOCOL=HTTP/1.1");
     _env.push_back("SERVER_SOFTWARE=WebServ/0.0");
     _env.push_back("REDIRECT_STATUS=200");
-    // _env.pop_back("HTTP_COOKIE=");
+    if (!headers["Cookie"].empty())
+        _env.push_back(std::string("HTTP_COOKIE=") + headers["Cookie"]);
 }
 
 char**  cgi_handler::vector_to_ptr()
@@ -189,6 +190,8 @@ void    cgi_handler::generate_response(std::string & cgi_response, respond & res
     std::string header, element;
     size_t      content_length;
 
+    std::cout << "cgi_response: " << cgi_response << std::endl;
+
     if (cgi_response.find("500\r\n") != std::string::npos || cgi_response.empty())
     {
         response.setstatusCode("500");
@@ -240,6 +243,6 @@ void    cgi_handler::generate_response(std::string & cgi_response, respond & res
 
     if (content_length == 0 && !response.getBody().empty())
         response.setContentLenght(std::to_string(response.getBody().size()));
-
+    std::cout << response.getCookies() << '\n';
     response.mergeRespondStrings();
 }

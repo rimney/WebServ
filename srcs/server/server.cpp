@@ -186,6 +186,7 @@ void    server::receive(int fd)
 
 void    server::send(int fd)
 {
+    std::cout << _respond[fd].getfinalString() << '\n';
     if(_respond[fd].getBody().empty())
         _respond[fd].recoverBody(atoi(_respond[fd].getstatusCode().c_str()));
     
