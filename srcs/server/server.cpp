@@ -457,7 +457,7 @@ void server::Get(int location_index , std::string path, int fd)
 
 void    server::process(int fd)
 {
-    // std::cout <<  "*-"<< _request_map[fd] << "-*"<< std::endl;
+    std::cout <<  "*-"<< _request_map[fd] << "-*"<< std::endl;
     if(!_request[fd].get_wait_body())
         _request[fd].parser(_request_map[fd]);
     else
@@ -470,12 +470,11 @@ void    server::process(int fd)
 
         // std::cout << "\nThe first line is : \n";
         std::cout << "//////////////// REQUEST ///////////////////\n";
-        std::cout <<  _request[fd].get_start_line().vertion << std::endl;
-        std::cout <<  _request[fd].get_start_line().method << std::endl;
-        std::cout <<  _request[fd].get_start_line().path << std::endl;
-        std::cout <<  _request[fd].get_start_line().vertion << std::endl;
-        std::cout <<  _request[fd].get_start_line().full_path << std::endl;
-        std::cout <<  _request[fd].get_start_line().query << std::endl;
+        std::cout <<  "method: " <<_request[fd].get_start_line().method << std::endl;
+        std::cout <<  "path: " <<_request[fd].get_start_line().path << std::endl;
+        std::cout <<  "vertion: " <<_request[fd].get_start_line().vertion << std::endl;
+        std::cout <<  "full_path: " <<_request[fd].get_start_line().full_path << std::endl;
+        std::cout <<  "query: " <<_request[fd].get_start_line().query << std::endl;
         // std::cout <<  "**"<<_request[fd].get_body() << "**"<< std::endl;
         std::cout << "ERROR : " <<_request[fd].get_error() << "\n";
         std::cout << "//////////////// REQUEST ///////////////////\n\n";

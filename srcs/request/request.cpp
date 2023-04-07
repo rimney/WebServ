@@ -11,21 +11,25 @@ void Request::parser(std::string &value)
     std::string *t = reinterpret_cast<std::string *>(p);
     for(int i = 0 ;_token.type != TYPE_EOF;)
     {
-        _token = _lexer.get_next_token();
+        if(i == 0)
+            _token = _lexer.get_next_token(0);
+        else
+            _token = _lexer.get_next_token(1);
         if(_token.type == TYPE_END_OF_LINE || _token.type == TYPE_CR)
             i++;
         if(_token.type == TYPE_END_OF_SSECTION)
             end_of_section = true;
         if(i == 0 && !end_of_section)
         {
+            
             *t = _token.value;
             t++;
         }
         else if (_token.type != TYPE_END_OF_LINE && _token.type != TYPE_CR
                 && _token.type != TYPE_END_OF_SSECTION && _token.type != TYPE_TWO_POINT && _token.type == false)
         {
-            _lexer.get_next_token();
-            buffer = _lexer.get_next_token().value;
+            _lexer.get_next_token(1);
+            buffer = _lexer.get_next_token(1).value;
             buffer.erase(buffer.begin());
             if(!buffer.empty() && !_token.value.empty())
             header.insert(std::make_pair(_token.value,buffer));
@@ -56,7 +60,9 @@ void Request::parser(std::string &value)
         body_size = atol(header.find("Content-Length")->second.c_str());
         if((unsigned long)body.length() >= body_size)
             wait_body = false;
-    }  
+    }
+    else if(start_line.method == "POST" && header.find("Content-Length")->first.empty() && header.find("Transfer-Encoding")->first.empty())
+        wait_body = true;
 }
 
 void Request::body_handling(std::string buffer)
@@ -220,6 +226,28 @@ void Request::location_well(server_parser &serv)
         
 }
 
+int alowed_character(char c)
+{
+    std::string valid = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._~:/?#[]@!$&'()*+,;=%";
+    for(int i = 0 ; i < (int)valid.length();i++)
+    {
+        if(c == valid[i])
+            return 1;
+    }
+    return 0;
+}
+
+int chek_hex(char c)
+{
+    std::string valid = "ABCDEF0123456789";
+    for(int i = 0 ; i < (int)valid.length();i++)
+    {
+        if(c == valid[i])
+            return 1;
+    }
+    return 0;
+}
+
 void Request::request_well_formed(server_parser &serv)
 {
     std::string tmp_path = start_line.path;
@@ -242,9 +270,19 @@ void Request::request_well_formed(server_parser &serv)
         r_error = "414 Request-URI Too Long";
     for(int i = 0 ; i < (int)tmp_path.length() ; i++)
     {
-        if(((tmp_path[i] < 95 || tmp_path[i] > 'z') && (tmp_path[i] < 33 || tmp_path[i] > 90))
-            || tmp_path[i] == 34 || tmp_path[i] == 60 || tmp_path[i] == 62 || tmp_path[i] == 96)
+        if(alowed_character(tmp_path[i]) == 0)
+        {
+            r_error = "400";
+            break;
+        }
+        if(tmp_path[i] == '%' && i + 1  < (int)tmp_path.length() && i + 2  < (int)tmp_path.length())
+        {
+            if( chek_hex(tmp_path[i + 1]) == 1 && chek_hex(tmp_path[i + 2]) == 1)
+            {
                 r_error = "400";
+                break;
+            } 
+        }
     }
 }
 

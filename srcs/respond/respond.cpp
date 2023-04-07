@@ -399,11 +399,10 @@ void	respond::setRespond(std::string path, std::string httpVersion, std::string 
             this->bodyFlag = false;
             this->sethttpVersion(httpVersion);
             this->setstatusCode("400");
-            this->setstatusDescription("400 Bad Request");
+            this->setstatusDescription("Bad Request");
             this->setBody(this->setErrorBody(this->getstatusCode()));
             this->setContentLenght(std::to_string(this->getBody().size()));
 			this->mergeRespondStrings();
-            close(fd);
             return ;
         }
         else if(error == "404")

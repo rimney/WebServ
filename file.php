@@ -26,15 +26,15 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 setcookie('email', $_POST['email'], time() + 3600 * 24 * 7);
                 setcookie('avatar', $avatar_destination, time() + 3600 * 24 * 7);
             } else {
-                echo 'File too big';
+                echo '<h1>File too big</h1>';
                 exit(1);
             }
         } else {
-            echo 'Error';
+            echo '<h1>Error</h1>';
             exit(1);
         }
     } else {
-        echo 'Not allowed';
+        echo '<h1>Not allowed</h1>';
         exit(1);
     }
 } else if ($_SERVER['REQUEST_METHOD'] == 'GET' && isset($_GET['logout'])) {
