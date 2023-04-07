@@ -114,7 +114,15 @@ void cgi_handler::exec(respond & response)
     fd_in = fileno(file_in);
     fd_out = fileno(file_out);
 
-    write(fd_in, _request.get_body().c_str(), _request.get_body().size());
+    if (write(fd_in, _request.get_body().c_str(), _request.get_body().size()) == -1)
+    {
+        response.setstatusCode("500");
+        response.setstatusDescription("Internal Server Error");
+        response.setContentType("text/html");
+        response.setBody("<h1>Internal Server Error</h1>");
+        response.mergeRespondStrings();
+        return ;
+    }
     lseek(fd_in, 0, SEEK_SET);
 
     cgi_pid = fork();

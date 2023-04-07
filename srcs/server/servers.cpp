@@ -6,7 +6,7 @@
 /*   By: eel-ghan <eel-ghan@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/10 00:38:14 by eel-ghan          #+#    #+#             */
-/*   Updated: 2023/04/07 02:17:08 by eel-ghan         ###   ########.fr       */
+/*   Updated: 2023/04/07 06:51:50 by eel-ghan         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -136,7 +136,7 @@ void    servers::run()
                 catch(const std::string& msg)
                 {
                     std::cout << msg << '\n';
-                    // break ;
+                    break ;
                 }
             }
         }
@@ -157,11 +157,13 @@ void    servers::run()
                     int fd = (*it).first ;
                     std::cerr << msg << "\n";
                     FD_CLR(fd, &_set_fds);
+                    FD_CLR(fd, &_set_write_fds);
+                    FD_CLR(fd, &_set_read_fds);
                     std::vector<int>::iterator i = std::find(_fds_ready.begin(), _fds_ready.end(), fd);
                     if (i != _fds_ready.end())
                         _fds_ready.erase(i);
                     _fds_cnx.erase(fd);
-                    // close(fd);
+                    close(fd);
                     break ;
                 }
             }
@@ -188,6 +190,7 @@ void    servers::run()
                     _fds_cnx[i].get_fd_port().erase(_fds_ready[i]);
                     _fds_cnx.erase(_fds_ready[i]);
                     _fds_ready.erase(_fds_ready.begin() + i);
+                    close(_fds_ready[i]);//??
                     break ;
                 }
             }

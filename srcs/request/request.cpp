@@ -46,22 +46,22 @@ void Request::parser(std::string &value)
         _token.value.clear();
     }
 
-    if(!header.find("Transfer-Encoding")->first.empty())
+    if(header.find("Transfer-Encoding") != header.end())
     {
-        if(header.find("Transfer-Encoding")->second == "chunked" )
+        if(header["Transfer-Encoding"] == "chunked" )
         {
             wait_body = true;
             body_handling(body);
         }
     }
-    else if (!header.find("Content-Length")->first.empty())
+    else if (header.find("Content-Length") != header.end())
     {
         wait_body = true;
-        body_size = atol(header.find("Content-Length")->second.c_str());
+        body_size = atol(header["Content-Length"].c_str());
         if((unsigned long)body.length() >= body_size)
             wait_body = false;
     }
-    else if(start_line.method == "POST" && header.find("Content-Length")->first.empty() && header.find("Transfer-Encoding")->first.empty())
+    else if(start_line.method == "POST" && header.find("Content-Length") != header.end() && header.find("Transfer-Encoding") != header.end())
         wait_body = true;
 }
 
@@ -69,7 +69,7 @@ void Request::body_handling(std::string buffer)
 {
     std::string hexa;
 
-    if(!header.find("Transfer-Encoding")->first.empty())
+    if(header.find("Transfer-Encoding") != header.end())
     {
         if(buffer[buffer.length() - 1] == 10 && buffer[buffer.length() - 2] == 13 && buffer[buffer.length() - 3] == 10
                                 && buffer[buffer.length() - 4] == 13 && buffer[buffer.length() - 5] == '0' && buffer[buffer.length() - 6] == 10 && buffer[buffer.length() - 7] == 13)
@@ -78,7 +78,7 @@ void Request::body_handling(std::string buffer)
             buffer.erase(buffer.length() - 7 , buffer.length() - 1);
             wait_body = false;
         }
-        if(header.find("Transfer-Encoding")->second == "chunked" )
+        if(header["Transfer-Encoding"] == "chunked" )
         {
             if(body_size == 0)
             {
@@ -129,7 +129,7 @@ void Request::body_handling(std::string buffer)
             }
         }
     }
-    else if(!header.find("Content-Length")->first.empty())
+    else if(header.find("Content-Length") != header.end())
     {
         body += buffer;
         if((unsigned long)body.length() >= body_size)
@@ -140,7 +140,8 @@ void Request::body_handling(std::string buffer)
 void Request::errors(server_parser &serv)
 {
     request_well_formed(serv);
-    location_well(serv);
+    if(r_error == "")
+        location_well(serv);
 }
 
 void Request::location_well(server_parser &serv)
@@ -154,7 +155,7 @@ void Request::location_well(server_parser &serv)
     for(size_t i = 0 ; i < (size_t)serv.getServerLocationsObject().size(); i++)
     {
         found = start_line.path.find(serv.getServerLocationsObject()[i].getLocationNameObject());
-        if (found != (size_t) -1  && index_of_charachter <= serv.getServerLocationsObject()[i].getLocationNameObject().length())
+        if (found != (size_t) -1  && index_of_charachter < serv.getServerLocationsObject()[i].getLocationNameObject().length())
         {
             index_of_charachter = serv.getServerLocationsObject()[i].getLocationNameObject().length();
             index = (long)i;
@@ -165,16 +166,19 @@ void Request::location_well(server_parser &serv)
         start_line.location_index = index;
         if(!serv.getServerLocationsObject()[index].getLocationRedirectionObject().empty()) //301 Moved Permanently
             r_error = "301";
-        if(!serv.getServerLocationsObject()[index].getLocationMethodsObject().empty())//405 Method Not Allowed
+        if(serv.getServerLocationsObject()[index].getLocationMethodsObject().size() > 0)//405 Method Not Allowed
         {
             for(size_t i = 0; i < serv.getServerLocationsObject()[index].getLocationMethodsObject().size() ; i++)
             {
+                std::cout << serv.getServerLocationsObject()[index].getLocationMethodsObject()[i] << "<<" <<std::endl;
                 if(serv.getServerLocationsObject()[index].getLocationMethodsObject()[i] == start_line.method)
                     method_allowed = true;
             }
             if(!method_allowed)
                 r_error = "405";
         }
+        else if(start_line.method !=  "POST" && start_line.method !=  "DELETE" && start_line.method !=  "GET")
+            r_error = "405";
         if(!serv.getServerLocationsObject()[index].getLocationRootObject().empty())//404 Not Found
         {
             if(serv.getServerLocationsObject()[index].getLocationRootObject() [serv.getServerLocationsObject()[index].getLocationRootObject() .length() - 1] == '/' && start_line.path[0] == '/')
@@ -199,9 +203,12 @@ void Request::location_well(server_parser &serv)
             {
                 for(int i = query_pos +1 ; i < (int)start_line.full_path.length() && start_line.full_path[i] != '#'   ; i++)
                     start_line.query += start_line.full_path[i];
+                start_line.full_path.erase(query_pos);
+                query_pos = start_line.path.find("?");
+                start_line.path.erase(query_pos);
             }
         }
-        if(!header.find("Content-Type")->first.empty() && header["Content-Type"] == "application/x-www-form-urlencoded")//query from post
+        if(header.find("Content-Type") != header.end() && header["Content-Type"] == "application/x-www-form-urlencoded")//query from post
             start_line.query = body;
     }
     else
@@ -246,27 +253,39 @@ int chek_hex(char c)
 void Request::request_well_formed(server_parser &serv)
 {
     std::string tmp_path = start_line.path;
-    if(!header.find("Transfer-Encoding")->first.empty())
+    if(header.find("Transfer-Encoding") != header.end())
     {
-        if(header.find("Transfer-Encoding")->second != "chunked")
+        if(header["Transfer-Encoding"] != "chunked")
+        {
             r_error = "501 Not Implemented";
-        else if(serv.getCmbsObject() > 0 && body.size() < (size_t)serv.getCmbsObject())
-             r_error = "413 Request Entity Too Large";
+            return;
+        }
+            
     }
-    else if((start_line.method == "POST" && header.find("Transfer-Encoding")->first.empty() && header.find("Content-Length")->first.empty())
-        || (start_line.method == "POST" && !header.find("Transfer-Encoding")->first.empty() && !header.find("Content-Length")->first.empty()))
-        r_error = "400";
-    else if(!header.find("Content-Length")->first.empty())
+    else if((start_line.method == "POST" && header.find("Transfer-Encoding") == header.end() && header.find("Content-Length") == header.end())
+        || (start_line.method == "POST" && header.find("Transfer-Encoding") != header.end() && header.find("Content-Length") != header.end()))
+        {
+            std::cout << "1\n";
+            r_error = "400";
+            return;
+        }
+        
+    if(body.size() > 0)
     {
-        if(serv.getCmbsObject()  > 0 && serv.getCmbsObject()  <  stoi(header.find("Content-Length")->second))
+        std::cout << "here\n";
+        if(serv.getCmbsObject()  > 0 && (size_t)serv.getCmbsObject()  <  body.size())
+        {
             r_error = "413 Request Entity Too Large";
+            return;
+        }
     }
-    else if(tmp_path.length() > 2048)
+    if(tmp_path.length() > 2048)
         r_error = "414 Request-URI Too Long";
     for(int i = 0 ; i < (int)tmp_path.length() ; i++)
     {
         if(alowed_character(tmp_path[i]) == 0)
         {
+            std::cout << "2\n";
             r_error = "400";
             break;
         }
@@ -274,6 +293,7 @@ void Request::request_well_formed(server_parser &serv)
         {
             if( chek_hex(tmp_path[i + 1]) == 1 && chek_hex(tmp_path[i + 2]) == 1)
             {
+                std::cout << "3\n";
                 r_error = "400";
                 break;
             } 

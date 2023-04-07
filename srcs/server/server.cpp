@@ -267,7 +267,6 @@ void    server::delete_method(std::string  & path, int fd)
         int r = is_file_or_dir(path);
         if (r == 1) // handle file cases
         {
-            std::cout << "file <<\n";
             if (remove(path.c_str()) == 0)
             {
                 _respond[fd].setstatusCode("204");
@@ -285,7 +284,6 @@ void    server::delete_method(std::string  & path, int fd)
         }
         else if (r == 2) // handle dir cases
         {
-            std::cout << "dir <<\n";
             if (path.back() == '/')
             {
                 struct Start_line start_line = _request[fd].get_start_line();
@@ -445,7 +443,7 @@ void    server::process(int fd)
         std::cout <<  _request[fd].get_start_line().vertion << std::endl;
         std::cout <<  _request[fd].get_start_line().full_path << std::endl;
         std::cout <<  _request[fd].get_start_line().query << std::endl;
-        // std::cout <<  "**"<<_request[fd].get_body() << "**"<< std::endl;
+        std::cout <<  "**"<<_request[fd].get_error() << "**"<< std::endl;
         std::cout << "//////////////// REQUEST ///////////////////\n\n";
         _respond[fd].setRespondLocationIndex(_request[fd].get_start_line().location_index);
         _respond[fd].setFd(fd);

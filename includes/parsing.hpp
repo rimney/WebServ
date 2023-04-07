@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   parsing.hpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: rimney <rimney@student.42.fr>              +#+  +:+       +#+        */
+/*   By: eel-ghan <eel-ghan@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/24 21:53:42 by rimney            #+#    #+#             */
-/*   Updated: 2023/04/03 20:32:06 by rimney           ###   ########.fr       */
+/*   Updated: 2023/04/07 06:08:24 by eel-ghan         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -49,7 +49,7 @@ class server_location
 		////////////// Constructors and Overloads //////////////
 		
 		////////////// Getters and Setters //////////////
-        int							getCmbsObject(void);
+        int							getLocationCmbsObject(void);
         int							getLocationindexObject(void){return (this->location_index);}
         int							getLocationCmbsObject(void) const ;
         bool						getLocationIsAutoIndexObject(void) const {return (this->is_auto_index);}
@@ -76,7 +76,7 @@ class server_location
         void    getAutoIndex(std::string *keys, size_t size);
         void    getRoot(std::string *keys, size_t size);
         void    getRedirection(std::string *keys, size_t size);
-        void    getCmds(std::string *keys, size_t size);
+        void    getLocationCmds(std::string *keys, size_t size);
         void    getMethods(std::string *Keys, size_t size);
         void    getCgiPath(std::string *Keys, size_t size);
         void    getCgiExec(std::string *Keys, size_t size);
@@ -160,6 +160,7 @@ class server_parser : public server_location
         void            restoreRootObject(int i);
         void            restoreIndexObject(int i);
         void            restoreAutoIndex(int i);
+        void            restoreCmbs(int i);
         void restoreServerMethods(int i);
         int getLocationByName(std::string name) const;
         void    checkServerData(void);

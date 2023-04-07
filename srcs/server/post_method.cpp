@@ -53,9 +53,13 @@ void server::multi_part(server_parser &serv,int fd)
     std::string boundary;
     std::string filename;
     std::string buffer;
-    for(size_t i = _request[fd].get_header().find("Content-Type")->second.find("=") + 1; i < (size_t)_request[fd].get_header().find("Content-Type")->second.length();i++)//find boundary
+    std::string buffer01 ;
+    if(_request[fd].get_header().find("Content-Type") != _request[fd].get_header().end())
+        buffer01 = _request[fd].get_header()["Content-Type"];
+    
+    for(size_t i = buffer01.find("=") + 1; i < (size_t)buffer01.length();i++)//find boundary
     {
-        if (_request[fd].get_header().find("Content-Type")->second[i] != '-')
+        if (buffer01[i] != '-')
                 boundary +=  _request[fd].get_header().find("Content-Type")->second[i];
     }
     for (size_t i = 0 ; i < (size_t)_request[fd].get_body().length();i++)
@@ -111,17 +115,17 @@ void    server::post_method(server_parser &serv, int fd)
         // }
         if(!serv.getServerLocationsObject()[_request[fd].get_start_line().location_index].getUploadObject().empty())
         {
-            if(!_request[fd].get_header().find("Content-Type")->first.empty())
+            if(_request[fd].get_header().find("Content-Type") != _request[fd].get_header().end())
             {
 
-                if(strncmp(_request[fd].get_header().find("Content-Type")->second.c_str(),"multipart",9) == 0)//multipart
+                if(strncmp(_request[fd].get_header()["Content-Type"].c_str(),"multipart",9) == 0)//multipart
                     multi_part(serv,fd);
                 else
                 {
                     struct timeval tp;
                     gettimeofday(&tp, NULL);
                     long int ms = tp.tv_sec * 1000 + tp.tv_usec / 1000;
-                    buffer = _request[fd].get_header().find("Content-Type")->second;
+                    buffer = _request[fd].get_header()["Content-Type"];
                     for(int i = 0 ; i < (int)buffer.length();i++)
                         if(buffer[i] == '/')
                             for(int j = i + 1 ; j < (int)buffer.length();j++)
@@ -156,7 +160,7 @@ void    server::post_method(server_parser &serv, int fd)
                         {
                             if (entry->d_type == DT_REG)
                             {
-                                if(strncmp(entry->d_name,"index.php",9) == 0)
+                                if(strncmp(entry->d_name,"index.php",9) == 0 || strncmp(entry->d_name,"index.py",8) == 0)
                                     is_found = true;
                             }  // if the entry is a regular file
                         }
@@ -167,7 +171,7 @@ void    server::post_method(server_parser &serv, int fd)
                 if(!is_found && error == "")
                 {
                         error = "403";//dosent have index file : "403 Forbidden"
-                        std::cout << " ** "<< "errror 403" << "++"<< std::endl;
+                        // std::cout << " ** "<< "errror 403" << "++"<< std::endl;
                 }
                 else if(!serv.getServerLocationsObject()[_request[fd].get_start_line().location_index].getCgiPathObject(_request[fd].get_start_line().full_path + "" ).empty() && is_found)
                 {
@@ -195,7 +199,5 @@ void    server::post_method(server_parser &serv, int fd)
     }
     std::cout << error << std::endl;
     _respond[fd].setRespond(_request[fd].get_start_line().full_path, _request[fd].get_start_line().vertion,error);
-    // std::cout << _respond[fd].getfinalString();
-    // exit(0);
    
 }

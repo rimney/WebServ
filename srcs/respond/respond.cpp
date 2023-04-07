@@ -6,7 +6,7 @@
 /*   By: eel-ghan <eel-ghan@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/15 20:32:17 by rimney            #+#    #+#             */
-/*   Updated: 2023/04/07 03:08:42 by eel-ghan         ###   ########.fr       */
+/*   Updated: 2023/04/07 06:14:39 by eel-ghan         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -481,7 +481,6 @@ void	respond::setRespond(std::string path, std::string httpVersion, std::string 
 					this->setRespond(path, this->httpVersion, "404");
 					return ;
 				}
-			std::cout << this->finalString << " <<\n";
 			return ;
 			}
 		}
