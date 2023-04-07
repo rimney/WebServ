@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Error Page</title>
+	<style>
+		body {
+			margin: 0;
+			padding: 0;
+			display: flex;
+			flex-direction: column;
+			justify-content: center;
+			align-items: center;
+			height: 100vh;
+			font-family: 'Fira Mono', monospace;
+		}
+		img {
+			position: absolute;
+			size : 20%
+			transform: translate(-50%, -50%);
+			animation: slide-up 2s ease-in-out forwards;
+			z-index: -1;
+		}
+		@keyframes slide-up {
+			from {
+				top: 80%;
+			}
+			to {
+				top: 0%;
+			}
+		}
+		.text {
+			display: flex;
+			flex-direction: column;
+			justify-content: center;
+			align-items: center;
+			margin-bottom: 120px;
+            color : white;
+		}
+		h1 {
+			font-size: 120px;
+			margin: 0;
+			margin-bottom: 40px;
+		}
+		h3 {
+			font-size: 36px;
+			margin: 0;
+			text-align: center;
+		}
+	</style>
+</head>
+<body>
+	<div class="text">
+		<h1>400 Bad Request</h1>
+		<h3>Let's take you <a href="/">HOME</a></h3>
+	</div>
+	<img src="/upload/brmohamm.jpeg" alt="Error Image">
+</body>
+</html>

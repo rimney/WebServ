@@ -6,7 +6,7 @@
 /*   By: rimney <rimney@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/07 03:50:36 by rimney            #+#    #+#             */
-/*   Updated: 2023/04/06 04:37:37 by rimney           ###   ########.fr       */
+/*   Updated: 2023/04/06 22:46:28 by rimney           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -842,8 +842,6 @@ void    server_parser::construct_server(std::vector<std::string>::iterator first
             getIndexPage(stringSplit(serverVec[i], ' ', &temp_size), temp_size);
             if(isFileOrDirectory(this->getRootObject() + this->getIndexObject()) == "error")
             {
-                std::cout << this->getRootObject() << "<<<<<\n";
-                std::cout << this->getRootObject() + this->getIndexObject() << " <<\n";
                 std::cerr << "Error : Check The Server Index Path\n";
                 exit(0);
             }
