@@ -262,7 +262,6 @@ int remove_dir(std::string path)
 
 void    server::delete_method(std::string  & path, int fd)
 {
-    std::cout << "delete method <<<\n";   
     if (is_path_exist(path))
     {
         int r = is_file_or_dir(path);
@@ -349,7 +348,6 @@ void server::Get(int location_index , std::string path, int fd)
     {
         if(!strcmp(strrchr(path.c_str(), '/'), "/favicon.ico"))
         {   
-            std::cout << "bypassed !\n";
             return ;
         }
     }
@@ -386,7 +384,6 @@ void server::Get(int location_index , std::string path, int fd)
         {
             if(path[path.size() - 1] != '/')
             {
-                std::cout << path << " << EEEEEEEEEE\n";
                 _respond[fd].sethttpVersion(_respond[fd].gethttpVersion());
 			    _respond[fd].setstatusCode("301");
 			    _respond[fd].setstatusDescription("Moved Permanently");
@@ -449,7 +446,6 @@ void    server::process(int fd)
         std::cout <<  _request[fd].get_start_line().full_path << std::endl;
         std::cout <<  _request[fd].get_start_line().query << std::endl;
         // std::cout <<  "**"<<_request[fd].get_body() << "**"<< std::endl;
-        std::cout << _request[fd].get_error() << "  <<<<<<<<<<<\n";
         std::cout << "//////////////// REQUEST ///////////////////\n\n";
         _respond[fd].setRespondLocationIndex(_request[fd].get_start_line().location_index);
         _respond[fd].setFd(fd);

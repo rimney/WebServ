@@ -190,7 +190,6 @@ void    cgi_handler::generate_response(std::string & cgi_response, respond & res
     std::string header, element;
     size_t      content_length;
 
-    std::cout << "cgi_response: " << cgi_response << std::endl;
 
     if (cgi_response.find("500\r\n") != std::string::npos || cgi_response.empty())
     {
@@ -222,7 +221,6 @@ void    cgi_handler::generate_response(std::string & cgi_response, respond & res
                 response.setstatusCode(header.substr(j));
             else if (element == "Set-Cookie")
             {
-                std::cout << "cookie <<<<<<<<<<\n";
                 response.setCookies(header.substr(j));
             }
             // else if (element == "Expires")

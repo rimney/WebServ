@@ -6,7 +6,7 @@
 /*   By: eel-ghan <eel-ghan@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/15 20:32:17 by rimney            #+#    #+#             */
-/*   Updated: 2023/04/07 02:14:22 by eel-ghan         ###   ########.fr       */
+/*   Updated: 2023/04/07 03:08:42 by eel-ghan         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -133,7 +133,6 @@ std::string respond::chunkedFileToString(std::string path)
         std::cout << "THE END !\n";
         bodyFlag = false;
         this->pathSave.clear();
-        std::cout << this->pathSave << " << PATH SAVE\n";
         this->cleanAll();
         this->chunkPosition = 0;
         close(fd);
@@ -278,8 +277,20 @@ std::string     respond::fileToSring(std::string path)
 
 std::string		respond::setErrorBody(std::string status_code)
 {
-    if(theFileExists(this->server.getServerErrorPageObject()) && this->isAmongErrorCodes(atoi(status_code.c_str())))
-        return (fileToSring(this->server.getServerErrorPageObject()));
+    if(isFileOrDirectory(this->server.getServerErrorPageObject()) == "directory" && this->isAmongErrorCodes(atoi(status_code.c_str())))
+    {
+        std::string ret;
+        if(this->server.getServerErrorPageObject().back() == '/')
+        {
+            ret = fileToSring(this->server.getServerErrorPageObject() + status_code + ".html");
+            return (ret);
+        }
+        else
+        {
+            ret = fileToSring(this->server.getServerErrorPageObject() + "/" + status_code + ".html");
+            return (ret);
+        }
+    }
     else if(this->isAmongErrorCodes(atoi(status_code.c_str())))
         return (fileToSring(this->server.getServerErrorPageObject()));    
     return ("");   
@@ -514,7 +525,6 @@ void	respond::setRespond(std::string path, std::string httpVersion, std::string 
             this->Body.clear();
             if(getfinalString().size() == 0)
 		        this->mergeRespondStrings();
-            std::cout << "Header Set ! 2 <<<<<<\n";
         }
         return ;
     }

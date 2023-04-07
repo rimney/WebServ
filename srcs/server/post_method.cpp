@@ -171,7 +171,6 @@ void    server::post_method(server_parser &serv, int fd)
                 }
                 else if(!serv.getServerLocationsObject()[_request[fd].get_start_line().location_index].getCgiPathObject(_request[fd].get_start_line().full_path + "" ).empty() && is_found)
                 {
-                    std::cout << " ** "<< "<<<<<<<<< dir >>>>>>>>>" << "++"<< std::endl;
                     _request[fd].get_start_line().full_path += "index.php";
                     cgi_handler cgi(_server_config, _request[fd], _fd_port_map[fd]);
                     cgi.exec(_respond[fd]);
@@ -185,8 +184,6 @@ void    server::post_method(server_parser &serv, int fd)
            {
                 if(!serv.getServerLocationsObject()[_request[fd].get_start_line().location_index].getCgiPathObject(_request[fd].get_start_line().full_path).empty())
                 {
-                    std::cout <<"<<<<< query"  <<_request[fd].get_start_line().query << ">>>>>"<< std::endl;
-                    std::cout << " ** "<< "<<<<<<<<<file >>>>>>>>>" << "++"<< std::endl;
                     cgi_handler cgi(_server_config, _request[fd], _fd_port_map[fd]);
                     cgi.exec(_respond[fd]);
                     return;
