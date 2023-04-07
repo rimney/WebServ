@@ -186,7 +186,6 @@ void    server::receive(int fd)
 
 void    server::send(int fd)
 {
-    std::cout << _respond[fd].getfinalString() << '\n';
     if(_respond[fd].getBody().empty())
         _respond[fd].recoverBody(atoi(_respond[fd].getstatusCode().c_str()));
     
@@ -346,7 +345,6 @@ void    server::delete_method(std::string  & path, int fd)
 
 void server::Get(int location_index , std::string path, int fd) 
 {
-    std::cout << "get method <<<\n";
     if(!strcmp(strrchr(path.c_str(), '/'), "/favicon.ico"))
     {
         if(!strcmp(strrchr(path.c_str(), '/'), "/favicon.ico"))
@@ -355,7 +353,6 @@ void server::Get(int location_index , std::string path, int fd)
             return ;
         }
     }
-    std::cout << location_index << " LOCATION_INDEX <<\n";
     server_location location = _server_config.getOneLocationObject(location_index);
     std::string isFOrD = isFileOrDirectory(path);
 
@@ -363,7 +360,6 @@ void server::Get(int location_index , std::string path, int fd)
     {
         if(isFOrD == "file")
         {
-            std::cout << "get 1 <<< \n";
             if(location.getHasCgi() && location.isCgi(_request[fd].get_start_line().full_path)) // check if the extention of file compatible with extentions 
             {
                 cgi_handler cgi(_server_config, _request[fd], _fd_port_map[fd]);
@@ -372,7 +368,6 @@ void server::Get(int location_index , std::string path, int fd)
             }    
             if(_respond[fd].fileToSring(path).size() >= 50000)
             {
-                std::cout << "get 2 <<< \n";
                 if(_respond[fd].getBodyFlag() == true)
 
                     return ;

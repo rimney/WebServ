@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   respond.cpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: rimney <rimney@student.42.fr>              +#+  +:+       +#+        */
+/*   By: eel-ghan <eel-ghan@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/15 20:32:17 by rimney            #+#    #+#             */
-/*   Updated: 2023/04/06 06:18:03 by rimney           ###   ########.fr       */
+/*   Updated: 2023/04/07 02:14:22 by eel-ghan         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -247,12 +247,15 @@ std::string respond::getExpires(void)
 
 std::string respond::getCookies(void)
 {
-	return ("Set-cookie: " + this->cookies);
+    std::string ret;
+    for(size_t i = 0; i < this->cookies.size(); i++)
+        ret += "Set-Cookie: " + this->cookies[i] + "\r\n";
+	return (ret);
 }
 
 void	respond::setCookies(std::string Cookie)
 {
-	this->cookies = Cookie;
+	this->cookies.push_back(Cookie);
 }
 
 
@@ -367,7 +370,7 @@ void	respond::setRespond(std::string path, std::string httpVersion, std::string 
             this->mergeRespondStrings();
             return ;
         }
-        else if(error == "400 Bad Request")
+        else if(error == "400")
         {
             this->bodyFlag = false;
             this->sethttpVersion(httpVersion);

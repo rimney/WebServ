@@ -206,7 +206,7 @@ void    cgi_handler::generate_response(std::string & cgi_response, respond & res
     {
         if (pos == i)
             break ;
-        
+
         header = cgi_response.substr(i, pos - i);
 
         if ((j = header.find(':')) != std::string::npos)
@@ -216,14 +216,17 @@ void    cgi_handler::generate_response(std::string & cgi_response, respond & res
                 response.setContentLenght(header.substr(j));
             else if (element == "Content-type")
                 response.setContentType(header.substr(j));
-            else if (element == "Location:")
+            else if (element == "Location")
                 response.setLocation(header.substr(j));
-            else if (element == "Status:")
+            else if (element == "Status")
                 response.setstatusCode(header.substr(j));
-            else if (element == "Set-cookie:")
+            else if (element == "Set-Cookie")
+            {
+                std::cout << "cookie <<<<<<<<<<\n";
                 response.setCookies(header.substr(j));
-            else if (element == "Expires:")
-                response.setExpires(header.substr(j));
+            }
+            // else if (element == "Expires")
+            //     response.setExpires(header.substr(j));
         }
         i += header.size() + 2;
         element.clear();
@@ -243,6 +246,6 @@ void    cgi_handler::generate_response(std::string & cgi_response, respond & res
 
     if (content_length == 0 && !response.getBody().empty())
         response.setContentLenght(std::to_string(response.getBody().size()));
-    std::cout << response.getCookies() << '\n';
+    
     response.mergeRespondStrings();
 }

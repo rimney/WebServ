@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   servers.cpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: rimney <rimney@student.42.fr>              +#+  +:+       +#+        */
+/*   By: eel-ghan <eel-ghan@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/10 00:38:14 by eel-ghan          #+#    #+#             */
-/*   Updated: 2023/04/06 05:45:32 by rimney           ###   ########.fr       */
+/*   Updated: 2023/04/07 02:06:11 by eel-ghan         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -125,7 +125,6 @@ void    servers::run()
             {
                 try
                 {
-                    std::cout << "here <<<\n";
                     (*it).second.accept((*it).first);
                     FD_SET((*it).second.get_fd_connection(), &_set_fds);
                     _fds_cnx.insert(std::make_pair((*it).second.get_fd_connection(), (*it).second));
@@ -180,7 +179,7 @@ void    servers::run()
                         {
                             // FD_CLR(_fds_ready[i], &_set_fds);
                             _fds_ready.erase(_fds_ready.begin() + i);
-                            std::cout << "send <<<<<\n";
+                            // std::cout << "send <<<<<\n";
                         }
                 }
                 catch(const std::string& msg)

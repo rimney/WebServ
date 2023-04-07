@@ -44,7 +44,7 @@ class lexer
 
     int get_index(){return index;}
 
-    token get_next_token()
+    token get_next_token(int is_line)
     {
         _token.value.clear();
         if (index >= size) {
@@ -76,7 +76,7 @@ class lexer
                 while (src[index] == '\t' || src[index] == 32)
                     ++index;
                 break;
-            } else if (src[index] == ':' && !is_key) {
+            } else if (src[index] == ':' && !is_key && is_line == 1) {
                 _token.type = TYPE_TWO_POINT;
                 _token.value += src[index];
                 is_key = true;
@@ -87,7 +87,7 @@ class lexer
                 _token.type = TYPE_TEXT;
             }
             index++;
-            if (src[index] == 13 || src[index] == '\n' || (src[index] == ':' && !is_key) 
+            if (src[index] == 13 || src[index] == '\n' || (src[index] == ':' && !is_key && is_line == 1) 
                         || (src[index] == '\n' && (index + 1 < size && src[index + 1] == '\n'))
                         || (src[index] == 13 && (index + 1 < size && src[index + 1] == 13)))
                 break;
@@ -96,4 +96,4 @@ class lexer
     }
 };
 
-#endif             
+#endif

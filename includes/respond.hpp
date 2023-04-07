@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   respond.hpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: rimney <rimney@student.42.fr>              +#+  +:+       +#+        */
+/*   By: eel-ghan <eel-ghan@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/14 17:42:24 by rimney            #+#    #+#             */
-/*   Updated: 2023/04/06 04:20:10 by rimney           ###   ########.fr       */
+/*   Updated: 2023/04/07 01:56:45 by eel-ghan         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,7 +40,7 @@ class respond
 		std::string		tempAutoIndexFile;// set a header flag << // set a path to the file
         int				location_index;
         int             fd;
-        std::string     cookies;
+        std::vector<std::string>     cookies;
         std::string     expireDate;
     
     public:
