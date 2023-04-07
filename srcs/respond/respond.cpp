@@ -6,7 +6,7 @@
 /*   By: eel-ghan <eel-ghan@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/15 20:32:17 by rimney            #+#    #+#             */
-/*   Updated: 2023/04/07 06:14:39 by eel-ghan         ###   ########.fr       */
+/*   Updated: 2023/04/07 07:54:26 by eel-ghan         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -298,7 +298,9 @@ std::string		respond::setErrorBody(std::string status_code)
 
 std::string		respond::mergeRespondStrings(void)
 {
-	this->finalString =  this->gethttpVersion() + " " + this->getstatusCode() + " " + this->getstatusDescription() + "\r\nContent-Length: " + this->getContentLenght() + "\r\n" + this->content_type + "\r\n";
+	this->finalString =  this->gethttpVersion() + " " + this->getstatusCode() + " " + this->getstatusDescription() + "\r\nContent-Length: " + this->getContentLenght() + "\r\n";
+    if(this->content_type.size())
+        this->finalString += this->content_type + "\r\n";
     if(!this->cookies.empty())
 	    this->finalString = this->finalString + this->getCookies() + "\r\n";
 	if(!this->location.empty()) 
@@ -462,8 +464,8 @@ void	respond::setRespond(std::string path, std::string httpVersion, std::string 
 	        {
 	            this->setLocation(location.getLocationRedirectionObject());
 	           	this->mergeRespondStrings();
+                std::cout << this->finalString << '\n';
                 return ;
-                std::cout << "HERE\n";
 	        }
 	        else
 	        {
@@ -513,7 +515,6 @@ void	respond::setRespond(std::string path, std::string httpVersion, std::string 
         this->pathSave = path;
         if(this->getBodyFlag() == false)
         {
-            std::cout << "Header Set !\n"; 
             this->pathSave = path;
             this->setChunkPosition(0);
             this->setContentType(getFileType(path));

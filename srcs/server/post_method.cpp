@@ -93,26 +93,8 @@ void    server::post_method(server_parser &serv, int fd)
     std::string error = "";
     DIR* dir;
     struct dirent* entry;
-    //  std::cout <<"**";
-    // for(size_t i = 0; i < _request[fd].get_body().length(); i++)
-    // {
-    //     if(_request[fd].get_body()[i] == 13)
-    //         std::cout <<"</r>";
-    //     else if (_request[fd].get_body()[i] == 10)
-    //         std::cout <<"</n>";
-    //     if (_request[fd].get_body()[i] != 13)
-    //         std::cout <<_request[fd].get_body()[i];
-        
-    // }
-    // std::cout <<" *end* " << "\n";
-
-    
     if(!_request[fd].get_body().empty())
     {
-        // if(!serv.getServerLocationsObject()[_request[fd].get_start_line().location_index].getHasRedirection())
-        // {
-
-        // }
         if(!serv.getServerLocationsObject()[_request[fd].get_start_line().location_index].getUploadObject().empty())
         {
             if(_request[fd].get_header().find("Content-Type") != _request[fd].get_header().end())

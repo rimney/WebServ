@@ -170,7 +170,6 @@ void Request::location_well(server_parser &serv)
         {
             for(size_t i = 0; i < serv.getServerLocationsObject()[index].getLocationMethodsObject().size() ; i++)
             {
-                std::cout << serv.getServerLocationsObject()[index].getLocationMethodsObject()[i] << "<<" <<std::endl;
                 if(serv.getServerLocationsObject()[index].getLocationMethodsObject()[i] == start_line.method)
                     method_allowed = true;
             }
@@ -223,7 +222,6 @@ void Request::location_well(server_parser &serv)
                 index = (long)i;
             }
         }
-        std::cout << "* end *" << std::endl;
     }
         
 }
@@ -265,14 +263,12 @@ void Request::request_well_formed(server_parser &serv)
     else if((start_line.method == "POST" && header.find("Transfer-Encoding") == header.end() && header.find("Content-Length") == header.end())
         || (start_line.method == "POST" && header.find("Transfer-Encoding") != header.end() && header.find("Content-Length") != header.end()))
         {
-            std::cout << "1\n";
             r_error = "400";
             return;
         }
         
     if(body.size() > 0)
     {
-        std::cout << "here\n";
         if(serv.getCmbsObject()  > 0 && (size_t)serv.getCmbsObject()  <  body.size())
         {
             r_error = "413 Request Entity Too Large";
@@ -285,7 +281,6 @@ void Request::request_well_formed(server_parser &serv)
     {
         if(alowed_character(tmp_path[i]) == 0)
         {
-            std::cout << "2\n";
             r_error = "400";
             break;
         }
@@ -293,7 +288,6 @@ void Request::request_well_formed(server_parser &serv)
         {
             if( chek_hex(tmp_path[i + 1]) == 1 && chek_hex(tmp_path[i + 2]) == 1)
             {
-                std::cout << "3\n";
                 r_error = "400";
                 break;
             } 
