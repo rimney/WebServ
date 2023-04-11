@@ -150,8 +150,11 @@ void cgi_handler::exec(respond & response)
             write(fd_out, "500\r\n", 5);
         }
 
+        std::string cgi_path = _location.getCgiPathObject(_request.get_start_line().full_path);
+        // const char *cgiPathCStr = cgiPath.c_str();
+
         char * const argv[3] = {
-            (char *) _location.getCgiPathObject(_request.get_start_line().full_path).c_str(),
+            (char *) cgi_path.c_str(),
             (char *) _request.get_start_line().full_path.c_str(),
             NULL
         };

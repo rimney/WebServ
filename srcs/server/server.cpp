@@ -129,7 +129,7 @@ void server::setup(server_parser & server_config, size_t i)
 
 void    server::set_addr(int i)
 {
-    memset((char *)&_addr, 0, sizeof(_addr)); // use ft_memset() of libft
+    memset((char *)&_addr, 0, sizeof(_addr));
     _addr.sin_family = AF_INET;
     _addr.sin_addr.s_addr = htonl(_host);
     _addr.sin_port = htons(_port[i]);
@@ -147,7 +147,7 @@ void server::accept(int fd)
 
     _fd_connection = ::accept(_fd_socket, NULL, NULL);
     if (setsockopt(_fd_connection, SOL_SOCKET, SO_NOSIGPIPE, &optval, sizeof(optval)) == -1)
-        throw(std::string("ERROR: faild to set socket option (setsockopt()) for _fd_socket."));
+        throw(std::string("ERROR: faild to set socket option for _fd_socket."));
     if (_fd_connection == -1)
         throw(std::string("ERROR: connection faild."));
     if (fcntl(_fd_connection, F_SETFL, O_NONBLOCK) == -1)
@@ -197,7 +197,7 @@ void    server::send(int fd)
         _request[fd].clear();
         _respond.erase(fd);
         _request.erase(fd);
-        throw(std::string("ERROR: send() failed to send response / file: " + _respond[fd].getPathSave()));
+        throw(std::string("ERROR: failed to send."));
     }
     _respond[fd].cleanAll();
 }

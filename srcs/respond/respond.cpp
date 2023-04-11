@@ -6,7 +6,7 @@
 /*   By: eel-ghan <eel-ghan@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/15 20:32:17 by rimney            #+#    #+#             */
-/*   Updated: 2023/04/07 07:54:26 by eel-ghan         ###   ########.fr       */
+/*   Updated: 2023/04/11 05:38:59 by eel-ghan         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -118,8 +118,9 @@ std::string respond::chunkedFileToString(std::string path)
     int fd = open(path.c_str(), O_RDONLY);
     if (fd == -1) 
     {
+        perror("open");
         std::cerr << "Error opening file " << path << std::endl;
-        return "error";
+        return "HTTP/1.1 500 Internal Server Error\r\n\r\n";
     }
     // Move file pointer to current chunk position
     lseek(fd, this->chunkPosition, SEEK_SET);
@@ -130,7 +131,6 @@ std::string respond::chunkedFileToString(std::string path)
     int bytes_read = read(fd, buffer, CHUNK_SIZE);
     if (bytes_read == 0)
     {
-        std::cout << "THE END !\n";
         bodyFlag = false;
         this->pathSave.clear();
         this->cleanAll();
@@ -248,7 +248,9 @@ std::string respond::getCookies(void)
 {
     std::string ret;
     for(size_t i = 0; i < this->cookies.size(); i++)
+    {
         ret += "Set-Cookie: " + this->cookies[i] + "\r\n";
+    }
 	return (ret);
 }
 

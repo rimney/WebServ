@@ -10,6 +10,7 @@
 # include "request.hpp"
 # include "parsing.hpp"
 # include "respond.hpp"
+# include <sys/wait.h>
 
 # define CGI_BUFFER 1024
 

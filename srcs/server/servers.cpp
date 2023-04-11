@@ -6,7 +6,7 @@
 /*   By: eel-ghan <eel-ghan@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/10 00:38:14 by eel-ghan          #+#    #+#             */
-/*   Updated: 2023/04/07 07:43:30 by eel-ghan         ###   ########.fr       */
+/*   Updated: 2023/04/11 07:13:54 by eel-ghan         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -92,19 +92,21 @@ void    servers::run()
         FD_ZERO(&_set_write_fds);
         for (std::vector<int>::iterator it = _fds_ready.begin(); it != _fds_ready.end(); it++)
             FD_SET(*it, &_set_write_fds);
-            
-        r = select(_max_fd + 1, &_set_read_fds, &_set_write_fds, NULL, &time);
 
+        r = select(_max_fd + 1, &_set_read_fds, &_set_write_fds, NULL, &time);
         if (r == -1)
         {
-            std::cout << "ERROR: failed to select sockets.\n";            
+            std::cerr << "ERROR: failed to select sockets.\n";
+             
             for (std::map<int, server>::iterator it = _fds_cnx.begin(); it != _fds_cnx.end(); it++)
                 ::close((*it).first);
+
             _fds_ready.clear();
             _fds_cnx.clear();
             FD_ZERO(&_set_read_fds);
             FD_ZERO(&_set_write_fds);
             FD_ZERO(&_set_fds);
+
             _max_fd = 0;
             for (std::map<int, server>::iterator it = _servers.begin(); it != _servers.end(); it++)
             {
@@ -116,7 +118,6 @@ void    servers::run()
         }
         else if (r == 0)
             continue ;
-            
 
         // accept connections
         for (std::map<int, server>::iterator it = _servers.begin(); it != _servers.end(); it++)
@@ -135,8 +136,7 @@ void    servers::run()
                 }
                 catch(const std::string& msg)
                 {
-                    std::cout << msg << '\n';
-                    break ;
+                    std::cerr << msg << '\n';
                 }
             }
         }
@@ -158,10 +158,10 @@ void    servers::run()
                     std::cerr << msg << "\n";
                     FD_CLR(fd, &_set_fds);
                     FD_CLR(fd, &_set_write_fds);
-                    FD_CLR(fd, &_set_read_fds);
                     std::vector<int>::iterator i = std::find(_fds_ready.begin(), _fds_ready.end(), fd);
                     if (i != _fds_ready.end())
                         _fds_ready.erase(i);
+                    _fds_cnx[fd].get_fd_port().erase(fd);
                     _fds_cnx.erase(fd);
                     close(fd);
                     break ;
@@ -178,25 +178,27 @@ void    servers::run()
                 {
                         _fds_cnx[_fds_ready[i]].send(_fds_ready[i]);
                         if (_fds_cnx[_fds_ready[i]].getRespond(_fds_ready[i]).getBodyFlag() == false)
-                        {
-                            // FD_CLR(_fds_ready[i], &_set_fds);
+                        {   
+                            if (_fds_cnx[_fds_ready[i]].get_request()[_fds_ready[i]].get_header()["Connection"] != "keep-alive")
+                            {
+                                close(_fds_ready[i]);
+                                _fds_cnx[_fds_ready[i]].get_fd_port().erase(_fds_ready[i]);
+                                _fds_cnx.erase(_fds_ready[i]);
+                                FD_CLR(_fds_ready[i], &_set_fds);
+                            }    
                             _fds_ready.erase(_fds_ready.begin() + i);
                         }
                 }
                 catch(const std::string& msg)
                 {
-                    std::cout << msg << "\n";
-                    close(_fds_ready[i]);//??
+                    std::cerr << msg << "\n";
+                    close(_fds_ready[i]);
                     FD_CLR(_fds_ready[i], &_set_fds);
-                    _fds_cnx[i].get_fd_port().erase(_fds_ready[i]);
+                    _fds_cnx[_fds_ready[i]].get_fd_port().erase(_fds_ready[i]);
                     _fds_cnx.erase(_fds_ready[i]);
                     _fds_ready.erase(_fds_ready.begin() + i);
-                    break ;
                 }
             }
         }
-        
-        // for (std::vector<server>::iterator it = _servers.begin(); it != _servers.end(); it++)
-        //     close((*it).get_fd_connection());
     }
 }
