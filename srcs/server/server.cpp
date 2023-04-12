@@ -362,10 +362,9 @@ void server::Get(int location_index , std::string path, int fd)
                 cgi.exec(_respond[fd]);
                 return ;
             }    
-            if(_respond[fd].fileToSring(path).size() >= 50000)
+            if(_respond[fd].fileToSring(path).size() >= 50000 && isFOrD == "file")
             {
                 if(_respond[fd].getBodyFlag() == true)
-
                     return ;
                 _respond[fd].setBodyFlag(true);
                     return;
@@ -443,7 +442,6 @@ void    server::process(int fd)
         std::cout <<  _request[fd].get_start_line().vertion << std::endl;
         std::cout <<  _request[fd].get_start_line().full_path << std::endl;
         std::cout <<  _request[fd].get_start_line().query << std::endl;
-        std::cout <<  "**"<<_request[fd].get_error() << "**"<< std::endl;
         std::cout << "//////////////// REQUEST ///////////////////\n\n";
         _respond[fd].setRespondLocationIndex(_request[fd].get_start_line().location_index);
         _respond[fd].setFd(fd);

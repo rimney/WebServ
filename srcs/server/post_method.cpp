@@ -166,7 +166,8 @@ void    server::post_method(server_parser &serv, int fd)
                    error = "403";//location doesn’t have cgi : "403 Forbidden" 
                  
            }
-           else//file
+           else if(_request[fd].get_start_line().path.find_last_of(".php") != std::string::npos 
+                    || _request[fd].get_start_line().path.find_last_of(".py") != std::string::npos)//file
            {
                 if(!serv.getServerLocationsObject()[_request[fd].get_start_line().location_index].getCgiPathObject(_request[fd].get_start_line().full_path).empty())
                 {
@@ -177,6 +178,8 @@ void    server::post_method(server_parser &serv, int fd)
                 else
                    error = "403";//location doesn’t have cgi : "403 Forbidden" 
            }
+           else
+                error = "403";
         }
     }
     std::cout << error << std::endl;

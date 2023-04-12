@@ -6,7 +6,7 @@
 /*   By: eel-ghan <eel-ghan@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/15 20:32:17 by rimney            #+#    #+#             */
-/*   Updated: 2023/04/11 05:38:59 by eel-ghan         ###   ########.fr       */
+/*   Updated: 2023/04/12 22:50:02 by eel-ghan         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -118,9 +118,9 @@ std::string respond::chunkedFileToString(std::string path)
     int fd = open(path.c_str(), O_RDONLY);
     if (fd == -1) 
     {
-        perror("open");
+        // perror("open");
         std::cerr << "Error opening file " << path << std::endl;
-        return "HTTP/1.1 500 Internal Server Error\r\n\r\n";
+        return "error";
     }
     // Move file pointer to current chunk position
     lseek(fd, this->chunkPosition, SEEK_SET);
@@ -141,7 +141,8 @@ std::string respond::chunkedFileToString(std::string path)
     else if (bytes_read == -1)
     {
         this->bodyFlag = false;
-        std::cerr << "Error: while chunking";
+        // if(isFileOrDirectory(path) == "file")
+            std::cerr << "Error: while chunking";
         close(fd);
         return "error";
     }

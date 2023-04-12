@@ -6,7 +6,7 @@
 /*   By: eel-ghan <eel-ghan@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/14 17:42:24 by rimney            #+#    #+#             */
-/*   Updated: 2023/04/07 01:56:45 by eel-ghan         ###   ########.fr       */
+/*   Updated: 2023/04/12 22:49:44 by eel-ghan         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -45,7 +45,7 @@ class respond
     
     public:
         respond() {};
-        respond(server_parser const & s): server(s) {};
+        respond(server_parser const & s): bodyFlag(false), server(s) {};
         respond(respond const & r) {*this = r;}
         void        setRespondServer(server_parser s) {this->server = s;}
 		void		setRespondLocationIndex(int location_index) {this->location_index = location_index;}
